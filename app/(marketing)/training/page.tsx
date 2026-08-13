@@ -32,13 +32,16 @@ export default function TrainingPage() {
       <section className="section-cream">
         <div className="shell grid gap-8 py-16 md:grid-cols-2">
           {CLASSES.map((c) => (
-            <Link key={c.slug} href={`/training/${c.slug}`} className="flex flex-col gap-3 border border-line-warm bg-white p-6 transition-colors hover:border-gold">
+            <div key={c.slug} className="flex flex-col gap-3 border border-line-warm bg-white p-6 transition-colors hover:border-gold">
               <p className="kicker">{c.no}</p>
               <h2 className="font-fraunces text-[21px] font-medium text-forest">{c.name}</h2>
               <p className="text-[14px] prose-muted">For {c.who} · {c.format}</p>
               <p className="text-[15.5px] prose-soft">{c.why}</p>
-              <span className="link-underline self-start text-[14px]">Class details</span>
-            </Link>
+              <div className="mt-auto flex flex-wrap items-center gap-4 pt-2">
+                <Link href={`/book?add=${c.bookItem}&class=${c.slug}`} className="btn-gold text-[14px]">Book this class</Link>
+                <Link href={`/training/${c.slug}`} className="link-underline text-[14px]">Class details</Link>
+              </div>
+            </div>
           ))}
         </div>
       </section>
