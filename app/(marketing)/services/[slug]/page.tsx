@@ -20,9 +20,9 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
 function imgFor(slug: string) {
   for (const g of SERVICE_GROUPS) {
     const hit = g.items.find((i) => i.key === slug);
-    if (hit) return hit.img;
+    if (hit) return hit;
   }
-  return "Drop photo";
+  return { img: "", src: "" };
 }
 
 export default function ServiceDetailPage({ params }: { params: { slug: string } }) {
@@ -44,7 +44,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
               <Link href="/plans" className="btn-outline">See plans</Link>
             </div>
           </div>
-          <ImageSlot label={imgFor(key)} />
+          <ImageSlot label={imgFor(key).img} src={imgFor(key).src} />
         </div>
       </section>
 

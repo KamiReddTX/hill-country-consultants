@@ -157,37 +157,37 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
 };
 
 /** /services listing, grouped, with the image drop-zone label per line. */
-export interface ServiceGroup { group: string; items: { key: ServiceKey; img: string }[] }
+export interface ServiceGroup { group: string; items: { key: ServiceKey; img: string; src: string }[] }
 export const SERVICE_GROUPS: ServiceGroup[] = [
   { group: "Admin & Coordination", items: [
-    { key: "va", img: "Drop photo — organized desk, inbox trays" },
-    { key: "pm", img: "Drop photo — wall schedule, printed plan set" },
+    { key: "va", img: "A virtual assistant's organized admin workspace", src: "/images/services/va.jpg" },
+    { key: "pm", img: "Project planning and coordination", src: "/images/services/pm.jpg" },
   ]},
   { group: "Construction", items: [
-    { key: "submittals", img: "Drop photo — rolled drawings on jobsite table" },
-    { key: "compliance", img: "Drop photo — labeled binders on a shelf" },
+    { key: "submittals", img: "Construction worker carrying steel on a job site", src: "/images/services/submittals.jpg" },
+    { key: "compliance", img: "Compliance and documentation records", src: "/images/services/compliance.jpg" },
   ]},
   { group: "Brand & Market", items: [
-    { key: "marketing", img: "Drop photo — printed collateral laid in a grid" },
-    { key: "brand", img: "Drop photo — type specimen sheets and swatches" },
+    { key: "marketing", img: "Marketing strategy documents laid out on a table", src: "/images/services/marketing.jpg" },
+    { key: "brand", img: "Brand guidance on a phone beside eyeglasses", src: "/images/services/brand.jpg" },
   ]},
   { group: "Publishing & Media", items: [
-    { key: "publishing", img: "Drop photo — manuscript pages with pencil marks" },
-    { key: "media", img: "Drop photo — microphone and mixing console" },
+    { key: "publishing", img: "Shelves filled with books", src: "/images/services/publishing.jpg" },
+    { key: "media", img: "Recording at a podcast microphone", src: "/images/services/media.jpg" },
   ]},
   { group: "Digital", items: [
-    { key: "digital", img: "Drop photo — wireframe printouts on a wall" },
+    { key: "digital", img: "Smartphone home screen with app icons", src: "/images/services/digital.jpg" },
   ]},
   { group: "People & Process", items: [
-    { key: "trainingSvc", img: "Drop photo — training room with long table" },
-    { key: "systems", img: "Drop photo — flow diagram on whiteboard" },
+    { key: "trainingSvc", img: "A corporate training session", src: "/images/services/trainingSvc.jpg" },
+    { key: "systems", img: "Systems and automation workflow planning", src: "/images/services/systems.jpg" },
   ]},
   { group: "Events", items: [
-    { key: "events", img: "Drop photo — set banquet room before doors open" },
+    { key: "events", img: "A seminar room arranged with rows of chairs", src: "/images/services/events.jpg" },
   ]},
   { group: "Specialty", items: [
-    { key: "ag", img: "Drop photo — aerial field pattern, section lines" },
-    { key: "grants", img: "Drop photo — bound report and archive folders" },
+    { key: "ag", img: "Aerial view of a tractor working a field", src: "/images/services/ag.jpg" },
+    { key: "grants", img: "Volunteers loading boxes of aid supplies", src: "/images/services/grants.jpg" },
   ]},
 ];
 

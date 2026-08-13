@@ -34,7 +34,7 @@ export default function ServicesPage() {
                 const meta = SERVICE_META[item.key];
                 return (
                   <article key={item.key} className="flex flex-col gap-4 border border-line-warm bg-white p-6">
-                    <ImageSlot label={item.img} ratio="16 / 9" />
+                    <ImageSlot label={item.img} src={item.src} ratio="16 / 9" />
                     <h3 className="font-fraunces text-[21px] font-medium text-forest">{meta.name}</h3>
                     <p className="flex-1 text-[16px] prose-soft">{meta.desc}</p>
                     <Link href={`/services/${item.key}`} className="link-underline self-start text-[14.5px]">
