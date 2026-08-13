@@ -9,3 +9,6 @@
 .vercel
 next-env.d.ts
 *.tsbuildinfo
+
+# FUSE mount temp artifacts
+.fuse_hidden*
