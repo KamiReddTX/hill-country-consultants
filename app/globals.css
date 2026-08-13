@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────
+   Hill Country Consultants — base + contrast system
+   Fonts are wired via next/font in app/layout.tsx which sets
+   --font-fraunces and --font-inter on <html>.
+   ───────────────────────────────────────────────────────────── */
+
+:root {
+  --forest: #234b34;
+  --cream: #f6f1e6;
+  --gold: #c2a24a;
+  --gold-hover: #a98a35;
+  --gold-on-forest: #d4b55f;
+  --charcoal: #20241f;
+}
+
+@layer base {
+  html { -webkit-font-smoothing: antialiased; }
+  body {
+    background: var(--cream);
+    color: var(--charcoal);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+  }
+  h1, h2, h3, h4 {
+    font-family: var(--font-fraunces), Georgia, serif;
+    color: var(--forest);
+    letter-spacing: -0.015em;
+    text-wrap: pretty;
+  }
+  a { color: var(--forest); text-decoration: none; }
+  a:hover { color: var(--gold); }
+  /* Every interactive control clears the 44px touch target. */
+  button, [role="button"], input[type="submit"], input[type="button"] { min-height: 44px; }
+}
+
+@layer components {
+  /* Layout shells ------------------------------------------------ */
+  .shell { @apply mx-auto w-full max-w-shell px-6; }
+
+  /* Sections alternate cream → white → cream.
+     Use .section-cream / .section-white; one .band-forest per page at most. */
+  .section-cream { @apply bg-cream border-t border-line; }
+  .section-white { @apply bg-white border-t border-line; }
+  .band-forest   { @apply bg-forest text-white; }
+
+  /* Buttons — gold is the only place gold touches a surface behind text,
+     and the text on gold is charcoal (never white, never gold-on-gold). */
+  .btn-gold {
+    @apply inline-flex items-center justify-center min-h-touch bg-gold text-charcoal
+           font-inter font-semibold px-6 tracking-wide transition-colors;
+  }
+  .btn-gold:hover { background: var(--gold-hover); color: var(--charcoal); }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center min-h-touch border border-forest
+           text-forest font-inter font-medium px-6 transition-colors;
+  }
+  .btn-outline:hover { @apply bg-forest text-white; }
+
+  /* A gold link underline used for "learn more" style links on light. */
+  .link-underline {
+    @apply font-inter font-medium text-forest;
+    border-bottom: 1px solid var(--gold);
+    padding-bottom: 3px;
+  }
+  .link-underline:hover { color: var(--charcoal); }
+
+  /* The thin gold rule under headings. Gold is decorative only. */
+  .rule-gold { @apply block h-0.5 w-12 bg-gold; }
+
+  /* Small uppercase label. On light use faint ink; on forest use gold-on-forest. */
+  .kicker { @apply font-inter uppercase text-ink-faint; font-size: 12px; letter-spacing: 0.2em; }
+  .band-forest .kicker { color: var(--gold-on-forest); }
+
+  /* Body copy tones that satisfy the contrast rules on light surfaces. */
+  .prose-soft { @apply text-ink-soft; }
+  .prose-muted { @apply text-ink-muted; }
+}
