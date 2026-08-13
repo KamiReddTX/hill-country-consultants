@@ -25,7 +25,7 @@ const shell = (title: string, body: string) => `
         ${body}
       </div>
       <div style="border-top:1px solid #e0d6bf;padding:16px 28px;color:#6b6552;font-size:12px">
-        info@hillcountryconsultants.com · 470-478-1590 · Longview, TX &amp; Atlanta, GA
+        <a href="mailto:info@hillcountryconsultants.com" style="color:#6b6552;text-decoration:underline">info@hillcountryconsultants.com</a> · 470-478-1590 · Longview, TX &amp; Atlanta, GA
       </div>
     </div>
   </div>`;

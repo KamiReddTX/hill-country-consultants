@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LEGAL, LEGAL_ORDER, type LegalPage } from "@/content/legal";
+import { linkifyEmail } from "@/components/linkify";
 
 /** Shared renderer for the four legal pages, with the legal subnav. */
 export function LegalView({ page }: { page: LegalPage }) {
@@ -43,7 +44,7 @@ export function LegalView({ page }: { page: LegalPage }) {
                 <h2 className="font-fraunces text-[22px] font-medium text-forest">{s.t}</h2>
                 <ul className="mt-4 flex flex-col gap-3">
                   {s.lines.map((line, i) => (
-                    <li key={i} className="text-[16px] prose-soft">{line}</li>
+                    <li key={i} className="text-[16px] prose-soft">{linkifyEmail(line)}</li>
                   ))}
                 </ul>
               </div>

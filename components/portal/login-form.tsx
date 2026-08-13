@@ -48,7 +48,8 @@ export function ClientLoginForm({ welcome }: { welcome?: boolean }) {
           <button disabled={busy} className="btn-gold">{busy ? "Signing in…" : "Sign in"}</button>
         </form>
         <p className="text-[14px] prose-muted">
-          Accounts are created when you book a service. Trouble signing in? info@hillcountryconsultants.com · 470-478-1590.
+          Accounts are created when you book a service. Trouble signing in?{" "}
+          <a className="link-underline" href="mailto:info@hillcountryconsultants.com">info@hillcountryconsultants.com</a> · 470-478-1590.
         </p>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
 import { MessageForm } from "@/components/portal/message-form";
+import { linkifyEmail } from "@/components/linkify";
 
 const CHANNELS = [
   { n: "Your account lead", d: "One named contact for every service line. Requests acknowledged the same business day." },
@@ -45,7 +46,7 @@ export default async function MessagesPage() {
         <p className="kicker mb-3">How to reach us</p>
         <ul className="grid gap-3 md:grid-cols-2">
           {CHANNELS.map((c) => (
-            <li key={c.n} className="border-t border-line-soft pt-3"><p className="text-[15px] font-medium text-charcoal">{c.n}</p><p className="text-[14px] prose-soft">{c.d}</p></li>
+            <li key={c.n} className="border-t border-line-soft pt-3"><p className="text-[15px] font-medium text-charcoal">{c.n}</p><p className="text-[14px] prose-soft">{linkifyEmail(c.d)}</p></li>
           ))}
         </ul>
       </div>

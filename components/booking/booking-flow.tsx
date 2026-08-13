@@ -178,7 +178,8 @@ export function BookingFlow({
           <p className="text-[17px] prose-soft">
             Reference <strong className="text-charcoal">{doneRef}</strong>. Scoped work is quoted in
             writing before it begins — we&apos;ll email your written quote within one business day. No
-            payment has been taken. Questions? info@hillcountryconsultants.com · 470-478-1590.
+            payment has been taken. Questions?{" "}
+            <a className="link-underline" href="mailto:info@hillcountryconsultants.com">info@hillcountryconsultants.com</a> · 470-478-1590.
           </p>
           <Link href="/services" className="link-underline mt-8 inline-block">← Back to services</Link>
         </div>
