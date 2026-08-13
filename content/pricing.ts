@@ -121,7 +121,7 @@ export interface RateLine {
 
 export const RATE_LINES: RateLine[] = [
   { svc: "va", n: "Virtual assistant block — 10 hours", p: "$650", cart: "va-block" },
-  { svc: "va", n: "Additional hours beyond the block", p: "$65/hr", quote: "q-pm" },
+  { svc: "va", n: "Additional hours beyond the block", p: "$65/hr", cart: "va-block" },
   { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
   { svc: "submittals", n: "Submittal package", p: "$350 each", cart: "sub-pkg" },
   { svc: "submittals", n: "Weekly submittal service · any volume", p: "$750/wk", cart: "sub-week" },
