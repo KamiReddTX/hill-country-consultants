@@ -22,7 +22,13 @@ export async function POST(req: Request) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return NextResponse.json({ ok: true, persisted: false });
+  const diag = body && (body as Record<string, unknown>).__diag === true;
+  if (!url || !key)
+    return NextResponse.json({
+      ok: true,
+      persisted: false,
+      ...(diag ? { diag: { urlPresent: !!url, keyPresent: !!key, keyLen: key ? key.length : 0 } } : {}),
+    });
 
   const clean = (v: unknown) => (typeof v === "string" ? v.trim() : "");
   const heard = clean(body.howHeard);
@@ -42,8 +48,16 @@ export async function POST(req: Request) {
       rep_code: clean(body.referral) || null,
       stage: "New lead",
     });
-    return NextResponse.json({ ok: true, persisted: !error });
-  } catch {
-    return NextResponse.json({ ok: true, persisted: false });
+    return NextResponse.json({
+      ok: true,
+      persisted: !error,
+      ...(diag ? { diag: { keyLen: key.length, err: error ? error.message : null } } : {}),
+    });
+  } catch (e) {
+    return NextResponse.json({
+      ok: true,
+      persisted: false,
+      ...(diag ? { diag: { threw: String(e).slice(0, 200) } } : {}),
+    });
   }
 }
