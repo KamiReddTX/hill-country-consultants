@@ -1,5 +1,7 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData, deriveOnboarding, money } from "@/lib/portal";
+import { SITE } from "@/content/site";
+import { KickoffStep } from "@/components/portal/kickoff-step";
 
 export default async function OnboardingPage() {
   const client = await getPortalClient();
@@ -32,6 +34,7 @@ export default async function OnboardingPage() {
                 <p className="text-[16px] font-medium text-charcoal">{s.t} <span className="ml-2 text-[12px] font-normal text-ink-faint">{s.when}</span></p>
                 <p className="text-[15px] prose-soft">{s.d}</p>
                 <p className={`text-[12px] font-semibold ${s.done ? "text-forest" : "text-ink-faint"}`}>{s.done ? "Done" : "Pending"}</p>
+                {s.key === "kickoff" && <KickoffStep url={SITE.kickoffUrl} done={s.done} />}
               </div>
             </li>
           ))}

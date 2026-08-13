@@ -59,6 +59,8 @@ export interface Database {
           rep_code: string;
           created_at: string;
           retained_since: string | null;
+          kickoff_at: string | null;
+          roadmap_at: string | null;
         };
         Insert: {
           id?: string;
@@ -71,6 +73,8 @@ export interface Database {
           assigned_to?: string;
           rep_code?: string;
           retained_since?: string | null;
+          kickoff_at?: string | null;
+          roadmap_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
       };
@@ -313,6 +317,7 @@ export interface Database {
       is_staff: { Args: Record<string, never>; Returns: boolean };
       is_admin: { Args: Record<string, never>; Returns: boolean };
       my_role: { Args: Record<string, never>; Returns: string };
+      mark_kickoff_scheduled: { Args: Record<string, never>; Returns: undefined };
     };
   };
 }

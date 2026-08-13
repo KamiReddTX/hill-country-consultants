@@ -3,6 +3,7 @@ import { getStaffMember, isAdmin, getDirectory, getClients, getBookings, getOnTh
 import { createClient } from "@/lib/supabase/server";
 import { AssignSelect } from "@/components/staff/assign-select";
 import { StatusSelect } from "@/components/staff/status-select";
+import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { ForceClockOutButton } from "@/components/staff/force-clockout-button";
 import { ApproveButton } from "@/components/staff/approve-button";
@@ -105,7 +106,7 @@ export default async function AdminPage() {
         <p className="mb-3 text-[13px] prose-muted">Ownership is a role. Setting it here clears the client from the unassigned queue everywhere. No passwords or access codes are stored or shown.</p>
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[760px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner (role)</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium">Rep</th></tr></thead>
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner (role)</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th></tr></thead>
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id} className="border-b border-line-soft/60">
@@ -113,10 +114,11 @@ export default async function AdminPage() {
                   <td className="p-3 prose-muted">{c.contact || "—"}<br /><span className="text-[12px]">{c.email}</span></td>
                   <td className="p-3"><AssignSelect clientId={c.id} current={c.assigned_to} /></td>
                   <td className="p-3"><StatusSelect clientId={c.id} current={c.status} /></td>
+                  <td className="p-3"><RoadmapCheck clientId={c.id} done={!!c.roadmap_at} /></td>
                   <td className="p-3 prose-muted">{c.rep_code || "—"}</td>
                 </tr>
               ))}
-              {clients.length === 0 && <tr><td colSpan={5} className="p-3 prose-muted">No clients yet.</td></tr>}
+              {clients.length === 0 && <tr><td colSpan={6} className="p-3 prose-muted">No clients yet.</td></tr>}
             </tbody>
           </table>
         </div>

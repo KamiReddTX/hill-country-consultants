@@ -67,6 +67,18 @@ export async function setClientStatus(clientId: string, status: string): Promise
   return { ok: true };
 }
 
+/** Admin only: check off (or clear) a client's 30-day roadmap onboarding step.
+ *  This is the one onboarding step an admin marks by hand, after the kickoff call. */
+export async function setRoadmapDone(clientId: string, done: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const db = createClient();
+  const { error } = await db.from("clients").update({ roadmap_at: done ? new Date().toISOString() : null }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
 /** Sales/admin: create a lead. Employee code is stamped from the signed-in rep. */
 export async function createLead(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();

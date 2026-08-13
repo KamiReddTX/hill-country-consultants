@@ -15,6 +15,7 @@ export const SITE = {
   locations: "Longview, Texas and Atlanta, Georgia",
   serving: "serving clients nationwide",
   publishingImprint: "Redd Ladys Chronicles",
+  kickoffUrl: "https://calendar.app.google/mk7fbVrrCJKY1uge9",
 } as const;
 
 /** Primary header navigation (matches the prototype's top nav). */

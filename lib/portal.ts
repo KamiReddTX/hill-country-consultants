@@ -52,10 +52,9 @@ export async function getPortalData(client: ClientRow): Promise<PortalData> {
 /** Onboarding checklist — each step's "done" is derived from real account signals,
  *  never fabricated. No signal → pending. */
 export function deriveOnboarding(d: PortalData) {
-  const active = d.client.status !== "In review";
   const steps = [
-    { key: "kickoff", t: "Kickoff call", when: "Week one · day 1–2", d: "Thirty to sixty minutes with your account lead to confirm goals, priorities, and who owns what on both sides.", done: active },
-    { key: "roadmap", t: "30-day roadmap", when: "Week one · day 2", d: "The first thirty days in writing — what we deliver, in what order, and what we need from you to hit each date.", done: d.deliverables.length > 0 || d.workLog.length > 0 },
+    { key: "kickoff", t: "Kickoff call", when: "Week one · day 1–2", d: "Thirty to sixty minutes with your account lead to confirm goals, priorities, and who owns what on both sides.", done: !!d.client.kickoff_at },
+    { key: "roadmap", t: "30-day roadmap", when: "Week one · day 2", d: "The first thirty days in writing — what we deliver, in what order, and what we need from you to hit each date.", done: !!d.client.roadmap_at },
     { key: "creds", t: "Secure credential handoff", when: "Week one · day 2–3", d: "Logins move through a shared password-manager vault. Nothing in email, nothing in plain text, returned at offboarding.", done: d.vault.length > 0 },
     { key: "board", t: "Shared task board", when: "Week one · day 3", d: "Your board goes live so every request, its status and its due date are visible to both of us.", done: d.tasks.length > 0 },
     { key: "files", t: "Channels & file structure", when: "Week one · day 4–5", d: "Communication channels are set, and your folder structure and naming convention are built before the first deliverable.", done: d.deliverables.length > 0 },
