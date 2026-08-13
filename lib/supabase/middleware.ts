@@ -35,8 +35,9 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const wantsPortal = path.startsWith("/portal");
-  const wantsStaff = path.startsWith("/staff");
+  // Gate the portals, but NOT their own login pages (or they redirect to themselves forever).
+  const wantsPortal = path.startsWith("/portal") && !path.startsWith("/portal/login");
+  const wantsStaff = path.startsWith("/staff") && !path.startsWith("/staff/login");
 
   if ((wantsPortal || wantsStaff) && !user) {
     const url = request.nextUrl.clone();
