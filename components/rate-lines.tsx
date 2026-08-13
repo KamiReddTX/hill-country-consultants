@@ -24,7 +24,7 @@ export function RateLines({ svc }: { svc: ServiceKey }) {
               href={href}
               className={isBook ? "btn-gold px-4 text-[13.5px]" : "btn-outline px-4 text-[13.5px]"}
             >
-              {isBook ? "Book now" : "Request a quote"}
+              {isBook ? "Book & pay" : "Request a quote"}
             </Link>
           </li>
         );

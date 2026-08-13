@@ -27,11 +27,9 @@ export const metadata: Metadata = {
   },
   description:
     "One flat monthly fee puts a whole firm behind your business — admin, documentation, compliance, coordination, marketing, publishing and more. Hybrid consulting and virtual assistance, since 2024.",
+  // og:title / og:description / og:url fall back to each page's own metadata,
+  // so shared links preview per-page instead of site-wide.
   openGraph: {
-    title: `${SITE.name} — ${SITE.tagline}`,
-    description:
-      "The capability of a full staff, without the payroll. Hybrid consulting and virtual assistance.",
-    url: siteUrl,
     siteName: SITE.name,
     type: "website",
   },

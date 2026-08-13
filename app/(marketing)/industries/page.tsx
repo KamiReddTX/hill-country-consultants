@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     "Where we bring the deepest working knowledge — construction, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and agriculture.",
   alternates: { canonical: "/industries" },
+  openGraph: { title: "Industries", url: "/industries" },
 };
 
 export default function IndustriesPage() {
@@ -30,7 +31,7 @@ export default function IndustriesPage() {
             <Link key={ind.slug} href={`/industries/${ind.slug}`} className="flex flex-col gap-4 border border-line-warm bg-white p-6 transition-colors hover:border-gold">
               <ImageSlot label={ind.img} ratio="16 / 9" />
               <h2 className="font-fraunces text-[21px] font-medium text-forest">{ind.name}</h2>
-              <p className="text-[16px] prose-soft">{ind.blurb}</p>
+              <p className="text-[16px] prose-soft">{ind.headline}</p>
               <span className="link-underline self-start text-[14.5px]">How we help</span>
             </Link>
           ))}

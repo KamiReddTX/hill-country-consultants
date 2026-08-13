@@ -125,7 +125,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
   { svc: "submittals", n: "Submittal package", p: "$350 each", cart: "sub-pkg" },
   { svc: "submittals", n: "Weekly submittal service · any volume", p: "$750/wk", cart: "sub-week" },
-  { svc: "submittals", n: "Rush turnaround", p: "$550/job", cart: "rush" },
+  { svc: "submittals", n: "Rush turnaround", p: "$550/job · never included in a plan", cart: "rush" },
   { svc: "compliance", n: "Single document — capabilities, cert, profile, one-sheet or SOP", p: "from $450", quote: "q-doc" },
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
   { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each", cart: "graphic" },

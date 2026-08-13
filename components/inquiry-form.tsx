@@ -11,7 +11,7 @@ import { useState, type ChangeEvent } from "react";
 export function InquiryForm() {
   const [submitted, setSubmitted] = useState(false);
   const [form, setForm] = useState({
-    name: "", business: "", email: "", phone: "", industry: "", timeline: "", message: "",
+    name: "", business: "", email: "", phone: "", industry: "", timeline: "", howHeard: "", referral: "", message: "",
   });
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -33,7 +33,17 @@ export function InquiryForm() {
   return (
     <form
       className="flex flex-col gap-4 border border-line-warm bg-white p-6 sm:p-8"
-      onSubmit={(e) => { e.preventDefault(); setSubmitted(true); }}
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          await fetch("/api/inquiry", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(form),
+          });
+        } catch { /* non-blocking — confirm regardless */ }
+        setSubmitted(true);
+      }}
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
@@ -60,9 +70,18 @@ export function InquiryForm() {
           <span className="text-[13px] font-medium text-ink-faint">Timeline</span>
           <input className={field} placeholder="e.g. this month" value={form.timeline} onChange={set("timeline")} />
         </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-medium text-ink-faint">How did you hear about us?</span>
+          <input className={field} value={form.howHeard} onChange={set("howHeard")} />
+        </label>
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-medium text-ink-faint">Referral or employee code</span>
+          <input className={field} value={form.referral} onChange={set("referral")} />
+          <span className="text-[12px] prose-muted">If a member of our team referred you, enter their code so they are credited.</span>
+        </label>
       </div>
       <label className="flex flex-col gap-1.5">
-        <span className="text-[13px] font-medium text-ink-faint">What do you need?</span>
+        <span className="text-[13px] font-medium text-ink-faint">What&apos;s eating the most of your time right now?</span>
         <textarea rows={4} className={field} value={form.message} onChange={set("message")} />
       </label>
       <button type="submit" className="btn-gold self-start">Request the free session</button>

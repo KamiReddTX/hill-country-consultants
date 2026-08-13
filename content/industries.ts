@@ -1,81 +1,131 @@
 /**
- * Six industries — verbatim from the prototype. Each maps to a starter bundle
- * (fixed items + quote requests) and the service lines most relevant to it.
+ * Six industries — verbatim from the approved build. Each preloads a set of
+ * services on /book (fixed BOOK_ITEMS + scoped QUOTE_ITEMS). No photos of people.
  */
-import type { ServiceKey } from "@/content/services";
 
 export interface Industry {
   slug: string;
   name: string;
-  img: string;
-  blurb: string;
-  pain: string;
-  start: string;
-  cart: string[];   // BOOK_ITEMS ids
-  quotes: string[]; // QUOTE_ITEMS ids
-  services: ServiceKey[];
+  img: string;        // placeholder label / image direction (becomes alt when a photo is added)
+  headline: string;   // the outcome for that trade
+  problem: string;    // one paragraph naming what actually goes wrong
+  handles: string[];  // what we handle
+  cart: string[];     // BOOK_ITEMS ids to preload on /book
+  quotes: string[];   // QUOTE_ITEMS ids to preload on /book
 }
+
+/** Standing boundaries, shown on every industry page (verbatim). */
+export const INDUSTRY_SCOPE_ENDS =
+  "We prepare — we do not certify or stamp engineering. Legal wording is flagged to your attorney and never altered by us. We are not a substitute for licensed bookkeeping, legal, or tax services.";
 
 export const INDUSTRIES: Industry[] = [
   {
-    slug: "construction-and-contractors",
+    slug: "construction",
     name: "Construction & Contractors",
-    img: "Drop photo — steel framing against sky",
-    blurb: "Submittals, compliance files, bid paperwork and the daily admin that keeps a jobsite moving — prepared to standard, on your letterhead.",
-    pain: "Rejected submittals cost a week you did not have, certifications lapse quietly, and the person who knows the process is on a jobsite.",
-    start: "One submittal package and 10 VA hours, with a quote on your compliance library.",
-    cart: ["sub-pkg", "va-block"], quotes: ["q-doc"],
-    services: ["submittals", "compliance", "pm", "va", "systems", "trainingSvc"],
+    img: "Steel framing against sky",
+    headline: "The paperwork that decides whether you get to build.",
+    problem:
+      "A rejected submittal costs a week you did not have. The product data is in five places, the spec section says something the cut sheet does not, and the transmittal goes out late because the person who knows the process is on a jobsite.",
+    handles: [
+      "Submittal packages to spec",
+      "Cut sheets marked and indexed",
+      "Compliance checklists and prequalification packages",
+      "Certification and insurance tracking",
+      "Transmittals, logs and ball-in-court",
+      "Resubmittal turnaround",
+    ],
+    cart: ["sub-pkg", "sub-week", "rush"],
+    quotes: [],
   },
   {
-    slug: "authors-and-personal-brands",
+    slug: "authors",
     name: "Authors & Personal Brands",
-    img: "Drop photo — stacked books and page proofs",
-    blurb: "From manuscript to launch, plus the brand, media and events that carry a book after release.",
-    pain: "The manuscript is finished and there is no team to edit, format, publish, or launch it.",
-    start: "Quotes on editorial and full book production, plus launch media assets.",
-    cart: ["media-asset"], quotes: ["q-edit", "q-book"],
-    services: ["publishing", "media", "marketing", "brand", "events", "digital"],
+    img: "Stacked books and page proofs",
+    headline: "Get the book finished, published, and selling.",
+    problem:
+      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing.",
+    handles: [
+      "Editorial at the stage you are at",
+      "Interior and eBook formatting",
+      "Cover and distribution coordination",
+      "Launch assets and media kit",
+      "Podcast and media production",
+      "The posting calendar around release",
+    ],
+    cart: ["podcast", "media-asset", "graphic"],
+    quotes: [],
   },
   {
-    slug: "food-and-hospitality",
+    slug: "food",
     name: "Food & Hospitality",
-    img: "Drop photo — empty dining room, morning light",
-    blurb: "The back office behind a food business — systems, documentation, marketing and team training.",
-    pain: "Menus, staffing and programs run on instinct, and nothing is written down when someone leaves.",
-    start: "Marketing graphics to stay visible, plus a quote on systems and SOPs.",
-    cart: ["graphic"], quotes: ["q-systems"],
-    services: ["systems", "marketing", "brand", "va", "trainingSvc", "events"],
+    img: "Empty dining room, morning light",
+    headline: "Run the business behind the kitchen.",
+    problem:
+      "Permits lapse, vendor paperwork piles up, and the marketing happens whenever somebody remembers. The food is the easy part; everything around it is what takes the hours.",
+    handles: [
+      "Permit and certification tracking",
+      "Vendor and supplier documentation",
+      "SOPs and training documents",
+      "Menu and promotional graphics",
+      "Event and catering coordination",
+      "The posting calendar",
+    ],
+    cart: ["graphic", "brand-starter"],
+    quotes: [],
   },
   {
-    slug: "small-and-mid-size-business",
+    slug: "smb",
     name: "Small & Mid-Size Business",
-    img: "Drop photo — storefront facade detail",
-    blurb: "The whole back office — admin, coordination, documentation, brand and digital — for one flat monthly fee.",
-    pain: "The owner is the admin, the marketer and the bookkeeper, and the work that grows the business waits.",
-    start: "10 VA hours to get your time back, plus a quote on systems that hold.",
-    cart: ["va-block"], quotes: ["q-systems"],
-    services: ["va", "pm", "systems", "compliance", "marketing", "brand", "digital"],
+    img: "Storefront facade detail",
+    headline: "A whole back office for one monthly fee.",
+    problem:
+      "One person is doing the invoicing, the scheduling, the follow-up and the filing, and none of it is anybody's actual job. The work that grows the business waits until the administrative work is done, and it never is.",
+    handles: [
+      "Daily admin and inbox management",
+      "Document production and templates",
+      "Process documentation",
+      "Marketing and brand assets",
+      "Project coordination",
+      "File architecture that survives turnover",
+    ],
+    cart: ["va-block"],
+    quotes: ["q-doc"],
   },
   {
-    slug: "nonprofits-and-mission-driven",
+    slug: "nonprofits",
     name: "Nonprofits & Mission-Driven",
-    img: "Drop photo — community hall interior",
-    blurb: "Grant research through submission and reporting, with the documentation and events that keep you fundable.",
-    pain: "Fundable grants go unclaimed, compliance files are thin, and reporting lands on whoever has time.",
-    start: "A grant research report, plus a quote on your first application.",
-    cart: ["grant-research"], quotes: ["q-grant-app"],
-    services: ["grants", "compliance", "va", "events", "marketing", "trainingSvc"],
+    img: "Community hall interior",
+    headline: "Stay fundable and stay compliant.",
+    problem:
+      "Grant deadlines arrive faster than the reporting gets done, and the documentation a funder asks for lives in four people's inboxes.",
+    handles: [
+      "Grant research and prospect lists",
+      "Application preparation and submission",
+      "Funder reporting and compliance files",
+      "Board and donor documents",
+      "Program documentation",
+      "Event coordination",
+    ],
+    cart: ["grant-research"],
+    quotes: ["q-grant-app"],
   },
   {
-    slug: "landowners-and-agriculture",
+    slug: "agriculture",
     name: "Landowners & Agriculture",
-    img: "Drop photo — fenceline across open pasture",
-    blurb: "Regenerative planning, stewardship records and the program paperwork a working property needs.",
-    pain: "The land is working but nothing is documented, and program deadlines pass unnoticed.",
-    start: "A grant research report, plus a quote on land planning.",
-    cart: ["grant-research"], quotes: ["q-ag"],
-    services: ["ag", "grants", "compliance", "va", "systems", "pm"],
+    img: "Fenceline across open pasture",
+    headline: "Records, programs and plans for working land.",
+    problem:
+      "Program paperwork, lease documents and stewardship records are scattered across a truck console, a filing cabinet and somebody's memory.",
+    handles: [
+      "Regenerative plan frameworks",
+      "Seasonal stewardship calendars",
+      "Record-keeping templates",
+      "Program and cost-share paperwork",
+      "Lease and vendor documentation",
+      "Operations coordination",
+    ],
+    cart: [],
+    quotes: ["q-ag"],
   },
 ];
 

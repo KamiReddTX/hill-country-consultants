@@ -6,6 +6,7 @@ import {
   BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd,
 } from "@/content/pricing";
 import { classBySlug } from "@/content/classes";
+import { INDUSTRIES } from "@/content/industries";
 
 type Step = "select" | "pay" | "done";
 type Cart = Record<string, number>;
@@ -85,6 +86,23 @@ export function BookingFlow({
     });
   const toggleQuote = (id: string) =>
     setQuotes((q) => { const n = { ...q }; if (n[id]) delete n[id]; else n[id] = true; return n; });
+
+  // Industry starting point: preload that industry's services and jump to the summary.
+  const applyIndustry = (cartIds: string[], quoteIds: string[]) => {
+    setCart((c) => {
+      const nc = { ...c };
+      cartIds.forEach((id) => { if (bookItemById(id)) nc[id] = (nc[id] || 0) + 1; });
+      return nc;
+    });
+    setQuotes((q) => {
+      const nq = { ...q };
+      quoteIds.forEach((id) => { if (quoteItemById(id)) nq[id] = true; });
+      return nq;
+    });
+    if (typeof document !== "undefined") {
+      document.getElementById("selection-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
 
   const calendar = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -226,6 +244,22 @@ export function BookingFlow({
                 </div>
               )}
 
+              <div className="mb-8">
+                <p className="kicker mb-3">Start from your industry</p>
+                <div className="flex flex-wrap gap-2">
+                  {INDUSTRIES.map((ind) => (
+                    <button
+                      key={ind.slug}
+                      type="button"
+                      onClick={() => applyIndustry(ind.cart, ind.quotes)}
+                      className="min-h-touch border border-line-warm bg-white px-4 text-[13.5px] text-charcoal hover:border-gold"
+                    >
+                      {ind.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <h2 className="mb-4 font-fraunces text-[20px] font-medium text-forest">Fixed-rate services</h2>
               {GROUPS.map((group) => (
                 <div key={group} className="mb-6">
@@ -314,7 +348,7 @@ export function BookingFlow({
         </div>
 
         {/* ── Right: sticky summary ── */}
-        <aside className="h-max lg:sticky lg:top-24">
+        <aside id="selection-summary" className="h-max scroll-mt-24 lg:sticky lg:top-24">
           <div className="border border-line-warm bg-white p-6">
             <p className="kicker mb-3">Your selection</p>
             {!hasSelection && <p className="text-[15px] prose-muted">Nothing added yet. Add a fixed-rate service or pick a quote request to begin.</p>}
