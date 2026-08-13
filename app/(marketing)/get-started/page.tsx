@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   description:
     "Book the free 30-minute strategy session. We map the work, recommend a plan tier or a standalone scope, and put it in writing before anything begins.",
   alternates: { canonical: "/get-started" },
+  openGraph: {
+    title: "Get Started · Hill Country Consultants",
+    description:
+      "Book the free 30-minute strategy session. We map the work, recommend a plan tier or a standalone scope, and put it in writing before anything begins.",
+    url: "/get-started",
+  },
 };
 
 export default function GetStartedPage() {

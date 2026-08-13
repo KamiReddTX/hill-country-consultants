@@ -6,6 +6,12 @@ export const metadata: Metadata = {
   description:
     "Book fixed-rate services and pay in full or a 50% deposit, or request a written quote for scoped work. Class bookings pick a date from our business-hours calendar.",
   alternates: { canonical: "/book" },
+  openGraph: {
+    title: "Book & Pay · Hill Country Consultants",
+    description:
+      "Book fixed-rate services and pay in full or a 50% deposit, or request a written quote for scoped work. Class bookings pick a date from our business-hours calendar.",
+    url: "/book",
+  },
 };
 
 export default function BookPage({

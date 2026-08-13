@@ -4,12 +4,19 @@ import { ImageSlot } from "@/components/image-slot";
 import { SectionHeading } from "@/components/section-heading";
 import { RateLines } from "@/components/rate-lines";
 import { SERVICE_GROUPS, SERVICE_META } from "@/content/services";
+import { INDUSTRIES } from "@/content/industries";
 
 export const metadata: Metadata = {
   title: "Services",
   description:
     "Fourteen service lines — admin and coordination, construction submittals, compliance, marketing and brand, publishing and media, digital, training, systems, events, agriculture and grants.",
   alternates: { canonical: "/services" },
+  openGraph: {
+    title: "Services · Hill Country Consultants",
+    description:
+      "Fourteen service lines — admin and coordination, construction submittals, compliance, marketing and brand, publishing and media, digital, training, systems, events, agriculture and grants.",
+    url: "/services",
+  },
 };
 
 export default function ServicesPage() {
@@ -23,6 +30,22 @@ export default function ServicesPage() {
             title="Every service line, in one firm."
             intro="Buy a plan and use all of them at your tier's volume, or book any one à la carte. Scoped work is quoted in writing before it begins."
           />
+          <div className="mt-8 border-t border-[#e8e0cd] pt-6">
+            <p className="mb-3.5 font-inter text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-faint">
+              Or see services by industry
+            </p>
+            <div className="flex flex-wrap gap-2.5">
+              {INDUSTRIES.map((ind) => (
+                <Link
+                  key={ind.slug}
+                  href={`/industries/${ind.slug}`}
+                  className="border border-[#d8cdb3] bg-cream px-4 py-3 font-inter text-[14px] font-semibold text-charcoal transition-colors hover:bg-[#ede5d2]"
+                >
+                  {ind.name}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
