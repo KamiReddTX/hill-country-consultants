@@ -36,7 +36,7 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-          <ImageSlot label="Drop hero photo — architectural detail, stone and timber" />
+          <ImageSlot label="Modern glass-and-concrete building exterior with reflected greenery" src="/images/hero.jpg" />
         </div>
       </section>
 
