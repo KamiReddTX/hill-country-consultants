@@ -9,6 +9,12 @@ export const metadata: Metadata = {
   description:
     "Hybrid consulting and virtual assistance — one firm behind your business, on-site when it matters and virtual when it counts. The four pillars behind the work.",
   alternates: { canonical: "/about" },
+  openGraph: {
+    title: "About · Hill Country Consultants",
+    description:
+      "Hybrid consulting and virtual assistance — one firm behind your business, on-site when it matters and virtual when it counts. The four pillars behind the work.",
+    url: "/about",
+  },
 };
 
 export default function AboutPage() {

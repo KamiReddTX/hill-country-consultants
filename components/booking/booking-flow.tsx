@@ -7,6 +7,7 @@ import {
 } from "@/content/pricing";
 import { classBySlug } from "@/content/classes";
 import { INDUSTRIES } from "@/content/industries";
+import { InquiryForm } from "@/components/inquiry-form";
 
 type Step = "select" | "pay" | "done";
 type Cart = Record<string, number>;
@@ -48,6 +49,7 @@ export function BookingFlow({
 }) {
   const [cart, setCart] = useState<Cart>(() => seedCart(initialAdd));
   const [quotes, setQuotes] = useState<Quotes>(() => seedQuotes(initialQuotes));
+  const [mode, setMode] = useState<"pay" | "call">("pay");
   const [payMode, setPayMode] = useState<"full" | "deposit">("full");
   const [step, setStep] = useState<Step>("select");
   const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "" });
@@ -189,7 +191,49 @@ export function BookingFlow({
 
   return (
     <section className="section-cream min-h-[70vh]">
-      <div className="shell grid gap-10 py-14 lg:grid-cols-[1.5fr_1fr]">
+      <div className="shell py-14">
+        {/* ── Mode tabs: pay vs. schedule a call (§8a) ── */}
+        <div className="mb-8 flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={() => setMode("pay")}
+            className={
+              mode === "pay"
+                ? "bg-forest px-[22px] py-4 font-inter text-[15px] font-semibold text-white"
+                : "border border-[#d8cdb3] px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-[#6b6552]"
+            }
+          >
+            Book &amp; pay for services
+          </button>
+          <button
+            type="button"
+            onClick={() => setMode("call")}
+            className={
+              mode === "call"
+                ? "bg-forest px-[22px] py-4 font-inter text-[15px] font-semibold text-white"
+                : "border border-[#d8cdb3] px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-[#6b6552]"
+            }
+          >
+            Schedule a call
+          </button>
+        </div>
+
+        {mode === "call" ? (
+          <div className="mx-auto max-w-[720px]">
+            <p className="kicker mb-3">Schedule a call</p>
+            <h1 className="font-fraunces text-[clamp(28px,4vw,42px)] font-normal text-forest">
+              Start with a free 30-minute strategy session.
+            </h1>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-8 text-[17px] prose-soft">
+              Prefer to talk it through before booking anything? We map the work, recommend a
+              plan tier or a standalone scope, and put it in writing before anything begins. No
+              obligation.
+            </p>
+            <InquiryForm />
+          </div>
+        ) : (
+        <div className="grid gap-10 lg:grid-cols-[1.5fr_1fr]">
         {/* ── Left: select / pay ── */}
         <div>
           <p className="kicker mb-3">Book &amp; pay</p>
@@ -390,6 +434,8 @@ export function BookingFlow({
             <p className="mt-4 text-[12.5px] prose-muted">All sales are final. Scoped work is quoted in writing before it begins.</p>
           </div>
         </aside>
+        </div>
+        )}
       </div>
     </section>
   );

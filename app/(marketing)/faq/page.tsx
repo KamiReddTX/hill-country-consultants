@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   description:
     "How Hill Country Consultants works — what we do, hybrid meaning, hours, booking, pricing, contracts, payment, turnaround and credentials.",
   alternates: { canonical: "/faq" },
+  openGraph: {
+    title: "FAQ · Hill Country Consultants",
+    description:
+      "How Hill Country Consultants works — what we do, hybrid meaning, hours, booking, pricing, contracts, payment, turnaround and credentials.",
+    url: "/faq",
+  },
 };
 
 export default function FaqPage() {

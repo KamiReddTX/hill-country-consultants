@@ -10,7 +10,16 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { class: string } }): Metadata {
   const c = classBySlug(params.class);
   if (!c) return { title: "Class" };
-  return { title: `${c.name} · Training`, description: c.why, alternates: { canonical: `/training/${c.slug}` } };
+  return {
+    title: `${c.name} · Training`,
+    description: c.why,
+    alternates: { canonical: `/training/${c.slug}` },
+    openGraph: {
+      title: `${c.name} · Training · Hill Country Consultants`,
+      description: c.why,
+      url: `/training/${c.slug}`,
+    },
+  };
 }
 
 export default function ClassPage({ params }: { params: { class: string } }) {

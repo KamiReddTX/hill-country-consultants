@@ -14,7 +14,16 @@ export function generateStaticParams() {
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
   if (!isServiceKey(params.slug)) return { title: "Service" };
   const meta = SERVICE_META[params.slug];
-  return { title: meta.name, description: meta.desc, alternates: { canonical: `/services/${params.slug}` } };
+  return {
+    title: meta.name,
+    description: meta.desc,
+    alternates: { canonical: `/services/${params.slug}` },
+    openGraph: {
+      title: `${meta.name} · Hill Country Consultants`,
+      description: meta.desc,
+      url: `/services/${params.slug}`,
+    },
+  };
 }
 
 function imgFor(slug: string) {

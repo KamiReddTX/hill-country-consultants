@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   description:
     "Eight corporate classes taught on site or virtually — workbook, resource pack and a hands-on build lab where your team produces real deliverables in the room.",
   alternates: { canonical: "/training" },
+  openGraph: {
+    title: "Corporate Training · Hill Country Consultants",
+    description:
+      "Eight corporate classes taught on site or virtually — workbook, resource pack and a hands-on build lab where your team produces real deliverables in the room.",
+    url: "/training",
+  },
 };
 
 export default function TrainingPage() {

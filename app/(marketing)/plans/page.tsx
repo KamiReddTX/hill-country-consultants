@@ -8,6 +8,12 @@ export const metadata: Metadata = {
   description:
     "Foundation $1,500/mo, Momentum $4,250/mo, Enterprise $7,000/mo. Every service line is in all three — your tier sets the volume, not which ones you can use.",
   alternates: { canonical: "/plans" },
+  openGraph: {
+    title: "Plans & Pricing · Hill Country Consultants",
+    description:
+      "Foundation $1,500/mo, Momentum $4,250/mo, Enterprise $7,000/mo. Every service line is in all three — your tier sets the volume, not which ones you can use.",
+    url: "/plans",
+  },
 };
 
 export default function PlansPage() {
