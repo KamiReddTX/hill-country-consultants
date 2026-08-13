@@ -7,10 +7,10 @@ function client(): Resend | null {
   return key ? new Resend(key) : null;
 }
 
-async function send(to: string, subject: string, html: string) {
+async function send(to: string, subject: string, html: string, replyTo?: string) {
   const resend = client();
   if (!resend) { console.warn("[email] RESEND_API_KEY not set — skipped:", subject); return; }
-  await resend.emails.send({ from, to, subject, html, replyTo: process.env.EMAIL_REPLY_TO } as any);
+  await resend.emails.send({ from, to, subject, html, replyTo: replyTo || process.env.EMAIL_REPLY_TO } as any);
 }
 
 const shell = (title: string, body: string) => `
@@ -43,6 +43,26 @@ export async function sendBookingConfirmation(opts: {
     <p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Access your client portal</a></p>
     <p style="font-size:13px;color:#6b6552">All sales are final. See the Refund &amp; Cancellation Policy.</p>`;
   await send(opts.to, `Booking confirmed · ${opts.ref}`, shell("Your booking is confirmed", body));
+}
+
+/** Internal alert to the team when a booking is paid. Reply-to is the client so
+ *  a reply reaches them directly. Recipient is ADMIN_NOTIFY_EMAIL (defaults to info@). */
+export async function sendPurchaseAdminAlert(opts: {
+  ref: string; business: string; contact: string; email: string; phone: string;
+  itemsHtml: string; amount: string; startDate: string;
+}) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:2px 16px 2px 0;color:#6b6552;white-space:nowrap">${k}</td><td style="padding:2px 0"><strong>${v || "—"}</strong></td></tr>`;
+  const body = `
+    <p style="font-size:16px;line-height:1.6">New paid booking — <strong>${opts.amount}</strong> · Ref <strong>${opts.ref}</strong></p>
+    <table style="font-size:14px;line-height:1.6;color:#3a3f38;border-collapse:collapse;margin:8px 0 16px">
+      ${row("Business", opts.business)}${row("Contact", opts.contact)}${row("Email", opts.email)}${row("Phone", opts.phone)}${row("Requested start", opts.startDate)}
+    </table>
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">Items:</p>
+    <div style="font-size:14px;line-height:1.7;color:#3a3f38">${opts.itemsHtml}</div>
+    <p style="font-size:13px;color:#6b6552;margin-top:16px">Reply to this email to reach the client directly.</p>`;
+  await send(to, `New booking · ${opts.amount} · ${opts.ref}`, shell("New paid booking", body), opts.email || undefined);
 }
 
 /** Friday weekly report (called from a scheduled job in the portal phase). */

@@ -75,13 +75,13 @@ export function SiteFooter() {
             <Link href="/privacy" className="whitespace-nowrap transition-colors hover:text-[#c2a24a]">Privacy Policy</Link>
             <Link
               href="/portal/login"
-              className="whitespace-nowrap border-b border-white/30 pb-0.5 transition-colors hover:border-[#6b6552] hover:text-[#c2a24a]"
+              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-[#c2a24a] hover:text-[#c2a24a]"
             >
               Client Portal
             </Link>
             <Link
               href="/staff/login"
-              className="whitespace-nowrap border-b border-white/30 pb-0.5 transition-colors hover:border-[#6b6552] hover:text-[#c2a24a]"
+              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-[#c2a24a] hover:text-[#c2a24a]"
             >
               Employee Portal
             </Link>

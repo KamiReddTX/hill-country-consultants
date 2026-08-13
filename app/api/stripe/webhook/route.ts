@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd } from "@/content/pricing";
-import { sendBookingConfirmation } from "@/lib/email";
+import { sendBookingConfirmation, sendPurchaseAdminAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -84,6 +84,15 @@ export async function POST(req: NextRequest) {
     try {
       await sendBookingConfirmation({ to: m.email, ref, itemsHtml, startDate: m.startDate || "", portalUrl: `${site}/portal/login` });
     } catch (e) { console.error("[webhook] email", e); }
+
+    // Internal heads-up to the team that a purchase came in.
+    const paid = "$" + ((s.amount_total ?? 0) / 100).toLocaleString("en-US", { minimumFractionDigits: 2 });
+    try {
+      await sendPurchaseAdminAlert({
+        ref, business: m.business || "", contact: m.contact || "", email: m.email || "", phone: m.phone || "",
+        itemsHtml, amount: paid, startDate: m.startDate || "",
+      });
+    } catch (e) { console.error("[webhook] admin alert", e); }
   }
 
   return NextResponse.json({ received: true });
