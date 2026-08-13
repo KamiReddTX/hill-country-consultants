@@ -9,7 +9,12 @@ export const metadata: Metadata = {
   description:
     "Where we bring the deepest working knowledge — construction, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and agriculture.",
   alternates: { canonical: "/industries" },
-  openGraph: { title: "Industries", url: "/industries" },
+  openGraph: {
+    title: "Industries · Hill Country Consultants",
+    description:
+      "Where we bring the deepest working knowledge — construction, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and agriculture.",
+    url: "/industries",
+  },
 };
 
 export default function IndustriesPage() {

@@ -115,13 +115,14 @@ export interface RateLine {
   svc: string;
   n: string;
   p: string;
-  cart?: string; // BOOK_ITEMS id  → "Book now"
+  cart?: string; // BOOK_ITEMS id  → "Book & pay"
   quote?: string; // QUOTE_ITEMS id → "Request a quote"
+  // Neither cart nor quote → an informational line: name + price as text, no button.
 }
 
 export const RATE_LINES: RateLine[] = [
   { svc: "va", n: "Virtual assistant block — 10 hours", p: "$650", cart: "va-block" },
-  { svc: "va", n: "Additional hours beyond the block", p: "$65/hr", cart: "va-block" },
+  { svc: "va", n: "Additional hours beyond the block", p: "$65/hr" },
   { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
   { svc: "submittals", n: "Submittal package", p: "$350 each", cart: "sub-pkg" },
   { svc: "submittals", n: "Weekly submittal service · any volume", p: "$750/wk", cart: "sub-week" },

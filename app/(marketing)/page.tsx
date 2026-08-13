@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: {
     title: "Hill Country Consultants — The capability of a full staff. Without the payroll.",
+    description:
+      "One flat monthly fee puts a whole firm behind your business — admin, documentation, compliance, coordination, marketing, publishing and more. On-site when it matters, virtual when it counts.",
     url: "/",
   },
 };

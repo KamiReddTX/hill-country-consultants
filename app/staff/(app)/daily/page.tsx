@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getStaffMember, getClients } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
+import { TaskMoveControl } from "@/components/staff/task-move-control";
+import { LogWorkForm } from "@/components/staff/log-work-form";
 
 const RECURRING = [
   "Clear the request queue — acknowledge every new client request the same business day.",
@@ -15,6 +17,7 @@ export default async function DailyPage() {
   const clients = await getClients();
   const byId = new Map(clients.map((c) => [c.id, c]));
   const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.role); };
+  const workable = clients.filter((c) => !c.assigned_to || c.assigned_to === me.role).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
 
   const db = createClient();
   const [tasks, notes, vault] = await Promise.all([
@@ -39,7 +42,10 @@ export default async function DailyPage() {
               <li key={t.id} className="border border-line-warm bg-white p-4">
                 <p className="text-[15px] font-medium text-charcoal">{t.title}</p>
                 <p className="text-[13px] prose-muted">{t.service || "—"}{t.due_date ? ` · needed by ${t.due_date}` : ""}</p>
-                <p className="text-[12px] text-ink-faint">{info(t.client_id)}</p>
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-[12px] text-ink-faint">{info(t.client_id)}</p>
+                  <TaskMoveControl taskId={t.id} current={t.column_name} />
+                </div>
               </li>
             ))}
           </ul>
@@ -67,6 +73,12 @@ export default async function DailyPage() {
             ))}
           </ul>
         )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">Log work</h2>
+        <p className="mb-3 text-[15px] prose-muted">Log today's hours by service line — entries appear on the client's work log and weekly report.</p>
+        <LogWorkForm clients={workable} />
       </section>
 
       <section>

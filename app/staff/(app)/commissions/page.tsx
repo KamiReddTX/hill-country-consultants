@@ -12,7 +12,8 @@ export default async function CommissionsPage() {
   if (!me) redirect("/staff/login");
   if (!isSalesOrAdmin(me)) return <p className="text-[15px] prose-muted">Commissions is for sales and admins.</p>;
   const clients = await getClients();
-  const mine = me.employee_code ? clients.filter((c) => c.rep_code === me.employee_code) : [];
+  const code = (s: string | null | undefined) => (s ?? "").trim().toUpperCase();
+  const mine = me.employee_code ? clients.filter((c) => code(c.rep_code) === code(me.employee_code)) : [];
 
   return (
     <div className="flex flex-col gap-6">

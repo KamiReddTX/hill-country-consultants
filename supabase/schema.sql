@@ -20,16 +20,21 @@ create table if not exists staff (
   created_at   timestamptz not null default now()
 );
 
-create or replace function is_staff() returns boolean language sql stable as $$
+-- SECURITY DEFINER + pinned search_path: these run inside the staff RLS policies,
+-- so they must bypass RLS on staff to avoid "infinite recursion detected in policy".
+create or replace function is_staff() returns boolean
+  language sql stable security definer set search_path = public, pg_temp as $$
   select exists (select 1 from staff s where s.user_id = auth.uid() and s.active);
 $$;
 
-create or replace function is_admin() returns boolean language sql stable as $$
+create or replace function is_admin() returns boolean
+  language sql stable security definer set search_path = public, pg_temp as $$
   select exists (select 1 from staff s where s.user_id = auth.uid()
                  and s.active and s.role = 'Administrator');
 $$;
 
-create or replace function my_role() returns text language sql stable as $$
+create or replace function my_role() returns text
+  language sql stable security definer set search_path = public, pg_temp as $$
   select role from staff where user_id = auth.uid() limit 1;
 $$;
 
@@ -69,6 +74,10 @@ create table if not exists bookings (
   created_at   timestamptz not null default now()
 );
 create index if not exists bookings_client_idx on bookings (client_id);
+-- MA7: idempotency guard — at most one booking per Stripe PaymentIntent, so a
+-- retried/duplicate webhook can't create a second paid booking.
+create unique index if not exists bookings_stripe_pi_unique
+  on bookings (stripe_payment_intent) where stripe_payment_intent is not null;
 
 -- ─────────────────────────── client working data
 create table if not exists client_tasks (
@@ -214,6 +223,8 @@ create policy notes_write on client_notes for insert
   with check (exists (select 1 from clients c where c.id = client_notes.client_id
                       and (c.user_id = auth.uid() or is_staff())));
 
+-- Tradeoff: client_vault stays is_staff() (not sales/admin) so virtual assistants
+-- can read the credential register to deliver work; any active staff member sees it.
 create policy vault_scope on client_vault for all
   using (exists (select 1 from clients c where c.id = client_vault.client_id
                  and (c.user_id = auth.uid() or is_staff())))
@@ -232,9 +243,11 @@ create policy deliverables_scope on client_deliverables for select
 create policy deliverables_staff_write on client_deliverables for all
   using (is_staff()) with check (is_staff());
 
--- sales: staff only
-create policy leads_staff on leads for all
-  using (is_staff()) with check (is_staff());
+-- sales: only sales reps and admins may see or touch leads.
+-- Mirrors isSalesOrAdmin() in the app UI (lib/staff.ts, lib/auth.ts).
+create policy leads_sales on leads for all
+  using (my_role() in ('Sales / account manager', 'Administrator'))
+  with check (my_role() in ('Sales / account manager', 'Administrator'));
 
 -- punches: an employee sees and closes only their own; admins see and close all
 create policy punches_own on punches for select
@@ -268,9 +281,19 @@ begin
   insert into bookings (client_id, ref, items, quotes, paid_cents, start_date)
   values (v_client, p_ref, p_items, p_quotes, p_paid_cents, p_start);
 
-  insert into client_tasks (client_id, title, service, due_date, paid, booking_ref)
-  select v_client, i->>'name', i->>'svc', p_start, true, p_ref
+  -- Purchased services are staff-owned and already in flight, so they land in
+  -- "In progress" as created_by 'staff' (not the client's default "Requested"/
+  -- "Your request"), which also surfaces them in the staff delivery queue.
+  insert into client_tasks (client_id, title, service, due_date, paid, booking_ref, created_by, column_name)
+  select v_client, i->>'name', i->>'svc', p_start, true, p_ref, 'staff', 'In progress'
   from jsonb_array_elements(p_items) i;
 
   return v_client;
 end $$;
+
+-- C1: SECURITY DEFINER + Supabase's default execute grants would let anon/authenticated
+-- forge "paid" bookings and overwrite clients by email. Lock it to the service-role key
+-- (the Stripe webhook); Supabase's direct grant to service_role survives this revoke.
+revoke execute on function create_client_after_payment(
+  text, text, text, text, text, jsonb, jsonb, integer, date, text
+) from public, anon, authenticated;

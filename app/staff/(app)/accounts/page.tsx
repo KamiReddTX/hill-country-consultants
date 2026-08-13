@@ -6,7 +6,8 @@ export default async function AccountsPage() {
   if (!me) redirect("/staff/login");
   if (!isSalesOrAdmin(me)) return <p className="text-[15px] prose-muted">Accounts is for sales and admins.</p>;
   const clients = await getClients();
-  const mine = clients.filter((c) => (me.employee_code && c.rep_code === me.employee_code) || c.assigned_to === me.role);
+  const code = (s: string | null | undefined) => (s ?? "").trim().toUpperCase();
+  const mine = clients.filter((c) => (!!me.employee_code && code(c.rep_code) === code(me.employee_code)) || c.assigned_to === me.role);
   return (
     <div className="flex flex-col gap-6">
       <div><h1 className="font-fraunces text-[32px] font-normal text-forest">Accounts</h1><span className="rule-gold mb-4 mt-2" /><p className="text-[14px] prose-muted">Clients carrying your employee code, or owned by your role.</p></div>

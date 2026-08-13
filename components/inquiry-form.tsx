@@ -3,15 +3,19 @@
 import { useState, type ChangeEvent } from "react";
 
 /**
- * Strategy-session / contact form. Mirrors the prototype's behaviour today
- * (client-side success state). Server delivery via Resend is wired in the email
- * phase — this component will then POST to /api/inquiry. Email + phone are shown
- * prominently so the page is useful immediately.
+ * Strategy-session / contact form. Posts to /api/inquiry and only confirms once
+ * the server reports the lead was actually saved (res.ok && persisted). On any
+ * failure it shows an inline error with our email + phone instead of a false
+ * confirmation. A hidden honeypot field lets the server silently drop bots.
+ * Email + phone are shown prominently so the page is useful immediately.
  */
 export function InquiryForm() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(false);
   const [form, setForm] = useState({
     name: "", business: "", email: "", phone: "", industry: "", timeline: "", howHeard: "", referral: "", message: "",
+    company_website: "", // honeypot — must stay empty for a real submission
   });
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -35,16 +39,40 @@ export function InquiryForm() {
       className="flex flex-col gap-4 border border-line-warm bg-white p-6 sm:p-8"
       onSubmit={async (e) => {
         e.preventDefault();
+        setError(false);
+        setSubmitting(true);
         try {
-          await fetch("/api/inquiry", {
+          const res = await fetch("/api/inquiry", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(form),
           });
-        } catch { /* non-blocking — confirm regardless */ }
-        setSubmitted(true);
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.persisted === true) {
+            setSubmitted(true);
+            return;
+          }
+          setError(true);
+        } catch {
+          setError(true);
+        } finally {
+          setSubmitting(false);
+        }
       }}
     >
+      {/* Honeypot: hidden from people; a bot that fills it is dropped server-side. */}
+      <div className="sr-only" aria-hidden="true">
+        <label htmlFor="company_website">Company website</label>
+        <input
+          id="company_website"
+          name="company_website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={form.company_website}
+          onChange={set("company_website")}
+        />
+      </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-ink-faint">Name</span>
@@ -84,7 +112,16 @@ export function InquiryForm() {
         <span className="text-[13px] font-medium text-ink-faint">What&apos;s eating the most of your time right now?</span>
         <textarea rows={4} className={field} value={form.message} onChange={set("message")} />
       </label>
-      <button type="submit" className="btn-gold self-start">Request the free session</button>
+      {error && (
+        <p role="alert" className="text-[14px] text-red-700">
+          We couldn&apos;t submit your request. Please email{" "}
+          <a className="link-underline" href="mailto:info@hillcountryconsultants.com">info@hillcountryconsultants.com</a>{" "}
+          or call 470-478-1590 and we&apos;ll take it from there.
+        </p>
+      )}
+      <button type="submit" disabled={submitting} className="btn-gold self-start">
+        {submitting ? "Sending…" : "Request the free session"}
+      </button>
       <p className="text-[13px] prose-muted">The 30-minute strategy session is free and creates no obligation.</p>
     </form>
   );

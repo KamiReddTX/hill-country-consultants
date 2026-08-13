@@ -42,6 +42,16 @@ const slotNoteForDow = (dow: number) =>
 
 const GROUPS = Array.from(new Set(BOOK_ITEMS.map((b) => b.group)));
 
+// Format integer cents as USD. Cents are shown only when the amount isn't a whole
+// dollar, so whole-dollar totals read exactly as before ($650, not $650.00) while a
+// 50% deposit on an odd total reads correctly ($62.50 — matching the Stripe charge).
+const usdCents = (cents: number) =>
+  "$" +
+  (cents / 100).toLocaleString("en-US", {
+    minimumFractionDigits: cents % 100 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  });
+
 export function BookingFlow({
   initialAdd, initialQuotes, initialClass,
 }: {
@@ -52,7 +62,7 @@ export function BookingFlow({
   const [mode, setMode] = useState<"pay" | "call">("pay");
   const [payMode, setPayMode] = useState<"full" | "deposit">("full");
   const [step, setStep] = useState<Step>("select");
-  const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "" });
+  const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "", repCode: "" });
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -63,6 +73,7 @@ export function BookingFlow({
   // calendar state
   const [calOffset, setCalOffset] = useState(0);
   const [pickedDate, setPickedDate] = useState("");
+  const [pickedIso, setPickedIso] = useState(""); // machine YYYY-MM-DD for the same pick — bookings.start_date is a date column
   const [pickedDow, setPickedDow] = useState<number | null>(null);
   const [slot, setSlot] = useState("");
 
@@ -72,7 +83,10 @@ export function BookingFlow({
   );
   const chosenQuotes = useMemo(() => QUOTE_ITEMS.filter((q) => quotes[q.id]), [quotes]);
   const fixedTotal = useMemo(() => chosen.reduce((s, it) => s + it.qty * it.price, 0), [chosen]);
-  const dueNow = payMode === "deposit" ? Math.round(fixedTotal / 2) : fixedTotal;
+  // Deposit computed once in cents so the amount shown here and the amount charged
+  // by app/api/checkout are always identical, including odd-dollar totals.
+  const depositCents = Math.round((fixedTotal / 2) * 100);
+  const dueNowCents = payMode === "deposit" ? depositCents : fixedTotal * 100;
   const canPay = fixedTotal > 0;
   const hasSelection = chosen.length > 0 || chosenQuotes.length > 0;
   const needsDate = !!selectedClass;
@@ -111,7 +125,7 @@ export function BookingFlow({
     const first = new Date(today.getFullYear(), today.getMonth() + calOffset, 1);
     const start = new Date(first);
     start.setDate(first.getDate() - ((first.getDay() + 6) % 7));
-    const days: { key: string; label: string; iso: string; open: boolean; appt: boolean; picked: boolean; dow: number }[] = [];
+    const days: { key: string; label: string; iso: string; date: string; open: boolean; appt: boolean; picked: boolean; dow: number }[] = [];
     for (let w = 0; w < 6; w++) {
       for (let d = 0; d < 6; d++) {
         const cur = new Date(start);
@@ -119,9 +133,10 @@ export function BookingFlow({
         const dow = cur.getDay();
         const inMonth = cur.getMonth() === first.getMonth();
         const iso = cur.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+        const date = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
         const closed = dow === 3 || dow === 0;
         const disabled = !inMonth || cur < today || closed;
-        days.push({ key: `${w}-${d}`, label: inMonth ? String(cur.getDate()) : "", iso, open: !disabled, appt: dow === 6 && !disabled, picked: pickedDate === iso, dow });
+        days.push({ key: `${w}-${d}`, label: inMonth ? String(cur.getDate()) : "", iso, date, open: !disabled, appt: dow === 6 && !disabled, picked: pickedDate === iso, dow });
       }
     }
     return { label: first.toLocaleDateString("en-US", { month: "long", year: "numeric" }), days };
@@ -129,26 +144,50 @@ export function BookingFlow({
 
   async function submit() {
     setError("");
-    if (!form.name || !form.business || !form.email || !form.phone || !form.startDate) {
-      setError("Please complete contact name, business, email, phone and requested start date."); return;
+    // For a class the start date is the picked class date (ISO, since start_date is
+    // a date column) — no separate field is shown.
+    const startDate = needsDate ? pickedIso : form.startDate;
+    if (!form.name || !form.business || !form.email || !form.phone) {
+      setError("Please complete contact name, business, email and phone."); return;
     }
-    if (!consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }
+    if (!needsDate && !form.startDate) { setError("Please choose a requested start date."); return; }
     if (needsDate && (!pickedDate || !slot)) { setError("Please choose a class date and time."); return; }
+    // The all-sales-are-final consent applies only to a paid booking; a free quote
+    // request carries no obligation, so it isn't gated on it.
+    if (canPay && !consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }
 
     const payload = {
       items: chosen.map((c) => ({ id: c.id, name: c.name, qty: c.qty, svc: c.svc, price: c.price })),
       quotes: chosenQuotes.map((q) => ({ id: q.id, name: q.name, from: q.from })),
-      payMode, dueNowCents: dueNow * 100,
-      contact: form, startDate: form.startDate,
+      payMode, dueNowCents,
+      contact: form, startDate,
       className: selectedClass ? `${selectedClass.no} — ${selectedClass.name}` : "",
       classDate: pickedDate, classSlot: slot,
       consentAt: new Date().toISOString(),
+      repCode: form.repCode,
     };
 
     if (!canPay) {
-      // Quote-only request — no charge. (Server email lands with the email phase.)
-      setDoneRef("HCC-" + Math.floor(100000 + Math.random() * 899999));
-      setStep("done");
+      // Quote-only request — no charge. Persist a lead first; only confirm once the
+      // server reports it stored, otherwise show the email/phone fallback so the
+      // request is never silently dropped.
+      try {
+        setBusy(true);
+        const res = await fetch("/api/quote", {
+          method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (res.ok && data.persisted) {
+          setDoneRef("HCC-" + Math.floor(100000 + Math.random() * 899999));
+          setStep("done");
+          return;
+        }
+        setError("We couldn't record your quote request just now. Please email info@hillcountryconsultants.com or call 470-478-1590 and we'll take it from there.");
+      } catch {
+        setError("Something went wrong sending your quote request. Please email info@hillcountryconsultants.com or call 470-478-1590 and we'll take it from there.");
+      } finally {
+        setBusy(false);
+      }
       return;
     }
 
@@ -262,7 +301,7 @@ export function BookingFlow({
                       <button
                         key={d.key}
                         disabled={!d.open}
-                        onClick={() => { setPickedDate(d.iso); setPickedDow(d.dow); setSlot(""); }}
+                        onClick={() => { setPickedDate(d.iso); setPickedIso(d.date); setPickedDow(d.dow); setSlot(""); }}
                         className={`min-h-touch border text-[13px] ${
                           d.picked ? "border-forest bg-forest text-white"
                           : d.open ? "border-line-warm bg-cream text-charcoal hover:border-gold"
@@ -347,7 +386,7 @@ export function BookingFlow({
                   <p className="kicker mb-2">How would you like to pay?</p>
                   <div className="flex gap-3">
                     <button onClick={() => setPayMode("full")} className={`min-h-touch flex-1 border px-4 ${payMode === "full" ? "border-forest bg-forest text-white" : "border-line-warm bg-white"}`}>Pay in full · {usd(fixedTotal)}</button>
-                    <button onClick={() => setPayMode("deposit")} className={`min-h-touch flex-1 border px-4 ${payMode === "deposit" ? "border-forest bg-forest text-white" : "border-line-warm bg-white"}`}>50% deposit · {usd(Math.round(fixedTotal / 2))}</button>
+                    <button onClick={() => setPayMode("deposit")} className={`min-h-touch flex-1 border px-4 ${payMode === "deposit" ? "border-forest bg-forest text-white" : "border-line-warm bg-white"}`}>50% deposit · {usdCents(depositCents)}</button>
                   </div>
                 </div>
               )}
@@ -362,28 +401,47 @@ export function BookingFlow({
                       value={form[k]} onChange={setField(k)} />
                   </label>
                 ))}
-                <label className="flex flex-col gap-1.5">
-                  <span className="text-[13px] font-medium text-ink-faint">Requested start date</span>
-                  <input required type="date" className="min-h-touch w-full border border-line-warm bg-white px-4 py-3 text-[16px] outline-none focus:border-forest" value={form.startDate} onChange={setField("startDate")} />
-                </label>
+                {needsDate ? (
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[13px] font-medium text-ink-faint">Class date</span>
+                    <div className="min-h-touch flex w-full items-center border border-line-warm bg-cream px-4 py-3 text-[16px] text-charcoal">
+                      {pickedDate ? `${pickedDate}${slot ? ` · ${slot}` : ""}` : "Choose your class date and time on the previous step."}
+                    </div>
+                  </label>
+                ) : (
+                  <label className="flex flex-col gap-1.5">
+                    <span className="text-[13px] font-medium text-ink-faint">Requested start date</span>
+                    <input required type="date" className="min-h-touch w-full border border-line-warm bg-white px-4 py-3 text-[16px] outline-none focus:border-forest" value={form.startDate} onChange={setField("startDate")} />
+                  </label>
+                )}
               </div>
               <label className="flex flex-col gap-1.5">
                 <span className="text-[13px] font-medium text-ink-faint">Project notes (optional)</span>
                 <textarea rows={3} className="w-full border border-line-warm bg-white px-4 py-3 text-[16px] outline-none focus:border-forest" value={form.notes} onChange={setField("notes")} />
               </label>
-              <label className="flex items-start gap-3 border border-line-warm bg-white p-4">
-                <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-                <span className="text-[14.5px] prose-soft">
-                  I have read and accept the{" "}
-                  <Link href="/terms" className="link-underline" target="_blank">Terms of Service</Link> and the{" "}
-                  <Link href="/refund-policy" className="link-underline" target="_blank">Refund &amp; Cancellation Policy</Link>.
-                  I understand all sales are final.
-                </span>
+              <label className="flex flex-col gap-1.5">
+                <span className="text-[13px] font-medium text-ink-faint">Referral or employee code (optional)</span>
+                <input type="text" className="min-h-touch w-full border border-line-warm bg-white px-4 py-3 text-[16px] outline-none focus:border-forest" value={form.repCode} onChange={setField("repCode")} />
               </label>
+              {canPay ? (
+                <label className="flex items-start gap-3 border border-line-warm bg-white p-4">
+                  <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
+                  <span className="text-[14.5px] prose-soft">
+                    I have read and accept the{" "}
+                    <Link href="/terms" className="link-underline" target="_blank">Terms of Service</Link> and the{" "}
+                    <Link href="/refund-policy" className="link-underline" target="_blank">Refund &amp; Cancellation Policy</Link>.
+                    I understand all sales are final.
+                  </span>
+                </label>
+              ) : (
+                <p className="border border-line-warm bg-white p-4 text-[14.5px] prose-soft">
+                  Quote requests are free and create no obligation. We price scoped work in writing before anything begins — no payment is taken now.
+                </p>
+              )}
               {error && <p className="text-[14px] text-red-700">{error}</p>}
               <div className="flex flex-wrap gap-3">
                 <button disabled={busy} onClick={submit} className="btn-gold">
-                  {busy ? "Starting checkout…" : canPay ? `Pay ${usd(dueNow)}` : "Submit quote request"}
+                  {busy ? (canPay ? "Starting checkout…" : "Submitting…") : canPay ? `Pay ${usdCents(dueNowCents)}` : "Submit quote request"}
                 </button>
                 <button onClick={() => { setStep("select"); setError(""); }} className="btn-outline">← Back</button>
               </div>
@@ -422,7 +480,7 @@ export function BookingFlow({
             )}
             {canPay && (
               <div className="border-t border-line-soft pt-3">
-                <div className="flex justify-between text-[15px]"><span className="prose-muted">Payable today</span><span className="font-fraunces text-[22px] text-charcoal tabular-nums">{usd(dueNow)}</span></div>
+                <div className="flex justify-between text-[15px]"><span className="prose-muted">Payable today</span><span className="font-fraunces text-[22px] text-charcoal tabular-nums">{usdCents(dueNowCents)}</span></div>
                 {payMode === "deposit" && <p className="mt-1 text-[13px] prose-muted">50% deposit — balance due on delivery.</p>}
               </div>
             )}

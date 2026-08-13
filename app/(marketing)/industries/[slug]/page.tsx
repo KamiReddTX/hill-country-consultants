@@ -15,7 +15,11 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
     title: ind.name,
     description: ind.headline,
     alternates: { canonical: `/industries/${ind.slug}` },
-    openGraph: { title: ind.name, url: `/industries/${ind.slug}` },
+    openGraph: {
+      title: `${ind.name} · Hill Country Consultants`,
+      description: ind.headline,
+      url: `/industries/${ind.slug}`,
+    },
   };
 }
 

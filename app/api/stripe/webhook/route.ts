@@ -44,6 +44,15 @@ export async function POST(req: NextRequest) {
       .filter(Boolean);
 
     const db = createServiceClient();
+
+    // Idempotency: Stripe delivers at-least-once and retries on any non-2xx, so a
+    // retry or duplicate event must not create a second client/booking/task set.
+    const paymentIntent = (s.payment_intent as string) || null;
+    if (paymentIntent) {
+      const { data: existing } = await db.from("bookings").select("id").eq("stripe_payment_intent", paymentIntent).maybeSingle();
+      if (existing) return NextResponse.json({ received: true, duplicate: true });
+    }
+
     const { data: clientId, error } = await db.rpc("create_client_after_payment", {
       p_email: m.email, p_business: m.business, p_contact: m.contact, p_phone: m.phone,
       p_ref: ref, p_items: items as any, p_quotes: quotes as any,
@@ -60,10 +69,15 @@ export async function POST(req: NextRequest) {
       scope_snapshot: { items, quotes, payMode: m.payMode, amount_total: s.amount_total } as any,
     }).eq("ref", ref);
 
-    // Invite the client so they can sign in; RLS binds their user_id on first login.
-    try { await db.auth.admin.inviteUserByEmail(m.email); } catch (e) { console.warn("[webhook] invite", e); }
-
+    // Invite the client to set a password and sign in; /auth/callback binds their
+    // user_id to their client row on first login.
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+    try {
+      await db.auth.admin.inviteUserByEmail(
+        m.email,
+        site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
+      );
+    } catch (e) { console.warn("[webhook] invite", e); }
     const itemsHtml =
       items.map((i: any) => `• ${i.name}${i.qty > 1 ? ` × ${i.qty}` : ""} — ${usd(i.price * i.qty)}`).join("<br>") +
       (quotes.length ? `<br><em>Quote requests:</em><br>` + quotes.map((q: any) => `• ${q.name} (${q.from})`).join("<br>") : "");

@@ -24,6 +24,9 @@ export async function POST(req: NextRequest) {
   if (!body.contact?.email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
 
   const fixedTotal = items.reduce((s, i) => s + (bookItemById(i.id)!.price * (i.qty || 1)), 0);
+  // Deposit in cents — the single amount both charged here and shown in the
+  // booking UI (components/booking/booking-flow.tsx), so they never disagree.
+  const depositCents = Math.round((fixedTotal / 2) * 100);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const site = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
 
@@ -33,7 +36,7 @@ export async function POST(req: NextRequest) {
           quantity: 1,
           price_data: {
             currency: "usd",
-            unit_amount: Math.round((fixedTotal / 2) * 100),
+            unit_amount: depositCents,
             product_data: { name: "50% deposit — Hill Country Consultants", description: "Balance due on delivery." },
           },
         }]
