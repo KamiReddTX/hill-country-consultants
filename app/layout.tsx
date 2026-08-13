@@ -17,7 +17,14 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+// The site is served from www (the apex 301-redirects to it), so metadata
+// (canonical + og:url) must use the www host to match what is actually served —
+// even if the deploy env var is still set to the bare domain.
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+const siteUrl = rawSiteUrl.replace(
+  /:\/\/hillcountryconsultants\.com/,
+  "://www.hillcountryconsultants.com",
+);
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
