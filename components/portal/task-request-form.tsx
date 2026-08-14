@@ -2,13 +2,6 @@
 import { useState, useTransition } from "react";
 import { addTaskRequest } from "@/app/portal/actions";
 
-const SERVICES = [
-  "Virtual Assistant & Admin", "Project Management & Coordination", "Construction Submittals",
-  "Compliance & Documentation", "Marketing & Graphics", "Brand Systems", "Publishing & Editorial",
-  "Music, Media & Podcast", "App, Web & PWA", "Corporate Training", "Systems & Automation",
-  "Event Planning", "Agriculture & Land", "Grants & Nonprofit",
-];
-
 export function TaskRequestForm() {
   const [pending, start] = useTransition();
   const [error, setError] = useState("");
@@ -16,22 +9,54 @@ export function TaskRequestForm() {
 
   return (
     <form
-      className="grid gap-3 border border-line-warm bg-white p-5 sm:grid-cols-[2fr_1.5fr_1fr_auto]"
-      action={(fd) => start(async () => {
-        setError(""); setDone(false);
-        const r = await addTaskRequest(fd);
-        if (r?.error) setError(r.error); else { setDone(true); (document.getElementById("task-form") as HTMLFormElement)?.reset(); }
-      })}
       id="task-form"
+      className="flex flex-col gap-3 border border-line-warm bg-white p-5"
+      action={(fd) =>
+        start(async () => {
+          setError("");
+          setDone(false);
+          const r = await addTaskRequest(fd);
+          if (r?.error) setError(r.error);
+          else {
+            setDone(true);
+            (document.getElementById("task-form") as HTMLFormElement)?.reset();
+          }
+        })
+      }
     >
-      <input name="title" required placeholder="What do you need?" className="min-h-touch border border-line-warm px-3 text-[15px] outline-none focus:border-forest" />
-      <select name="service" className="min-h-touch border border-line-warm px-3 text-[15px] outline-none focus:border-forest">
-        {SERVICES.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
-      <input name="due" type="date" className="min-h-touch border border-line-warm px-3 text-[15px] outline-none focus:border-forest" />
-      <button disabled={pending} className="btn-gold px-5 text-[14px]">{pending ? "Adding…" : "Add request"}</button>
-      {error && <p className="text-[13px] text-red-700 sm:col-span-4">{error}</p>}
-      {done && <p className="text-[13px] text-forest sm:col-span-4">Added — your account lead sees it the same business day.</p>}
+      <p className="font-fraunces text-[20px] font-medium text-forest">Tasks</p>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-[13px] font-medium text-ink-faint">Describe exactly what you need us to do, in full detail</span>
+        <textarea
+          name="details"
+          required
+          rows={4}
+          placeholder="What's the task, the goal, and any context or examples we should know…"
+          className="w-full border border-line-warm px-3 py-2 text-[15px] outline-none focus:border-forest"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1.5">
+        <span className="text-[13px] font-medium text-ink-faint">Upload any documents needed for the task <span className="font-normal text-ink-faint">(optional · up to ~15MB total)</span></span>
+        <input
+          name="files"
+          type="file"
+          multiple
+          className="text-[14px] file:mr-3 file:border file:border-line-warm file:bg-cream file:px-3 file:py-1.5 file:text-[13px] file:text-forest"
+        />
+      </label>
+
+      <div className="flex flex-wrap items-end gap-3">
+        <label className="flex flex-col gap-1.5">
+          <span className="text-[13px] font-medium text-ink-faint">Date needed by</span>
+          <input name="due" type="date" className="min-h-touch border border-line-warm px-3 text-[15px] outline-none focus:border-forest" />
+        </label>
+        <button disabled={pending} className="btn-gold px-6 text-[14px]">{pending ? "Submitting…" : "Submit task"}</button>
+      </div>
+
+      {error && <p className="text-[13px] text-red-700">{error}</p>}
+      {done && <p className="text-[13px] text-forest">Submitted — it&apos;s in Requested, and your account lead is notified.</p>}
     </form>
   );
 }

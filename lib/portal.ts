@@ -4,6 +4,7 @@ import type { ClientRow, BookingRow, ClientTaskRow, VaultRow } from "@/lib/datab
 export interface WorkLogRow { id: string; worked_on: string; service: string | null; task: string | null; performed_by: string | null; hours: number }
 export interface DeliverableRow { id: string; name: string; service: string | null; status: string; file_url: string | null; delivered_on: string | null }
 export interface NoteRow { id: string; body: string; created_at: string }
+export interface TaskFileRow { id: string; task_id: string; name: string; created_at: string }
 
 export interface PortalData {
   client: ClientRow;
@@ -13,6 +14,7 @@ export interface PortalData {
   workLog: WorkLogRow[];
   deliverables: DeliverableRow[];
   notes: NoteRow[];
+  taskFiles: TaskFileRow[];
 }
 
 /** The signed-in client, or null if this user isn't a client. RLS returns only their row. */
@@ -30,13 +32,14 @@ export async function getPortalClient(): Promise<ClientRow | null> {
 export async function getPortalData(client: ClientRow): Promise<PortalData> {
   const db = createClient();
   const id = client.id;
-  const [bookings, tasks, vault, workLog, deliverables, notes] = await Promise.all([
+  const [bookings, tasks, vault, workLog, deliverables, notes, taskFiles] = await Promise.all([
     db.from("bookings").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     db.from("client_tasks").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     db.from("client_vault").select("*").eq("client_id", id).order("updated_at", { ascending: false }),
     db.from("client_work_log").select("*").eq("client_id", id).order("worked_on", { ascending: false }),
     db.from("client_deliverables").select("*").eq("client_id", id).order("delivered_on", { ascending: false }),
     db.from("client_notes").select("*").eq("client_id", id).order("created_at", { ascending: false }),
+    db.from("client_task_files").select("id,task_id,name,created_at").eq("client_id", id),
   ]);
   return {
     client,
@@ -46,6 +49,7 @@ export async function getPortalData(client: ClientRow): Promise<PortalData> {
     workLog: (workLog.data as WorkLogRow[]) ?? [],
     deliverables: (deliverables.data as DeliverableRow[]) ?? [],
     notes: (notes.data as NoteRow[]) ?? [],
+    taskFiles: (taskFiles.data as TaskFileRow[]) ?? [],
   };
 }
 

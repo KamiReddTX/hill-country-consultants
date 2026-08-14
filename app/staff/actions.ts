@@ -209,6 +209,28 @@ export async function moveTaskColumn(taskId: string, column: string): Promise<Ac
   return { ok: true };
 }
 
+/** Staff (AM/VA): accept a Requested task and move it into the work queue. */
+export async function acceptTask(taskId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createClient();
+  const { error } = await db.from("client_tasks").update({ column_name: "In progress", needs_clarification: false }).eq("id", taskId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
+  return { ok: true };
+}
+
+/** Staff: mark a task done and send it to the client for review. */
+export async function submitTaskToClient(taskId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createClient();
+  const { error } = await db.from("client_tasks").update({ column_name: "In review" }).eq("id", taskId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
+  return { ok: true };
+}
+
 /** Staff: log one work-log entry for a client. Stamped with the signed-in staffer. */
 export async function logWork(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();

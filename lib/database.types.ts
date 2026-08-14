@@ -140,6 +140,9 @@ export interface Database {
           booking_ref: string | null;
           created_by: string;
           created_at: string;
+          details: string | null;
+          approved_at: string | null;
+          needs_clarification: boolean;
         };
         Insert: {
           id?: string;
@@ -151,8 +154,16 @@ export interface Database {
           paid?: boolean;
           booking_ref?: string | null;
           created_by?: string;
+          details?: string | null;
+          approved_at?: string | null;
+          needs_clarification?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["client_tasks"]["Insert"]>;
+      };
+      client_task_files: {
+        Row: { id: string; task_id: string; client_id: string; name: string; path: string; size: number | null; uploaded_by: string; created_at: string };
+        Insert: { id?: string; task_id: string; client_id: string; name: string; path: string; size?: number | null; uploaded_by?: string };
+        Update: Partial<Database["public"]["Tables"]["client_task_files"]["Insert"]>;
       };
       client_notes: {
         Row: { id: string; client_id: string; body: string; created_at: string };
@@ -323,6 +334,8 @@ export interface Database {
       is_admin: { Args: Record<string, never>; Returns: boolean };
       my_role: { Args: Record<string, never>; Returns: string };
       mark_kickoff_scheduled: { Args: Record<string, never>; Returns: undefined };
+      client_approve_task: { Args: { p_task: string }; Returns: undefined };
+      client_request_changes: { Args: { p_task: string }; Returns: undefined };
     };
   };
 }

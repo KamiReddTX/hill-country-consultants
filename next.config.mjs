@@ -9,6 +9,8 @@ const nextConfig = {
   // (a compile-time strictness issue, not a runtime bug). Don't block deploys on it.
   typescript: { ignoreBuildErrors: true },
   eslint: { ignoreDuringBuilds: true },
+  // Task-document uploads ride in the server action body.
+  experimental: { serverActions: { bodySizeLimit: "15mb" } },
 };
 
 export default nextConfig;

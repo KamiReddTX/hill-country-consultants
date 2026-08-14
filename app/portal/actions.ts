@@ -2,24 +2,66 @@
 export type ActionResult = { error?: string; ok?: boolean };
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
 
-/** Client adds a request to their own task board (lands in "Requested"). */
+/**
+ * Client submits a task: full description, date needed, and any documents.
+ * Lands in "Requested". Files go to a private bucket via the service role, with
+ * their metadata recorded on client_task_files.
+ */
 export async function addTaskRequest(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
-  const title = String(formData.get("title") || "").trim();
-  if (!title) return { error: "A short description is required." };
+  const details = String(formData.get("details") || "").trim();
+  if (!details) return { error: "Describe exactly what you need us to do." };
+  const due = String(formData.get("due") || "") || null;
+  const title = details.length > 70 ? details.slice(0, 70).trimEnd() + "…" : details;
+
   const db = createClient();
-  const { error } = await db.from("client_tasks").insert({
-    client_id: client.id,
-    title,
-    service: String(formData.get("service") || "") || null,
-    due_date: String(formData.get("due") || "") || null,
-    column_name: "Requested",
-    created_by: "client",
-  });
+  const { data: task, error } = await db
+    .from("client_tasks")
+    .insert({ client_id: client.id, title, details, due_date: due, column_name: "Requested", created_by: "client" })
+    .select("id")
+    .single();
+  if (error || !task) return { error: error?.message || "Could not save your task." };
+
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (files.length) {
+    try {
+      const admin = createServiceClient();
+      for (const file of files.slice(0, 10)) {
+        const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+        const path = `${client.id}/${task.id}/${Date.now()}-${safe}`;
+        const buf = Buffer.from(await file.arrayBuffer());
+        const up = await admin.storage.from("task-files").upload(path, buf, { contentType: file.type || "application/octet-stream" });
+        if (!up.error) {
+          await admin.from("client_task_files").insert({
+            task_id: task.id, client_id: client.id, name: file.name.slice(0, 200), path, size: file.size, uploaded_by: "client",
+          } as any);
+        }
+      }
+    } catch (e) { console.error("[addTaskRequest] upload", e); }
+  }
+  revalidatePath("/portal/tasks");
+  return { ok: true };
+}
+
+/** Client approves a delivered task (from "In review" → "Delivered", dated). */
+export async function approveTask(taskId: string): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const { error } = await createClient().rpc("client_approve_task", { p_task: taskId });
+  if (error) return { error: error.message };
+  revalidatePath("/portal/tasks");
+  return { ok: true };
+}
+
+/** Client asks for changes (→ back to "In progress", flags the VA/AM to call). */
+export async function requestChanges(taskId: string): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const { error } = await createClient().rpc("client_request_changes", { p_task: taskId });
   if (error) return { error: error.message };
   revalidatePath("/portal/tasks");
   return { ok: true };
