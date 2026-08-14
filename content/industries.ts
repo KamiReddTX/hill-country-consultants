@@ -14,9 +14,19 @@ export interface Industry {
   quotes: string[];   // QUOTE_ITEMS ids to preload on /book
 }
 
-/** Standing boundaries, shown on every industry page (verbatim). */
+/** Fallback boundary. Per-industry lines below take precedence. */
 export const INDUSTRY_SCOPE_ENDS =
   "We prepare — we do not certify or stamp engineering. Legal wording is flagged to your attorney and never altered by us. We are not a substitute for licensed bookkeeping, legal, or tax services.";
+
+/** "Where our scope ends" — tailored to each industry's real boundary. */
+export const INDUSTRY_SCOPE_BY_SLUG: Record<string, string> = {
+  construction: "We prepare — we do not certify or stamp engineering. Your general contractor or contractor of record reviews and signs.",
+  authors: "We prepare, format and coordinate — we do not act as your literary agent or guarantee sales or placement. Contract and rights language is flagged to your attorney and never altered by us.",
+  food: "We prepare and track — we do not issue permits or provide licensed food-safety certification. Legal wording is flagged to your attorney and never altered by us.",
+  smb: "We are not a substitute for licensed bookkeeping, legal, or tax services. Legal wording is flagged to your attorney and never altered by us.",
+  nonprofits: "We research, prepare and submit — no grant award is guaranteed, and we are not your auditor. Legal wording is flagged to your attorney and never altered by us.",
+  agriculture: "We prepare records and frameworks — we do not provide licensed surveying or agronomy; specialized work is referred out. Legal wording is flagged to your attorney and never altered by us.",
+};
 
 export const INDUSTRIES: Industry[] = [
   {
@@ -43,7 +53,7 @@ export const INDUSTRIES: Industry[] = [
     img: "Stacked books and page proofs",
     headline: "Get the book finished, published, and selling.",
     problem:
-      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing.",
+      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing vendor registered with the Library of Congress.",
     handles: [
       "Editorial at the stage you are at",
       "Interior and eBook formatting",

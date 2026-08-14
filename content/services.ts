@@ -92,7 +92,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
   },
   publishing: {
     headline: "Publish Your Book",
-    pain: "The manuscript is done, or close, and the next steps are a maze. We take a manuscript from draft to launch under Redd Ladys Chronicles.",
+    pain: "The manuscript is done, or close, and the next steps are a maze. We take a manuscript from draft to launch under Redd Ladys Chronicles, our publishing vendor registered with the Library of Congress.",
     included: ["Editorial consultation and manuscript editing", "Developmental, line, and proof passes", "eBook formatting and cover coordination", "Full interior and production build", "Release and launch strategy, and distribution setup"],
     expect: ["A staged pipeline with clear milestones", "Metadata and ISBN set before release", "One title per term at Enterprise", "Editorial from $450 per 10k words; full production and release from $3,500 standalone"],
     scope: "Ghostwriting is priced separately, from $10,000. ISBN and print runs at cost. Contract and rights language is flagged to your attorney and never altered by us.",

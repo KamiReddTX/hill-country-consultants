@@ -121,7 +121,7 @@ export default function HomePage() {
           </div>
           <p className="text-[20px] prose-soft">
             One hire gets you one skill set —{" "}
-            <span className="font-semibold text-charcoal">$5,500–$7,500/month</span> once you count
+            <span className="font-semibold text-charcoal">$5,500–$7,500/month</span> calculating
             salary, benefits, PTO, equipment, software, and management. For the same money, often
             less, you get the whole firm.
           </p>

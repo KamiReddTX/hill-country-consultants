@@ -87,14 +87,14 @@ export const TRUST_POINTS: { t: string; d: string }[] = [
 export const PILLARS: { t: string; d: string }[] = [
   { t: "Documentation", d: "Submittals, SOPs, manuals, proposals and capability statements, produced to a defined standard and delivered on your letterhead." },
   { t: "Compliance", d: "Certifications, permits, insurance tracking and audit-ready files. The paperwork that keeps you eligible to work." },
-  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. Somebody has to own the follow-through, in writing." },
+  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will do the follow through for you, in writing." },
   { t: "Systems", d: "File architecture, naming conventions, templates and intake forms. Structure that holds after we hand it back." },
 ];
 
 /** Home — what a client gets in their portal the day they sign (verbatim). */
 export const PORTAL_FEATURES: { t: string; d: string }[] = [
   { t: "Onboarding tracker", d: "Week one, step by step: kickoff call, roadmap, credentials, task board, file structure, marked done as it happens." },
-  { t: "Your 30-day roadmap", d: "What we deliver, in what order, by what date, and what we need from you to hit each one." },
+  { t: "Your 30-day roadmap", d: "What we deliver, in what order, by what date, and what we need from you to accomplish each task." },
   { t: "Shared task board", d: "Requested, in progress, in review, delivered. Add a request yourself and we confirm the same business day." },
   { t: "Weekly report", d: "Every Friday: what we delivered, the hours it took, what is in flight, and what is next." },
   { t: "Work log", d: "Daily entries with hours by service line, reconciled against your allotment at every review." },

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ImageSlot } from "@/components/image-slot";
-import { INDUSTRIES, industryBySlug, INDUSTRY_SCOPE_ENDS } from "@/content/industries";
+import { INDUSTRIES, industryBySlug, INDUSTRY_SCOPE_ENDS, INDUSTRY_SCOPE_BY_SLUG } from "@/content/industries";
 
 export function generateStaticParams() {
   return INDUSTRIES.map((i) => ({ slug: i.slug }));
@@ -68,7 +68,7 @@ export default function IndustryPage({ params }: { params: { slug: string } }) {
           </ul>
           <div className="mt-12 max-w-[46em] border-l-2 border-gold pl-5">
             <p className="kicker mb-2">Where our scope ends</p>
-            <p className="text-[15.5px] prose-muted">{INDUSTRY_SCOPE_ENDS}</p>
+            <p className="text-[15.5px] prose-muted">{INDUSTRY_SCOPE_BY_SLUG[ind.slug] || INDUSTRY_SCOPE_ENDS}</p>
           </div>
         </div>
       </section>

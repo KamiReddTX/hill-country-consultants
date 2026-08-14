@@ -3,7 +3,7 @@
 export const PILLARS: { t: string; d: string }[] = [
   { t: "Documentation", d: "Submittals, SOPs, manuals, proposals and capability statements, produced to a defined standard and delivered on your letterhead." },
   { t: "Compliance", d: "Certifications, permits, insurance tracking and audit-ready files. The paperwork that keeps you eligible to work." },
-  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. Somebody has to own the follow-through, in writing." },
+  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will do the follow through for you, in writing." },
   { t: "Systems", d: "File architecture, naming conventions, templates and intake forms. Structure that holds after we hand it back." },
 ];
 
