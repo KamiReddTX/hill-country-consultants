@@ -45,11 +45,6 @@ export default async function RoadmapPage() {
               <p className="font-medium text-charcoal">{r.t}</p>
               <p className="text-[14px] prose-soft">{r.d}</p>
               {r.note && <p className="mt-1 text-[14px] text-forest">{r.note}</p>}
-              {r.key === "review" && (
-                <a href={SITE.reviewUrl} target="_blank" rel="noopener noreferrer" className="btn-gold mt-3 inline-block text-[14px]">
-                  Schedule your 30-day review
-                </a>
-              )}
             </div>
             <span className={`justify-self-start rounded-full border px-2.5 py-0.5 text-[12px] font-semibold sm:justify-self-end ${STATUS_STYLE[r.status] || STATUS_STYLE["Not started"]}`}>
               {r.status}
@@ -57,6 +52,16 @@ export default async function RoadmapPage() {
           </li>
         ))}
       </ol>
+
+      <div className="flex flex-col items-start gap-4 border border-line-warm bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="font-medium text-charcoal">Day 30 — your first full review</p>
+          <p className="text-[14px] prose-soft">When you reach day 30, book your review call and we&apos;ll walk through the month together.</p>
+        </div>
+        <a href={SITE.reviewUrl} target="_blank" rel="noopener noreferrer" className="btn-gold shrink-0 text-[14px]">
+          Schedule your 30-day review
+        </a>
+      </div>
     </div>
   );
 }
