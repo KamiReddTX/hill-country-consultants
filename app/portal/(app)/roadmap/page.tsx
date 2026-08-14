@@ -54,10 +54,7 @@ export default async function RoadmapPage() {
       </ol>
 
       <div className="flex flex-col items-start gap-4 border border-line-warm bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <p className="font-medium text-charcoal">Day 30 — your first full review</p>
-          <p className="text-[14px] prose-soft">When you reach day 30, book your review call and we&apos;ll walk through the month together.</p>
-        </div>
+        <p className="text-[15px] prose-soft">Book your first full review and we&apos;ll walk through the month together.</p>
         <a href={SITE.reviewUrl} target="_blank" rel="noopener noreferrer" className="btn-gold shrink-0 text-[14px]">
           Schedule your 30-day review
         </a>
