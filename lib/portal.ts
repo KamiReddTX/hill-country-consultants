@@ -78,3 +78,26 @@ export function deriveWeekly(d: PortalData) {
 }
 
 export const money = (cents: number) => "$" + (cents / 100).toLocaleString("en-US", { maximumFractionDigits: 0 });
+
+/** Statuses an AM/VA can set on each roadmap phase. */
+export const ROADMAP_STATUSES = ["Not started", "In progress", "Complete"] as const;
+export type RoadmapStatus = (typeof ROADMAP_STATUSES)[number];
+
+/** The five fixed roadmap phases. Per-client status + notes live in
+ *  client_roadmap and are overlaid on top of these. */
+export const ROADMAP_FRAMEWORK: { key: string; window: string; t: string; d: string }[] = [
+  { key: "onboarding", window: "Days 1–5", t: "Onboarding complete", d: "Kickoff call, credential handoff through the vault, task board live, channels and file structure built." },
+  { key: "baseline", window: "Days 5–10", t: "Document baseline", d: "We inventory what exists — capabilities statement, certifications, insurance, SOPs — and list what is missing or expired." },
+  { key: "deliverables", window: "Days 10–20", t: "First deliverables", d: "Highest-pain work first, against your tier allotment. Every item runs its pre-delivery review before it reaches you." },
+  { key: "systems", window: "Days 15–25", t: "Systems and templates", d: "Naming convention, folder structure, intake forms and reusable templates so the work holds after we hand it back." },
+  { key: "review", window: "Day 30", t: "First full review", d: "What we delivered, what is in flight, what capacity went unused, and what we recommend for the next thirty days." },
+];
+
+export interface RoadmapRow { phase: string; status: string; note: string | null }
+
+/** A client's saved roadmap phase rows (sparse — only phases staff have set). */
+export async function getClientRoadmap(clientId: string): Promise<RoadmapRow[]> {
+  const db = createClient();
+  const { data } = await db.from("client_roadmap").select("phase,status,note").eq("client_id", clientId);
+  return (data as RoadmapRow[]) ?? [];
+}

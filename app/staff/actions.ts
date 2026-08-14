@@ -174,6 +174,26 @@ export async function approveTimesheet(staffId: string, periodStart: string, per
   return { ok: true };
 }
 
+/** Staff (AM/VA): set a client's 30-day roadmap phase status + note. RLS allows
+ *  staff writes; the delivery page only surfaces the staffer's own/open clients.
+ *  Used as a <form> action, so it returns void. */
+export async function saveRoadmapPhase(formData: FormData): Promise<void> {
+  const me = await getStaffMember();
+  if (!me) return;
+  const clientId = String(formData.get("clientId") || "");
+  const phase = String(formData.get("phase") || "");
+  if (!clientId || !phase) return;
+  const status = String(formData.get("status") || "Not started");
+  const note = String(formData.get("note") || "").trim() || null;
+  const db = createClient();
+  await db.from("client_roadmap").upsert(
+    { client_id: clientId, phase, status, note, updated_at: new Date().toISOString() },
+    { onConflict: "client_id,phase" },
+  );
+  revalidatePath("/staff/delivery");
+  revalidatePath("/portal/roadmap");
+}
+
 /** The four board columns a client task moves through (mirrors the portal task board). */
 const TASK_COLUMNS = ["Requested", "In progress", "In review", "Delivered"] as const;
 

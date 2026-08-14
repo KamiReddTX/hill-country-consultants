@@ -78,6 +78,11 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
       };
+      client_roadmap: {
+        Row: { id: string; client_id: string; phase: string; status: string; note: string | null; updated_at: string };
+        Insert: { id?: string; client_id: string; phase: string; status?: string; note?: string | null; updated_at?: string };
+        Update: Partial<Database["public"]["Tables"]["client_roadmap"]["Insert"]>;
+      };
       bookings: {
         Row: {
           id: string;

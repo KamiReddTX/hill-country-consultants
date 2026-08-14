@@ -3,6 +3,7 @@ import { getStaffMember, getClients } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { AddDeliverableForm } from "@/components/staff/add-deliverable-form";
+import { ClientRoadmapEditor } from "@/components/staff/client-roadmap-editor";
 
 export default async function DeliveryPage() {
   const me = await getStaffMember();
@@ -12,10 +13,17 @@ export default async function DeliveryPage() {
   const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.role); };
   const workable = clients.filter((c) => !c.assigned_to || c.assigned_to === me.role).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
   const db = createClient();
-  const [tasks, deliv] = await Promise.all([
+  const [tasks, deliv, roadmap] = await Promise.all([
     db.from("client_tasks").select("*").in("column_name", ["In progress", "In review"]),
     db.from("client_deliverables").select("*").order("delivered_on", { ascending: false }).limit(40),
+    db.from("client_roadmap").select("phase,status,note,client_id"),
   ]);
+  const roadmapByClient = new Map<string, { phase: string; status: string; note: string | null }[]>();
+  (roadmap.data ?? []).forEach((r: any) => {
+    const a = roadmapByClient.get(r.client_id) || [];
+    a.push({ phase: r.phase, status: r.status, note: r.note });
+    roadmapByClient.set(r.client_id, a);
+  });
   const queue = (tasks.data ?? []).filter((t) => mineOrOpen(t.client_id));
   const delivered = (deliv.data ?? []).filter((d) => mineOrOpen(d.client_id));
   const name = (cid: string) => byId.get(cid)?.business || byId.get(cid)?.contact || "Client";
@@ -35,6 +43,20 @@ export default async function DeliveryPage() {
         <h2 className="mb-3 font-fraunces text-[20px] font-medium text-forest">Record a deliverable</h2>
         <p className="mb-3 text-[14px] prose-muted">Logs to the client's Files &amp; deliverables and their weekly report.</p>
         <AddDeliverableForm clients={workable} />
+      </section>
+      <section>
+        <h2 className="mb-3 font-fraunces text-[20px] font-medium text-forest">30-day roadmaps</h2>
+        <p className="mb-3 text-[14px] prose-muted">Set each phase&apos;s status and a client-specific note — this is exactly what shows on the client&apos;s Roadmap tab.</p>
+        {workable.length === 0 ? <p className="text-[15px] prose-muted">No clients assigned to you yet.</p> : (
+          <div className="flex flex-col gap-2">
+            {workable.map((c) => (
+              <details key={c.id} className="border border-line-warm bg-white">
+                <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">{c.label}</summary>
+                <div className="border-t border-line-soft p-4"><ClientRoadmapEditor clientId={c.id} rows={roadmapByClient.get(c.id) || []} /></div>
+              </details>
+            ))}
+          </div>
+        )}
       </section>
       <section>
         <h2 className="mb-3 font-fraunces text-[20px] font-medium text-forest">Recently delivered</h2>
