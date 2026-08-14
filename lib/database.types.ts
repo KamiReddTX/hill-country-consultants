@@ -143,6 +143,8 @@ export interface Database {
           details: string | null;
           approved_at: string | null;
           needs_clarification: boolean;
+          charge_cents: number | null;
+          charge_status: string;
         };
         Insert: {
           id?: string;
@@ -157,6 +159,8 @@ export interface Database {
           details?: string | null;
           approved_at?: string | null;
           needs_clarification?: boolean;
+          charge_cents?: number | null;
+          charge_status?: string;
         };
         Update: Partial<Database["public"]["Tables"]["client_tasks"]["Insert"]>;
       };

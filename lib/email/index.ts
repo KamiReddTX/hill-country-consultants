@@ -65,6 +65,16 @@ export async function sendPurchaseAdminAlert(opts: {
   await send(to, `New booking · ${opts.amount} · ${opts.ref}`, shell("New paid booking", body), opts.email || undefined);
 }
 
+/** Ask a client to pay an additional charge before a task starts. */
+export async function sendTaskPaymentRequest(opts: { to: string; amount: string; payUrl: string; taskTitle: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">There's an additional charge of <strong>${opts.amount}</strong> to start this task:</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">${opts.taskTitle}</p>
+    <p style="margin:22px 0"><a href="${opts.payUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Pay ${opts.amount}</a></p>
+    <p style="font-size:13px;color:#6b6552">Once payment clears, the task moves into progress and shows on your board. Questions? Just reply to this email.</p>`;
+  await send(opts.to, `Payment to start your task — ${opts.amount}`, shell("A quick payment to get started", body));
+}
+
 /** Friday weekly report (called from a scheduled job in the portal phase). */
 export async function sendWeeklyReport(opts: { to: string; business: string; summaryHtml: string; portalUrl: string }) {
   const body = `

@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients } from "@/lib/staff";
+import { getStaffMember, getClients, isAdmin } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { AddDeliverableForm } from "@/components/staff/add-deliverable-form";
 import { ClientRoadmapEditor } from "@/components/staff/client-roadmap-editor";
 import { TaskWorkflowButton } from "@/components/staff/task-workflow-button";
+import { TaskChargeForm } from "@/components/staff/task-charge-form";
 
 export default async function DeliveryPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
+  const admin = isAdmin(me);
   const clients = await getClients();
   const byId = new Map(clients.map((c) => [c.id, c]));
   const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.role); };
@@ -55,7 +57,16 @@ export default async function DeliveryPage() {
                   <p className="mt-1 text-[12px] prose-muted">{t.due_date ? `needed by ${t.due_date}` : "no date set"}</p>
                   {tf.length > 0 && <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">{tf.map((f) => <li key={f.id}><a href={`/api/task-file/${f.id}`} className="text-[12px] text-forest underline underline-offset-2 hover:text-gold">{f.name}</a></li>)}</ul>}
                 </div>
-                <div className="shrink-0"><TaskWorkflowButton taskId={t.id} kind="accept" /></div>
+                <div className="flex shrink-0 flex-col items-start gap-2">
+                  {t.paid && t.created_by === "staff" ? (
+                    admin ? <TaskWorkflowButton taskId={t.id} kind="accept" /> : <span className="text-[12px] prose-muted">Awaiting admin approval</span>
+                  ) : (
+                    <>
+                      <TaskWorkflowButton taskId={t.id} kind="accept" />
+                      <TaskChargeForm taskId={t.id} status={t.charge_status} cents={t.charge_cents} />
+                    </>
+                  )}
+                </div>
               </li>
             );
           })}</ul>

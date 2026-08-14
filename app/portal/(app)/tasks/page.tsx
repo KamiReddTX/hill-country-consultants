@@ -63,6 +63,11 @@ export default async function TasksPage() {
                         </ul>
                       )}
                       {t.created_by === "client" && col === "Requested" && <p className="mt-1 text-[11px] text-ink-faint">Your request</p>}
+                      {col === "Requested" && t.charge_status === "sent" && t.charge_cents ? (
+                        <a href={`/api/pay/task/${t.id}`} className="mt-2 inline-block border border-gold bg-gold/15 px-2.5 py-1 text-[12px] font-semibold text-forest hover:bg-gold/25">
+                          Pay ${(t.charge_cents / 100).toFixed(2)} to start
+                        </a>
+                      ) : null}
                       {t.needs_clarification && col === "In progress" && <p className="mt-1 text-[11px] text-gold">Sent back for changes</p>}
                       {col === "In review" && <TaskReviewActions taskId={t.id} />}
                       {col === "Delivered" && t.approved_at && (

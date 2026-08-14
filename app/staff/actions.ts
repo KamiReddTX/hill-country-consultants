@@ -4,6 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember } from "@/lib/staff";
+import { sendTaskPaymentRequest } from "@/lib/email";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -209,11 +210,15 @@ export async function moveTaskColumn(taskId: string, column: string): Promise<Ac
   return { ok: true };
 }
 
-/** Staff (AM/VA): accept a Requested task and move it into the work queue. */
+/** Accept a Requested task into the work queue. A VA/AM may accept a client
+ *  request; a PURCHASED service can only be approved & assigned by an admin. */
 export async function acceptTask(taskId: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   const db = createClient();
+  const { data: task } = await db.from("client_tasks").select("paid,created_by").eq("id", taskId).maybeSingle();
+  const isPurchase = !!task && (task as any).paid && (task as any).created_by === "staff";
+  if (isPurchase && me.role !== "Administrator") return { error: "Only an administrator can approve & assign a purchased service." };
   const { error } = await db.from("client_tasks").update({ column_name: "In progress", needs_clarification: false }).eq("id", taskId);
   if (error) return { error: error.message };
   revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
@@ -227,6 +232,33 @@ export async function submitTaskToClient(taskId: string): Promise<ActionResult> 
   const db = createClient();
   const { error } = await db.from("client_tasks").update({ column_name: "In review" }).eq("id", taskId);
   if (error) return { error: error.message };
+  revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
+  return { ok: true };
+}
+
+/** Staff (AM/VA): set a task's extra charge and email the client a payment link. */
+export async function sendTaskPaymentLink(taskId: string, amount: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const cents = Math.round(parseFloat(String(amount).replace(/[^0-9.]/g, "")) * 100);
+  if (!cents || cents < 100) return { error: "Enter an amount of at least $1." };
+  const db = createClient();
+  const { data: task } = await db.from("client_tasks").select("id,title,client_id").eq("id", taskId).maybeSingle();
+  if (!task) return { error: "Task not found." };
+  const { data: client } = await db.from("clients").select("email").eq("id", (task as any).client_id).maybeSingle();
+  const { error } = await db.from("client_tasks").update({ charge_cents: cents, charge_status: "sent" }).eq("id", taskId);
+  if (error) return { error: error.message };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  try {
+    if ((client as any)?.email) {
+      await sendTaskPaymentRequest({
+        to: (client as any).email,
+        amount: "$" + (cents / 100).toFixed(2),
+        payUrl: `${site}/api/pay/task/${taskId}`,
+        taskTitle: (task as any).title || "Your task",
+      });
+    }
+  } catch (e) { console.error("[sendTaskPaymentLink] email", e); }
   revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
   return { ok: true };
 }

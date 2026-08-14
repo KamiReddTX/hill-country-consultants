@@ -32,6 +32,14 @@ export async function POST(req: NextRequest) {
   if (event.type === "checkout.session.completed") {
     const s = event.data.object as Stripe.Checkout.Session;
     const m = s.metadata || {};
+
+    // Per-task charge (Phase 2): mark the task paid and move it into progress.
+    if (m.kind === "task_charge" && m.taskId) {
+      const tdb = createServiceClient();
+      await tdb.from("client_tasks").update({ charge_status: "paid", paid: true, column_name: "In progress", needs_clarification: false }).eq("id", m.taskId);
+      return NextResponse.json({ received: true });
+    }
+
     const ref = "HCC-" + Math.floor(100000 + Math.random() * 899999);
 
     const items = (m.items || "")
