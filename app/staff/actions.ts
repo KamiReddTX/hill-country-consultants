@@ -270,7 +270,7 @@ export async function staffReplyMessage(formData: FormData): Promise<ActionResul
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   if (!text && files.length === 0) return { error: "Write a message or attach a file." };
   const db = createClient();
-  const { data: c } = await db.from("clients").select("id,email,assigned_to").eq("id", clientId).maybeSingle();
+  const { data: c } = await db.from("clients").select("id,email,assigned_to,reply_token").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
   // Owner, team member (client_assignments), or admin/BM may message the client.
   if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
@@ -280,8 +280,10 @@ export async function staffReplyMessage(formData: FormData): Promise<ActionResul
   if (error) return { error: error.message };
   const saved = files.length ? await uploadNoteFiles(clientId, (note as any).id, files, me.name || me.email) : 0;
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const inbound = process.env.INBOUND_EMAIL_DOMAIN;
+  const replyTo = inbound && (c as any).reply_token ? `reply+${(c as any).reply_token}@${inbound}` : me.email;
   try {
-    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo: me.email, message: text || (saved ? `Sent you ${saved} file${saved > 1 ? "s" : ""}.` : "") });
+    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo, message: text || (saved ? `Sent you ${saved} file${saved > 1 ? "s" : ""}.` : "") });
   } catch (e) { console.warn("[staffReplyMessage] email", e); }
   revalidatePath("/staff/messages"); revalidatePath("/portal/messages");
   return { ok: true };

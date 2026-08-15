@@ -145,8 +145,10 @@ export async function addMessage(formData: FormData): Promise<ActionResult> {
     .select("id").single();
   if (error) return { error: error.message };
   const saved = files.length ? await uploadNoteFiles(client.id, (note as any).id, files, client.contact || client.email || "Client") : 0;
+  const inbound = process.env.INBOUND_EMAIL_DOMAIN;
+  const replyTo = inbound && (client as any).reply_token ? `reply+${(client as any).reply_token}@${inbound}` : (client.email || undefined);
   await notifyAssignedStaff(client, (to) =>
-    sendStaffMessageAlert({ to, clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff/messages` : "", replyTo: client.email || undefined, message: body || (saved ? `Sent ${saved} file${saved > 1 ? "s" : ""}.` : "") }),
+    sendStaffMessageAlert({ to, clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff/messages` : "", replyTo, message: body || (saved ? `Sent ${saved} file${saved > 1 ? "s" : ""}.` : "") }),
   );
   revalidatePath("/portal/messages"); revalidatePath("/staff/messages");
   return { ok: true };
