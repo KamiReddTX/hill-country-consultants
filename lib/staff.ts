@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaff } from "@/lib/auth";
 import type { StaffRow, ClientRow, LeadRow, PunchRow, BookingRow } from "@/lib/database.types";
 
@@ -80,6 +80,13 @@ export async function getOnTheClock(): Promise<PunchRow[]> {
 }
 
 /** Staff directory (admin only per RLS). */
+/** Minimal staff picker options (id + display name only, no pay) — safe to show
+ *  to account managers who can't read the full directory under RLS. */
+export async function getStaffOptions(): Promise<{ id: string; label: string }[]> {
+  const { data } = await createServiceClient().from("staff").select("id,name,email,active").eq("active", true);
+  return (data ?? []).map((s: any) => ({ id: s.id, label: s.name || s.email }));
+}
+
 export async function getDirectory(): Promise<StaffRow[]> {
   const db = createClient();
   const { data } = await db.from("staff").select("*").order("created_at", { ascending: false });
