@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
 import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS } from "@/content/pricing";
-import { SITE } from "@/content/site";
+import { PlanInterest } from "@/components/plan-interest";
 
 export const metadata: Metadata = {
   title: "Plans & Pricing",
@@ -35,7 +35,7 @@ export default function PlansPage() {
                 <span className="rule-gold" />
                 <p className="font-fraunces text-[32px] leading-none text-charcoal tabular-nums">{pl.price}</p>
                 <p className="flex-1 text-[16px] prose-muted">{pl.best}</p>
-                <a href={SITE.consultUrl} target="_blank" rel="noopener noreferrer" className="btn-gold self-start px-5 text-[14px]">Book a call</a>
+                <PlanInterest plan={pl.name} />
               </div>
             ))}
           </div>

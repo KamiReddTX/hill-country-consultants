@@ -128,6 +128,30 @@ export async function sendClientMessageAlert(opts: { to: string; from: string; p
   await send(opts.to, `New reply in your client portal`, shell("You have a new message", body));
 }
 
+/** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
+export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">Thanks for your interest in our <strong>${opts.plan}</strong> plan.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Let&apos;s map it out together. Book your <strong>free 30-minute strategy session</strong> and we&apos;ll confirm scope and next steps — in writing — before anything begins.</p>
+    <p style="margin:22px 0"><a href="${opts.bookingUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Book your free strategy session</a></p>
+    <p style="font-size:13px;color:#6b6552">Prefer to talk now? Reply to this email or call 470-478-1590.</p>`;
+  await send(opts.to, `Book your free strategy session — ${opts.plan} plan`, shell("Let's talk about your growth", body));
+}
+
+/** Team heads-up that a prospect is interested in a plan. Reply-to reaches the prospect. */
+export async function sendPlanInterestAlert(opts: { plan: string; email: string; name: string }) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:2px 16px 2px 0;color:#6b6552;white-space:nowrap">${k}</td><td style="padding:2px 0"><strong>${v || "—"}</strong></td></tr>`;
+  const body = `
+    <p style="font-size:16px;line-height:1.6">New plan interest — <strong>${opts.plan}</strong></p>
+    <table style="font-size:14px;line-height:1.6;color:#3a3f38;border-collapse:collapse;margin:8px 0 16px">
+      ${row("Name", opts.name)}${row("Email", opts.email)}${row("Plan", opts.plan)}
+    </table>
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">They&apos;ve been emailed the free strategy-session booking link. This lead is in your <strong>Pipeline → New lead</strong>.</p>`;
+  await send(to, `New ${opts.plan} plan interest · ${opts.name || opts.email}`, shell("New plan interest", body), opts.email || undefined);
+}
+
 /** 4-hour shift alert to the employee and admins. */
 export async function sendShiftAlert(opts: { to: string; name: string; hours: number }) {
   const body = `<p style="font-size:16px;line-height:1.6">${opts.name} has been clocked in for <strong>${opts.hours.toFixed(1)} hours</strong>. Shifts over 4 hours are flagged for review.</p>`;
