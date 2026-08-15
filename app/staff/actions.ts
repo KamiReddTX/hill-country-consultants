@@ -269,7 +269,8 @@ export async function staffReplyMessage(clientId: string, body: string): Promise
   const db = createClient();
   const { data: c } = await db.from("clients").select("id,email,assigned_to").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
-  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  // Owner, team member (client_assignments), or admin/BM may message the client.
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   const { error } = await db.from("client_notes").insert({ client_id: clientId, body: text, sender: "staff", author_name: me.name || me.email });
   if (error) return { error: error.message };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
@@ -289,7 +290,7 @@ export async function uploadClientFile(formData: FormData): Promise<ActionResult
   const db = createClient();
   const { data: c } = await db.from("clients").select("id,assigned_to").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
-  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   if (!files.length) return { error: "Choose at least one file." };
   const admin = createServiceClient();
@@ -316,10 +317,7 @@ export async function deleteClientFile(fileId: string): Promise<ActionResult> {
   const admin = createServiceClient();
   const { data: f } = await admin.from("client_files").select("path,client_id").eq("id", fileId).maybeSingle();
   if (!f) return { error: "Not found." };
-  if (!isPrivileged(me)) {
-    const { data: c } = await admin.from("clients").select("assigned_to").eq("id", (f as any).client_id).maybeSingle();
-    if (!c || (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
-  }
+  if (!(await canReachClient(me, (f as any).client_id))) return { error: "This isn't your client." };
   await admin.storage.from("client-files").remove([(f as any).path]);
   await admin.from("client_files").delete().eq("id", fileId);
   revalidatePath("/staff/files"); revalidatePath("/portal/files");
@@ -333,7 +331,7 @@ export async function sendVaultInviteEmail(clientId: string): Promise<ActionResu
   const db = createClient();
   const { data: c } = await db.from("clients").select("email,assigned_to").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
-  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   if (!(c as any).email) return { error: "This client has no email on file." };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
   try {
@@ -352,7 +350,7 @@ export async function addClientVaultEntry(formData: FormData): Promise<ActionRes
   const db = createClient();
   const { data: c } = await db.from("clients").select("assigned_to").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
-  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   const { error } = await db.from("client_vault").insert({
     client_id: clientId, name,
     username: String(formData.get("username") || "") || null,
