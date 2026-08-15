@@ -84,6 +84,22 @@ export async function sendWeeklyReport(opts: { to: string; business: string; sum
   await send(opts.to, `Your weekly report`, shell("Weekly report", body));
 }
 
+/** Invite the client to set up the shared password vault with their account team. */
+export async function sendVaultInvite(opts: { to: string; from: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> is setting up your shared password vault.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">This is how we securely hold the logins we need to work on your behalf. Live passwords always live in the encrypted password manager we share with you — never in an email or a web page.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Next steps:</p>
+    <ol style="font-size:15px;line-height:1.7;color:#3a3f38">
+      <li>Accept the vault share when it arrives from our password manager (confirm the sender is hillcountryconsultants.com).</li>
+      <li>Create your own master password — we never see it.</li>
+      <li>Add each login you want us to have; we confirm in writing what access we hold and why.</li>
+    </ol>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">You can see the running list of accounts we hold on your portal&apos;s <strong>Shared Vault</strong> tab.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your portal</a></p>` : ""}`;
+  await send(opts.to, `Setting up your shared password vault`, shell("Your shared password vault", body));
+}
+
 /** Tell a client their VA/AM replied — the message itself lives in the portal. */
 export async function sendClientMessageAlert(opts: { to: string; from: string; portalUrl: string }) {
   const body = `

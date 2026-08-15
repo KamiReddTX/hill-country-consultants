@@ -17,6 +17,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   tabs.push({ href: "/staff/daily", label: "Daily tasks" });
   tabs.push({ href: "/staff/messages", label: "Messages" });
   tabs.push({ href: "/staff/files", label: "Files" });
+  tabs.push({ href: "/staff/vault", label: "Vault" });
   if (hourly) tabs.push({ href: "/staff/clock", label: "Time clock" });
   if (sales) tabs.push(
     { href: "/staff/intake", label: "Intake" }, { href: "/staff/pipeline", label: "Pipeline" },

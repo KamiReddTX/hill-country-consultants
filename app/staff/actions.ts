@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
@@ -310,6 +310,67 @@ export async function deleteClientFile(fileId: string): Promise<ActionResult> {
   await admin.storage.from("client-files").remove([(f as any).path]);
   await admin.from("client_files").delete().eq("id", fileId);
   revalidatePath("/staff/files"); revalidatePath("/portal/files");
+  return { ok: true };
+}
+
+/** Owner/BM/admin: email the client to set up the shared password vault. */
+export async function sendVaultInviteEmail(clientId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createClient();
+  const { data: c } = await db.from("clients").select("email,assigned_to").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  if (!(c as any).email) return { error: "This client has no email on file." };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  try {
+    await sendVaultInvite({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/vault` : "" });
+  } catch (e) { return { error: "Could not send the invite — try again." }; }
+  return { ok: true };
+}
+
+/** Owner/BM/admin: register an account in the client's shared vault (no passwords). */
+export async function addClientVaultEntry(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const clientId = String(formData.get("clientId") || "");
+  const name = String(formData.get("name") || "").trim();
+  if (!clientId || !name) return { error: "Give the account a name." };
+  const db = createClient();
+  const { data: c } = await db.from("clients").select("assigned_to").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  if (!isPrivileged(me) && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  const { error } = await db.from("client_vault").insert({
+    client_id: clientId, name,
+    username: String(formData.get("username") || "") || null,
+    url: String(formData.get("url") || "") || null,
+    purpose: String(formData.get("purpose") || "") || null,
+    needs_resync: false,
+  } as any);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
+  return { ok: true };
+}
+
+/** Owner/BM/admin: flag or clear a vault entry's re-sync state. */
+export async function setClientVaultResync(id: string, needs: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createClient();
+  const { error } = await db.from("client_vault").update({ needs_resync: needs, updated_at: new Date().toISOString() }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
+  return { ok: true };
+}
+
+/** Owner/BM/admin: remove a vault entry. */
+export async function deleteClientVaultEntry(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createClient();
+  const { error } = await db.from("client_vault").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
   return { ok: true };
 }
 
