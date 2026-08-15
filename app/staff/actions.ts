@@ -3,7 +3,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getStaffMember, isPrivileged } from "@/lib/staff";
+import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
@@ -477,6 +477,36 @@ export async function setClientBilling(clientId: string, billingType: string): P
   const { error } = await createServiceClient().from("clients").update({ billing_type: billingType }).eq("id", clientId);
   if (error) return { error: error.message };
   revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin/BM: set a sales rep's commission rate (percent). */
+export async function setStaffCommission(staffId: string, pct: number): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const clean = Math.max(0, Math.min(100, Number(pct) || 0));
+  const { error } = await createServiceClient().from("staff").update({ commission_pct: clean }).eq("id", staffId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory"); revalidatePath("/staff/sales");
+  return { ok: true };
+}
+
+/** Sales lead (Sales Manager/BM/Admin): assign a lead to a sales agent (sets the
+ *  rep code + name so the sale attributes to them). Empty staffId unassigns. */
+export async function assignLeadRep(leadId: string, staffId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesLead(me)) return { error: "Sales managers and admins only." };
+  const admin = createServiceClient();
+  let rep_code = "", rep_name: string | null = null;
+  if (staffId) {
+    const { data: s } = await admin.from("staff").select("employee_code,name,email").eq("id", staffId).maybeSingle();
+    if (!s) return { error: "Agent not found." };
+    rep_code = (s as any).employee_code || "";
+    rep_name = (s as any).name || (s as any).email || null;
+  }
+  const { error } = await admin.from("leads").update({ rep_code, rep_name }).eq("id", leadId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/sales"); revalidatePath("/staff/pipeline");
   return { ok: true };
 }
 

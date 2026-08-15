@@ -4,6 +4,7 @@ import { ROLE_OPTIONS } from "@/content/roles";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { RoleEditor } from "@/components/staff/role-editor";
 import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
+import { CommissionInput } from "@/components/staff/commission-input";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -29,7 +30,7 @@ export default async function DirectoryPage() {
         <h2 className="mb-3 font-fraunces text-[20px] font-medium text-forest">Directory</h2>
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[820px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th><th className="p-3 font-medium w-72">Roles</th><th className="p-3 font-medium">Code</th><th className="p-3 font-medium text-right">Rate</th><th className="p-3 font-medium">Hourly</th><th className="p-3 font-medium">Active</th><th className="p-3 font-medium">Manage</th></tr></thead>
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th><th className="p-3 font-medium w-72">Roles</th><th className="p-3 font-medium">Code</th><th className="p-3 font-medium text-right">Rate</th><th className="p-3 font-medium">Commission</th><th className="p-3 font-medium">Hourly</th><th className="p-3 font-medium">Active</th><th className="p-3 font-medium">Manage</th></tr></thead>
             <tbody>
               {directory.map((s) => (
                 <tr key={s.id} className="border-b border-line-soft/60 align-top">
@@ -38,12 +39,13 @@ export default async function DirectoryPage() {
                   <td className="p-3 prose-soft"><RoleEditor staffId={s.id} current={rolesOf(s)} options={ROLE_OPTIONS} /></td>
                   <td className="p-3 prose-muted">{s.employee_code || "—"}</td>
                   <td className="p-3 text-right tabular-nums">{s.hourly ? usd(Number(s.rate || 0)) : "—"}</td>
+                  <td className="p-3"><CommissionInput staffId={s.id} current={Number((s as any).commission_pct || 0)} /></td>
                   <td className="p-3">{s.hourly ? "Yes" : "No"}</td>
                   <td className="p-3">{s.active ? "Yes" : "No"}</td>
                   <td className="p-3">{s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}</td>
                 </tr>
               ))}
-              {directory.length === 0 && <tr><td colSpan={8} className="p-3 prose-muted">No employees yet.</td></tr>}
+              {directory.length === 0 && <tr><td colSpan={9} className="p-3 prose-muted">No employees yet.</td></tr>}
             </tbody>
           </table>
         </div>

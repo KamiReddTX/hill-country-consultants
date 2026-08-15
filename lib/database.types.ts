@@ -9,6 +9,7 @@ export type Role =
   | "Virtual assistant"
   | "Account manager"
   | "Sales staff"
+  | "Sales Manager"
   | "Business Manager"
   | "Submittals specialist"
   | "Documentation specialist"
@@ -31,6 +32,7 @@ export interface Database {
           role: Role;
           roles: string[];
           rate: number;
+          commission_pct: number;
           employee_code: string | null;
           hourly: boolean;
           active: boolean;
@@ -44,6 +46,7 @@ export interface Database {
           role?: Role;
           roles?: string[];
           rate?: number;
+          commission_pct?: number;
           employee_code?: string | null;
           hourly?: boolean;
           active?: boolean;
