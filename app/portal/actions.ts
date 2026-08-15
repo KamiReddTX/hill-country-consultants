@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
 import { sendStaffTaskAlert, sendStaffMessageAlert } from "@/lib/email";
+import { uploadNoteFiles } from "@/lib/message-files";
 import type { ClientRow } from "@/lib/database.types";
 
 /** Email the client's assigned VA/AM (a single owner). No-op if unassigned. */
@@ -130,17 +131,22 @@ export async function deleteVaultEntry(id: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Client posts a message to their account lead (stored as a client note). */
+/** Client posts a message to their account lead (stored as a client note),
+ *  optionally with attachments. */
 export async function addMessage(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
   const body = String(formData.get("body") || "").trim();
-  if (!body) return { error: "Write a message first." };
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (!body && files.length === 0) return { error: "Write a message or attach a file." };
   const db = createClient();
-  const { error } = await db.from("client_notes").insert({ client_id: client.id, body, sender: "client", author_name: client.contact || null });
+  const { data: note, error } = await db.from("client_notes")
+    .insert({ client_id: client.id, body, sender: "client", author_name: client.contact || null })
+    .select("id").single();
   if (error) return { error: error.message };
+  const saved = files.length ? await uploadNoteFiles(client.id, (note as any).id, files, client.contact || client.email || "Client") : 0;
   await notifyAssignedStaff(client, (to) =>
-    sendStaffMessageAlert({ to, clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff/messages` : "" }),
+    sendStaffMessageAlert({ to, clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff/messages` : "", replyTo: client.email || undefined, message: body || (saved ? `Sent ${saved} file${saved > 1 ? "s" : ""}.` : "") }),
   );
   revalidatePath("/portal/messages"); revalidatePath("/staff/messages");
   return { ok: true };

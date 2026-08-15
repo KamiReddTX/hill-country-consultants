@@ -7,10 +7,17 @@ function client(): Resend | null {
   return key ? new Resend(key) : null;
 }
 
-async function send(to: string, subject: string, html: string, replyTo?: string) {
+const fromAddress = (from.match(/<(.+?)>/)?.[1]) || from;
+/** Escape user/staff-authored text before dropping it into HTML email bodies. */
+const esc = (s: string) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
+
+async function send(to: string, subject: string, html: string, replyTo?: string, fromName?: string) {
   const resend = client();
   if (!resend) { console.warn("[email] RESEND_API_KEY not set — skipped:", subject); return; }
-  await resend.emails.send({ from, to, subject, html, replyTo: replyTo || process.env.EMAIL_REPLY_TO } as any);
+  // Keep the authenticated domain address, but show the sender's name when given,
+  // so the recipient sees who it's from and Reply-To routes straight to them.
+  const fromLine = fromName ? `${esc(fromName)} via Hill Country Consultants <${fromAddress}>` : from;
+  await resend.emails.send({ from: fromLine, to, subject, html, replyTo: replyTo || process.env.EMAIL_REPLY_TO } as any);
 }
 
 const shell = (title: string, body: string) => `
@@ -95,12 +102,15 @@ export async function sendStaffTaskAlert(opts: { to: string; clientName: string;
   await send(opts.to, `New task from ${opts.clientName}`, shell("New task request", body));
 }
 
-/** Alert the assigned VA/AM that a client sent a new message. */
-export async function sendStaffMessageAlert(opts: { to: string; clientName: string; portalUrl: string }) {
+/** Alert the assigned VA/AM that a client sent a new message. Reply-To is the
+ *  client, so the staffer can answer straight from their inbox. */
+export async function sendStaffMessageAlert(opts: { to: string; clientName: string; portalUrl: string; replyTo?: string; message?: string }) {
   const body = `
-    <p style="font-size:16px;line-height:1.6"><strong>${opts.clientName}</strong> sent you a message in the portal.</p>
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.clientName)}</strong> sent you a message in the portal.</p>
+    ${opts.message ? `<div style="font-size:15px;line-height:1.6;color:#3a3f38;border-left:3px solid #c2a24a;padding:2px 0 2px 14px;margin:12px 0;white-space:pre-wrap">${esc(opts.message)}</div>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">Reply to this email to answer them directly, or open the portal to keep it in the thread.</p>
     ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open Messages</a></p>` : ""}`;
-  await send(opts.to, `New message from ${opts.clientName}`, shell("New client message", body));
+  await send(opts.to, `New message from ${opts.clientName}`, shell("New client message", body), opts.replyTo, opts.clientName);
 }
 
 /** Invite the client to set up the shared password vault with their account team. */
@@ -119,21 +129,26 @@ export async function sendVaultInvite(opts: { to: string; from: string; portalUr
   await send(opts.to, `Setting up your shared password vault`, shell("Your shared password vault", body));
 }
 
-/** Tell a client their VA/AM replied — the message itself lives in the portal. */
-export async function sendClientMessageAlert(opts: { to: string; from: string; portalUrl: string }) {
+/** Tell a client their VA/AM sent a message. The message is included, and
+ *  Reply-To is the employee, so the client can answer them straight from email. */
+export async function sendClientMessageAlert(opts: { to: string; from: string; portalUrl: string; replyTo?: string; message?: string }) {
   const body = `
-    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> replied to your message.</p>
-    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Open your client portal to read it and continue the conversation.</p>
-    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Read your message</a></p>` : ""}`;
-  await send(opts.to, `New reply in your client portal`, shell("You have a new message", body));
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.from)}</strong> sent you a message.</p>
+    ${opts.message ? `<div style="font-size:15px;line-height:1.6;color:#3a3f38;border-left:3px solid #c2a24a;padding:2px 0 2px 14px;margin:12px 0;white-space:pre-wrap">${esc(opts.message)}</div>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">Just reply to this email to answer ${esc(opts.from)} directly, or open your portal to continue the conversation there.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your portal</a></p>` : ""}`;
+  await send(opts.to, `New message from ${opts.from}`, shell("You have a new message", body), opts.replyTo, opts.from);
 }
 
-/** Tell an employee a teammate sent them a DM in the staff portal. */
-export async function sendTeammateMessageAlert(opts: { to: string; from: string; portalUrl: string }) {
+/** Tell an employee a teammate sent them a DM in the staff portal. Reply-To is
+ *  the sender, so they can answer straight from their inbox. */
+export async function sendTeammateMessageAlert(opts: { to: string; from: string; portalUrl: string; replyTo?: string; message?: string }) {
   const body = `
-    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> sent you a direct message in the staff portal.</p>
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.from)}</strong> sent you a direct message in the staff portal.</p>
+    ${opts.message ? `<div style="font-size:15px;line-height:1.6;color:#3a3f38;border-left:3px solid #c2a24a;padding:2px 0 2px 14px;margin:12px 0;white-space:pre-wrap">${esc(opts.message)}</div>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">Reply to this email to answer ${esc(opts.from)} directly, or open the portal.</p>
     ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your messages</a></p>` : ""}`;
-  await send(opts.to, `New message from ${opts.from}`, shell("You have a new message", body));
+  await send(opts.to, `New message from ${opts.from}`, shell("You have a new message", body), opts.replyTo, opts.from);
 }
 
 /** Welcome a new employee: create-password link, then log in to set up their profile. */

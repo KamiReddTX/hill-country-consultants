@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { MessageForm } from "@/components/portal/message-form";
 
 export default async function MessagesPage() {
@@ -8,6 +8,11 @@ export default async function MessagesPage() {
   if (!client) redirect("/portal/login");
   const { notes } = await getPortalData(client);
   const thread = [...notes].reverse(); // getPortalData returns newest-first; show oldest-first
+
+  // Attachments for this thread.
+  const { data: nfiles } = await createClient().from("note_files").select("*").eq("client_id", client.id);
+  const filesByNote = new Map<string, any[]>();
+  (nfiles ?? []).forEach((f: any) => { const a = filesByNote.get(f.note_id) || []; a.push(f); filesByNote.set(f.note_id, a); });
 
   // Resolve the assigned VA/AM contact card.
   let owner: { name: string; email: string } | null = null;
@@ -48,7 +53,10 @@ export default async function MessagesPage() {
                 <li key={n.id} className={`flex ${staff ? "justify-start" : "justify-end"}`}>
                   <div className={`max-w-[80%] border p-3 ${staff ? "border-line-warm bg-white" : "border-forest/30 bg-forest/5"}`}>
                     <p className="text-[12px] font-semibold text-forest">{staff ? (n.author_name || "Your account team") : "You"}</p>
-                    <p className="mt-1 whitespace-pre-wrap text-[15px] prose-soft">{n.body}</p>
+                    {n.body && <p className="mt-1 whitespace-pre-wrap text-[15px] prose-soft">{n.body}</p>}
+                    {(filesByNote.get(n.id) || []).map((f: any) => (
+                      <a key={f.id} href={`/api/message-file/${f.id}`} target="_blank" rel="noreferrer" className="mt-1 block text-[13px] text-forest underline underline-offset-2 hover:text-gold">📎 {f.name}</a>
+                    ))}
                     <p className="mt-1 text-[11px] text-ink-faint">{new Date(n.created_at).toLocaleString()}</p>
                   </div>
                 </li>

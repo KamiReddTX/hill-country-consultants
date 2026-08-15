@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
+import { uploadNoteFiles } from "@/lib/message-files";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -261,21 +262,26 @@ export async function setStaffActive(staffId: string, active: boolean): Promise<
 
 /** Staff (owner or admin) replies to a client's message. The reply is recorded
  *  in the portal chat and the client gets an email that a response is waiting. */
-export async function staffReplyMessage(clientId: string, body: string): Promise<ActionResult> {
+export async function staffReplyMessage(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
-  const text = String(body || "").trim();
-  if (!text) return { error: "Write a reply first." };
+  const clientId = String(formData.get("clientId") || "");
+  const text = String(formData.get("body") || "").trim();
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (!text && files.length === 0) return { error: "Write a message or attach a file." };
   const db = createClient();
   const { data: c } = await db.from("clients").select("id,email,assigned_to").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
   // Owner, team member (client_assignments), or admin/BM may message the client.
   if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
-  const { error } = await db.from("client_notes").insert({ client_id: clientId, body: text, sender: "staff", author_name: me.name || me.email });
+  const { data: note, error } = await db.from("client_notes")
+    .insert({ client_id: clientId, body: text, sender: "staff", author_name: me.name || me.email })
+    .select("id").single();
   if (error) return { error: error.message };
+  const saved = files.length ? await uploadNoteFiles(clientId, (note as any).id, files, me.name || me.email) : 0;
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
   try {
-    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "" });
+    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo: me.email, message: text || (saved ? `Sent you ${saved} file${saved > 1 ? "s" : ""}.` : "") });
   } catch (e) { console.warn("[staffReplyMessage] email", e); }
   revalidatePath("/staff/messages"); revalidatePath("/portal/messages");
   return { ok: true };
@@ -893,7 +899,7 @@ export async function sendDirectMessage(recipientId: string, body: string): Prom
     const to = (r as any)?.email;
     if (to && (r as any)?.active) {
       const site = process.env.NEXT_PUBLIC_SITE_URL || "";
-      await sendTeammateMessageAlert({ to, from: me.name || me.email, portalUrl: site ? `${site}/staff/messages?view=dm&with=${me.id}` : "" });
+      await sendTeammateMessageAlert({ to, from: me.name || me.email, portalUrl: site ? `${site}/staff/messages?view=dm&with=${me.id}` : "", replyTo: me.email, message: text });
     }
   } catch (e) { console.warn("[sendDirectMessage] email", e); }
   revalidatePath("/staff/messages"); revalidatePath("/staff");

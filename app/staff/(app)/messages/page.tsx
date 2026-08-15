@@ -68,6 +68,12 @@ async function ClientsView({ db, admin }: { db: any; admin: boolean }) {
   const notesByClient = new Map<string, any[]>();
   (staffNotes ?? []).forEach((n: any) => { const a = notesByClient.get(n.client_id) || []; a.push(n); notesByClient.set(n.client_id, a); });
 
+  // Attachments for the visible messages.
+  const noteIds = (notes ?? []).map((n: any) => n.id);
+  const { data: nfiles } = noteIds.length ? await db.from("note_files").select("*").in("note_id", noteIds) : { data: [] as any[] };
+  const filesByNote = new Map<string, any[]>();
+  (nfiles ?? []).forEach((f: any) => { const a = filesByNote.get(f.note_id) || []; a.push(f); filesByNote.set(f.note_id, a); });
+
   if (clients.length === 0) return <p className="text-[15px] prose-muted">No clients assigned to you yet.</p>;
 
   return (
@@ -86,7 +92,10 @@ async function ClientsView({ db, admin }: { db: any; admin: boolean }) {
                 {thread.map((n: any) => (
                   <li key={n.id} className={`max-w-[80%] px-3 py-2 text-[14px] ${n.sender === "staff" ? "ml-auto bg-forest text-white" : "bg-cream/60 text-charcoal"}`}>
                     <p className="mb-0.5 text-[11px] opacity-70">{n.sender === "staff" ? (n.author_name || "Team") : "Client"} · {when(n.created_at)}</p>
-                    <p className="whitespace-pre-wrap">{n.body}</p>
+                    {n.body && <p className="whitespace-pre-wrap">{n.body}</p>}
+                    {(filesByNote.get(n.id) || []).map((f: any) => (
+                      <a key={f.id} href={`/api/message-file/${f.id}`} target="_blank" rel="noreferrer" className={`mt-1 block text-[12px] underline ${n.sender === "staff" ? "text-white/90" : "text-forest"}`}>📎 {f.name}</a>
+                    ))}
                   </li>
                 ))}
               </ul>
