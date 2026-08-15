@@ -34,6 +34,18 @@ export interface Database {
           rate: number;
           commission_pct: number;
           phone: string | null;
+          avatar_path: string | null;
+          address: string | null;
+          timezone: string | null;
+          personal_email: string | null;
+          emergency_contact_name: string | null;
+          emergency_contact_phone: string | null;
+          employment_type: string | null;
+          start_date: string | null;
+          dd_bank_name: string | null;
+          dd_routing: string | null;
+          dd_account: string | null;
+          dd_account_type: string | null;
           employee_code: string | null;
           hourly: boolean;
           active: boolean;
@@ -191,6 +203,11 @@ export interface Database {
         Row: { id: string; client_id: string; name: string; path: string; period_start: string | null; period_end: string | null; created_at: string };
         Insert: { id?: string; client_id: string; name: string; path: string; period_start?: string | null; period_end?: string | null };
         Update: Partial<Database["public"]["Tables"]["client_reports"]["Insert"]>;
+      };
+      staff_documents: {
+        Row: { id: string; staff_id: string; name: string; path: string; kind: string; requires_signature: boolean; signed_at: string | null; signed_name: string | null; signed_ip: string | null; uploaded_by: string | null; created_at: string };
+        Insert: { id?: string; staff_id: string; name: string; path: string; kind?: string; requires_signature?: boolean; signed_at?: string | null; signed_name?: string | null; signed_ip?: string | null; uploaded_by?: string | null };
+        Update: Partial<Database["public"]["Tables"]["staff_documents"]["Insert"]>;
       };
       staff_reset_requests: {
         Row: { id: string; email: string; status: string; requested_at: string; handled_by: string | null; handled_at: string | null };

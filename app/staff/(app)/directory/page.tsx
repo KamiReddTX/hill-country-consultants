@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getStaffMember, isPrivileged, getDirectory, rolesOf, usd } from "@/lib/staff";
+import { createClient } from "@/lib/supabase/server";
 import { ROLE_OPTIONS } from "@/content/roles";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { RoleEditor } from "@/components/staff/role-editor";
@@ -7,6 +8,7 @@ import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
 import { CommissionInput } from "@/components/staff/commission-input";
 import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
 import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
+import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -14,6 +16,9 @@ export default async function DirectoryPage() {
   if (!isPrivileged(me)) return <p className="text-[15px] prose-muted">The Directory is for administrators and business managers only.</p>;
 
   const directory = await getDirectory();
+  const { data: allDocs } = await createClient().from("staff_documents").select("*").order("created_at", { ascending: false });
+  const docsByStaff = new Map<string, any[]>();
+  (allDocs ?? []).forEach((d: any) => { const a = docsByStaff.get(d.staff_id) || []; a.push(d); docsByStaff.set(d.staff_id, a); });
 
   return (
     <div className="flex flex-col gap-8">
@@ -54,6 +59,21 @@ export default async function DirectoryPage() {
               {directory.length === 0 && <tr><td colSpan={9} className="p-3 prose-muted">No employees yet.</td></tr>}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Employment &amp; documents</h2>
+        <p className="mb-3 text-[13px] prose-muted">Set each employee&apos;s employment type and start date, and upload their paystubs, contracts, NDAs, and tax forms. Tick &ldquo;requires signature&rdquo; for anything they must e-sign on their profile.</p>
+        <div className="flex flex-col gap-2">
+          {directory.map((s) => (
+            <details key={s.id} className="border border-line-warm bg-white">
+              <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">{s.name || s.email}</summary>
+              <div className="border-t border-line-soft p-4">
+                <StaffDocsManager staffId={s.id} employmentType={(s as any).employment_type || ""} startDate={(s as any).start_date || ""} docs={docsByStaff.get(s.id) || []} />
+              </div>
+            </details>
+          ))}
         </div>
       </section>
     </div>

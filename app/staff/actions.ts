@@ -2,6 +2,7 @@
 export type ActionResult = { error?: string; ok?: boolean };
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome } from "@/lib/email";
@@ -535,15 +536,94 @@ export async function assignLeadRep(leadId: string, staffId: string): Promise<Ac
   return { ok: true };
 }
 
-/** Any employee: update their own name + phone on their profile. */
+/** Any employee: update their own self-service profile fields. */
 export async function updateMyProfile(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
-  const name = String(formData.get("name") || "").trim();
-  const phone = String(formData.get("phone") || "").trim();
-  const { error } = await createClient().rpc("update_my_profile", { p_name: name, p_phone: phone });
+  const keys = ["name", "phone", "personal_email", "address", "timezone", "emergency_contact_name", "emergency_contact_phone", "dd_bank_name", "dd_routing", "dd_account", "dd_account_type"];
+  const p: Record<string, string> = {};
+  keys.forEach((k) => { p[k] = String(formData.get(k) || "").trim(); });
+  const { error } = await createClient().rpc("update_my_profile", { p });
   if (error) return { error: error.message };
   revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Any employee: upload their own profile photo. */
+export async function uploadMyAvatar(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const file = formData.get("avatar");
+  if (!(file instanceof File) || file.size === 0) return { error: "Choose an image." };
+  if (file.size > 5 * 1024 * 1024) return { error: "Image must be under 5MB." };
+  const admin = createServiceClient();
+  const ext = (file.name.split(".").pop() || "jpg").replace(/[^a-z0-9]/gi, "").slice(0, 5) || "jpg";
+  const path = `${me.id}/${Date.now()}.${ext}`;
+  const buf = Buffer.from(await file.arrayBuffer());
+  const up = await admin.storage.from("staff-avatars").upload(path, buf, { contentType: file.type || "image/jpeg", upsert: true });
+  if (up.error) return { error: up.error.message };
+  await admin.from("staff").update({ avatar_path: path }).eq("id", me.id);
+  revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Admin/BM: set an employee's employment type and start date. */
+export async function setEmploymentInfo(staffId: string, employmentType: string, startDate: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const { error } = await createServiceClient().from("staff")
+    .update({ employment_type: employmentType || null, start_date: startDate || null }).eq("id", staffId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory"); revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Admin/BM: upload a document (paystub, contract, NDA, tax form) to an employee. */
+export async function uploadStaffDocument(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const staffId = String(formData.get("staffId") || "");
+  const kind = String(formData.get("kind") || "document");
+  const requires = formData.get("requires_signature") === "on";
+  if (!staffId) return { error: "Missing employee." };
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (!files.length) return { error: "Choose a file." };
+  const admin = createServiceClient();
+  let saved = 0;
+  for (const file of files.slice(0, 10)) {
+    const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+    const path = `${staffId}/${Date.now()}-${safe}`;
+    const buf = Buffer.from(await file.arrayBuffer());
+    const up = await admin.storage.from("staff-docs").upload(path, buf, { contentType: file.type || "application/octet-stream" });
+    if (!up.error) { await admin.from("staff_documents").insert({ staff_id: staffId, name: file.name.slice(0, 200), path, kind, requires_signature: requires, uploaded_by: me!.id } as any); saved++; }
+  }
+  if (!saved) return { error: "Upload failed — try again." };
+  revalidatePath("/staff/directory"); revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Admin/BM: remove an employee document. */
+export async function deleteStaffDocument(docId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: d } = await admin.from("staff_documents").select("path").eq("id", docId).maybeSingle();
+  if (d) await admin.storage.from("staff-docs").remove([(d as any).path]);
+  await admin.from("staff_documents").delete().eq("id", docId);
+  revalidatePath("/staff/directory"); revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Any employee: e-sign one of their own documents (records name + time + IP). */
+export async function signStaffDocument(docId: string, signedName: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const name = String(signedName || "").trim();
+  if (!name) return { error: "Type your full legal name to sign." };
+  const ip = headers().get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  const { error } = await createClient().rpc("sign_staff_document", { p_doc: docId, p_name: name, p_ip: ip });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/profile"); revalidatePath("/staff/directory");
   return { ok: true };
 }
 
