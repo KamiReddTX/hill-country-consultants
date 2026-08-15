@@ -267,6 +267,52 @@ export async function staffReplyMessage(clientId: string, body: string): Promise
   return { ok: true };
 }
 
+/** Staff (owner or admin) uploads one or more files into a client's shared space. */
+export async function uploadClientFile(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const clientId = String(formData.get("clientId") || "");
+  if (!clientId) return { error: "Missing client." };
+  const db = createClient();
+  const { data: c } = await db.from("clients").select("id,assigned_to").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  if (me.role !== "Administrator" && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
+  if (!files.length) return { error: "Choose at least one file." };
+  const admin = createServiceClient();
+  let saved = 0;
+  for (const file of files.slice(0, 10)) {
+    const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+    const path = `${clientId}/${Date.now()}-${safe}`;
+    const buf = Buffer.from(await file.arrayBuffer());
+    const up = await admin.storage.from("client-files").upload(path, buf, { contentType: file.type || "application/octet-stream" });
+    if (!up.error) {
+      await admin.from("client_files").insert({ client_id: clientId, name: file.name.slice(0, 200), path, size: file.size, uploaded_by: me.name || me.email } as any);
+      saved++;
+    }
+  }
+  if (!saved) return { error: "Upload failed — try again." };
+  revalidatePath("/staff/files"); revalidatePath("/portal/files");
+  return { ok: true };
+}
+
+/** Staff (owner or admin) removes a file from a client's shared space. */
+export async function deleteClientFile(fileId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: f } = await admin.from("client_files").select("path,client_id").eq("id", fileId).maybeSingle();
+  if (!f) return { error: "Not found." };
+  if (me.role !== "Administrator") {
+    const { data: c } = await admin.from("clients").select("assigned_to").eq("id", (f as any).client_id).maybeSingle();
+    if (!c || (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  }
+  await admin.storage.from("client-files").remove([(f as any).path]);
+  await admin.from("client_files").delete().eq("id", fileId);
+  revalidatePath("/staff/files"); revalidatePath("/portal/files");
+  return { ok: true };
+}
+
 export async function signOutStaff() {
   const db = createClient();
   await db.auth.signOut();
