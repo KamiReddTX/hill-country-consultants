@@ -115,9 +115,9 @@ export async function addMessage(formData: FormData): Promise<ActionResult> {
   const body = String(formData.get("body") || "").trim();
   if (!body) return { error: "Write a message first." };
   const db = createClient();
-  const { error } = await db.from("client_notes").insert({ client_id: client.id, body });
+  const { error } = await db.from("client_notes").insert({ client_id: client.id, body, sender: "client", author_name: client.contact || null });
   if (error) return { error: error.message };
-  revalidatePath("/portal/messages");
+  revalidatePath("/portal/messages"); revalidatePath("/staff/messages");
   return { ok: true };
 }
 

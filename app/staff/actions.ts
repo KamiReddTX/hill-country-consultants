@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember } from "@/lib/staff";
-import { sendTaskPaymentRequest } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
@@ -243,6 +243,27 @@ export async function setStaffActive(staffId: string, active: boolean): Promise<
   const { error } = await createServiceClient().from("staff").update({ active }).eq("id", staffId);
   if (error) return { error: error.message };
   revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Staff (owner or admin) replies to a client's message. The reply is recorded
+ *  in the portal chat and the client gets an email that a response is waiting. */
+export async function staffReplyMessage(clientId: string, body: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const text = String(body || "").trim();
+  if (!text) return { error: "Write a reply first." };
+  const db = createClient();
+  const { data: c } = await db.from("clients").select("id,email,assigned_to").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  if (me.role !== "Administrator" && (c as any).assigned_to !== me.id) return { error: "This isn't your client." };
+  const { error } = await db.from("client_notes").insert({ client_id: clientId, body: text, sender: "staff", author_name: me.name || me.email });
+  if (error) return { error: error.message };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  try {
+    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "" });
+  } catch (e) { console.warn("[staffReplyMessage] email", e); }
+  revalidatePath("/staff/messages"); revalidatePath("/portal/messages");
   return { ok: true };
 }
 

@@ -180,9 +180,9 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["staff_reset_requests"]["Insert"]>;
       };
       client_notes: {
-        Row: { id: string; client_id: string; body: string; created_at: string };
-        Insert: { id?: string; client_id: string; body: string };
-        Update: Partial<{ body: string }>;
+        Row: { id: string; client_id: string; body: string; sender: string; author_name: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; body: string; sender?: string; author_name?: string | null };
+        Update: Partial<{ body: string; sender: string; author_name: string | null }>;
       };
       client_vault: {
         // Credential REGISTER only — never a password column.

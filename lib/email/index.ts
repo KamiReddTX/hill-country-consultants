@@ -84,6 +84,15 @@ export async function sendWeeklyReport(opts: { to: string; business: string; sum
   await send(opts.to, `Your weekly report`, shell("Weekly report", body));
 }
 
+/** Tell a client their VA/AM replied — the message itself lives in the portal. */
+export async function sendClientMessageAlert(opts: { to: string; from: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> replied to your message.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Open your client portal to read it and continue the conversation.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Read your message</a></p>` : ""}`;
+  await send(opts.to, `New reply in your client portal`, shell("You have a new message", body));
+}
+
 /** 4-hour shift alert to the employee and admins. */
 export async function sendShiftAlert(opts: { to: string; name: string; hours: number }) {
   const body = `<p style="font-size:16px;line-height:1.6">${opts.name} has been clocked in for <strong>${opts.hours.toFixed(1)} hours</strong>. Shifts over 4 hours are flagged for review.</p>`;
