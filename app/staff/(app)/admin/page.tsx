@@ -10,6 +10,7 @@ import { ApproveButton } from "@/components/staff/approve-button";
 import { PrintButton } from "@/components/staff/print-button";
 import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
+import { PasswordResetForm } from "@/components/staff/password-reset-form";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -115,6 +116,13 @@ export default async function AdminPage() {
         <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Weekly reports</h2>
         <p className="mb-3 text-[13px] prose-muted">Generate this week&apos;s PDF (last 7 days of approved hours + deliverables) and publish it to the client&apos;s Weekly Report tab.</p>
         {clientOpts.length === 0 ? <p className="text-[15px] prose-muted">No clients yet.</p> : <GenerateReportForm clients={clientOpts} />}
+      </section>
+
+      {/* Password resets */}
+      <section>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Password resets</h2>
+        <p className="mb-3 text-[13px] prose-muted">Email a client or employee a link to set a new password for their portal. Copy their email from the tables below if needed.</p>
+        <PasswordResetForm />
       </section>
 
       {/* Staff directory */}

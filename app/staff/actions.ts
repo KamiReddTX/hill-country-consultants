@@ -156,6 +156,25 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
   return { ok: true };
 }
 
+/** Admin only: send a password-reset (recovery) email so a client or employee
+ *  can set a new password and get back into their portal. The recovery link lands
+ *  on /auth/callback, which establishes a session and routes them to set-password. */
+export async function sendPasswordReset(email: string, portal: "client" | "staff"): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const clean = String(email || "").trim().toLowerCase();
+  if (!clean || !clean.includes("@")) return { error: "Enter a valid email address." };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const next = portal === "staff" ? "/staff" : "/portal";
+  const db = createClient();
+  const { error } = await db.auth.resetPasswordForEmail(
+    clean,
+    site ? { redirectTo: `${site}/auth/callback?next=${next}` } : undefined,
+  );
+  if (error) return { error: error.message };
+  return { ok: true };
+}
+
 export async function signOutStaff() {
   const db = createClient();
   await db.auth.signOut();
