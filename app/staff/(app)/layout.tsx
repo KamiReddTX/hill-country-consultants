@@ -12,7 +12,10 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   if (!me) redirect("/staff/login");
 
   const priv = isPrivileged(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
-  const tabs: { href: string; label: string }[] = [{ href: "/staff", label: "Dashboard" }];
+  const tabs: { href: string; label: string }[] = [
+    { href: "/staff/profile", label: "My profile" },
+    { href: "/staff", label: "Dashboard" },
+  ];
   if (priv) tabs.push({ href: "/staff/admin", label: "Admin" });
   if (priv) tabs.push({ href: "/staff/directory", label: "Directory" });
   if (salesLead) tabs.push({ href: "/staff/sales", label: "Sales" });
@@ -20,13 +23,12 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   tabs.push({ href: "/staff/messages", label: "Messages" });
   tabs.push({ href: "/staff/files", label: "Files" });
   tabs.push({ href: "/staff/vault", label: "Vault" });
-  if (hourly) tabs.push({ href: "/staff/clock", label: "Time clock" });
+  if (hourly) tabs.push({ href: "/staff/clock", label: "Timesheet" });
   if (sales) tabs.push(
     { href: "/staff/intake", label: "Intake" }, { href: "/staff/pipeline", label: "Pipeline" },
     { href: "/staff/accounts", label: "Accounts" }, { href: "/staff/commissions", label: "Commissions" });
   tabs.push({ href: "/staff/clients", label: "All clients" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/reports", label: "Reports" });
   if (sales) tabs.push({ href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
-  tabs.push({ href: "/staff/profile", label: "My profile" });
 
   return (
     <div className="min-h-screen bg-cream">

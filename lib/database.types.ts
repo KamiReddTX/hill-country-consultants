@@ -33,6 +33,7 @@ export interface Database {
           roles: string[];
           rate: number;
           commission_pct: number;
+          phone: string | null;
           employee_code: string | null;
           hourly: boolean;
           active: boolean;
@@ -47,6 +48,7 @@ export interface Database {
           roles?: string[];
           rate?: number;
           commission_pct?: number;
+          phone?: string | null;
           employee_code?: string | null;
           hourly?: boolean;
           active?: boolean;

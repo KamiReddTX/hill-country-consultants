@@ -27,7 +27,7 @@ export function SetPasswordForm({ next, email }: { next: string; email: string }
       setError("We couldn't set your password. Open the link in your email again, or call 470-478-1590.");
       return;
     }
-    router.push(next);
+    router.push(next === "/staff" ? "/staff/profile" : next);
     router.refresh();
   }
 

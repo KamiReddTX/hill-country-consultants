@@ -510,6 +510,18 @@ export async function assignLeadRep(leadId: string, staffId: string): Promise<Ac
   return { ok: true };
 }
 
+/** Any employee: update their own name + phone on their profile. */
+export async function updateMyProfile(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const name = String(formData.get("name") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const { error } = await createClient().rpc("update_my_profile", { p_name: name, p_phone: phone });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
 export async function signOutStaff() {
   const db = createClient();
   await db.auth.signOut();
