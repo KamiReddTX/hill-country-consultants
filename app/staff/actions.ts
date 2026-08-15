@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
@@ -164,14 +164,23 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
     hourly: formData.get("hourly") === "on",
   });
   if (error) return { error: error.message };
-  // Invite the new staffer to set a password; /auth/callback binds their staff
-  // row to the auth user on first login.
+  // Invite the new staffer. Build a server-readable token_hash link ourselves and
+  // send our own branded welcome email — this avoids the fragment-token invite link
+  // that lands people on the login page instead of the set-password screen.
   try {
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
-    await createServiceClient().auth.admin.inviteUserByEmail(
-      email,
-      site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined,
-    );
+    const svc = createServiceClient();
+    const { data: link } = await svc.auth.admin.generateLink({
+      type: "invite", email,
+      options: site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined,
+    } as any);
+    const hashed = (link as any)?.properties?.hashed_token;
+    if (site && hashed) {
+      const actionUrl = `${site}/auth/callback?token_hash=${hashed}&type=invite&next=/staff`;
+      await sendEmployeeWelcome({ to: email, name: String(formData.get("name") || "") || null, actionUrl });
+    } else {
+      await svc.auth.admin.inviteUserByEmail(email, site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined);
+    }
   } catch (e) { console.warn("[addStaff] invite", e); }
   revalidatePath("/staff/admin");
   return { ok: true };
@@ -182,7 +191,7 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
  *  on /auth/callback, which establishes a session and routes them to set-password. */
 export async function sendPasswordReset(email: string, portal: "client" | "staff"): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const clean = String(email || "").trim().toLowerCase();
   if (!clean || !clean.includes("@")) return { error: "Enter a valid email address." };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
@@ -377,7 +386,22 @@ export async function deleteClientVaultEntry(id: string): Promise<ActionResult> 
   return { ok: true };
 }
 
-/** Admin only: set the full set of roles an employee holds (multi-role). */
+/** Admin/BM: permanently delete an employee and their staff login. */
+export async function deleteEmployee(staffId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (staffId === me.id) return { error: "You can't delete your own account." };
+  const admin = createServiceClient();
+  const { data: s } = await admin.from("staff").select("user_id").eq("id", staffId).maybeSingle();
+  const { error } = await admin.from("staff").delete().eq("id", staffId);
+  if (error) return { error: error.message };
+  const uid = (s as any)?.user_id;
+  if (uid) { try { await admin.auth.admin.deleteUser(uid); } catch (e) { console.warn("[deleteEmployee] auth", e); } }
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Admin/BM: set the full set of roles an employee holds (multi-role). */
 export async function setStaffRoles(staffId: string, roles: string[]): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isPrivileged(me)) return { error: "Admins and business managers only." };

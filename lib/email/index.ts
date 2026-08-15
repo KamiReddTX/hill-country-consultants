@@ -128,6 +128,16 @@ export async function sendClientMessageAlert(opts: { to: string; from: string; p
   await send(opts.to, `New reply in your client portal`, shell("You have a new message", body));
 }
 
+/** Welcome a new employee: create-password link, then log in to set up their profile. */
+export async function sendEmployeeWelcome(opts: { to: string; name: string | null; actionUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">Welcome${opts.name ? `, ${opts.name}` : ""} — you&apos;ve been added to the Hill Country Consultants team.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">First, create your password. Then you&apos;ll land on your employee profile to set it up and get to work.</p>
+    <p style="margin:22px 0"><a href="${opts.actionUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Create your password</a></p>
+    <p style="font-size:13px;color:#6b6552">This link is single-use and expires. If it doesn&apos;t work, ask your administrator to resend it, or use &ldquo;Forgot your password?&rdquo; on the staff login.</p>`;
+  await send(opts.to, "Welcome to Hill Country Consultants — create your password", shell("Welcome to the team", body));
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `

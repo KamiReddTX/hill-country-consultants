@@ -5,6 +5,8 @@ import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { RoleEditor } from "@/components/staff/role-editor";
 import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
 import { CommissionInput } from "@/components/staff/commission-input";
+import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
+import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -42,7 +44,11 @@ export default async function DirectoryPage() {
                   <td className="p-3"><CommissionInput staffId={s.id} current={Number((s as any).commission_pct || 0)} /></td>
                   <td className="p-3">{s.hourly ? "Yes" : "No"}</td>
                   <td className="p-3">{s.active ? "Yes" : "No"}</td>
-                  <td className="p-3">{s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}</td>
+                  <td className="p-3"><div className="flex flex-col gap-1">
+                    {s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}
+                    <EmployeeResetButton email={s.email} />
+                    {s.id !== me.id && <DeleteEmployeeButton staffId={s.id} label={s.name || s.email} />}
+                  </div></td>
                 </tr>
               ))}
               {directory.length === 0 && <tr><td colSpan={9} className="p-3 prose-muted">No employees yet.</td></tr>}
