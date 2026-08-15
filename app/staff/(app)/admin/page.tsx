@@ -1,11 +1,10 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, isAdmin, getDirectory, getClients, getBookings, getOnTheClock, periodOf, usd } from "@/lib/staff";
+import { getStaffMember, isAdmin, isPrivileged, getDirectory, getClients, getBookings, getOnTheClock, periodOf, usd } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { AssignSelect } from "@/components/staff/assign-select";
 import { DeleteClientButton } from "@/components/staff/delete-client-button";
 import { StatusSelect } from "@/components/staff/status-select";
 import { RoadmapCheck } from "@/components/staff/roadmap-check";
-import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { ForceClockOutButton } from "@/components/staff/force-clockout-button";
 import { ApproveButton } from "@/components/staff/approve-button";
 import { PrintButton } from "@/components/staff/print-button";
@@ -13,17 +12,16 @@ import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button"
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { PasswordResetForm } from "@/components/staff/password-reset-form";
 import { StaffResetActions } from "@/components/staff/staff-reset-actions";
-import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
-import { RoleEditor } from "@/components/staff/role-editor";
 import { AccountTeam } from "@/components/staff/account-team";
-import { ROLE_OPTIONS } from "@/content/roles";
-import { rolesOf } from "@/lib/staff";
+import { AddClientForm } from "@/components/staff/add-client-form";
+import { BillingSelect } from "@/components/staff/billing-select";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  if (!isAdmin(me)) return <p className="text-[15px] prose-muted">The Admin tab is for administrators only.</p>;
+  if (!isPrivileged(me)) return <p className="text-[15px] prose-muted">The Admin tab is for administrators and business managers only.</p>;
+  const admin = isAdmin(me);
 
   const [directory, clients, bookings, onClock] = await Promise.all([getDirectory(), getClients(), getBookings(), getOnTheClock()]);
   const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
@@ -53,10 +51,10 @@ export default async function AdminPage() {
 
   return (
     <div className="flex flex-col gap-12">
-      <div><h1 className="font-fraunces text-[32px] font-normal text-forest">Admin</h1><span className="rule-gold mb-2 mt-2" /><p className="text-[13px] prose-muted">Administrators only.</p></div>
+      <div><h1 className="font-fraunces text-[32px] font-normal text-forest">Admin</h1><span className="rule-gold mb-2 mt-2" /><p className="text-[13px] prose-muted">Administrators &amp; business managers.{admin ? "" : " Payroll, password resets, and account deletion are admin-only."}</p></div>
 
-      {/* On the clock now */}
-      <section>
+      {/* On the clock now — admin only */}
+      {admin && <section>
         <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">On the clock now</h2>
         {onClock.length === 0 ? <p className="text-[15px] prose-muted">Nobody is clocked in.</p> : (
           <ul className="flex flex-col gap-2">
@@ -72,10 +70,10 @@ export default async function AdminPage() {
             })}
           </ul>
         )}
-      </section>
+      </section>}
 
-      {/* Timesheets */}
-      <section>
+      {/* Timesheets — admin only */}
+      {admin && <section>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-fraunces text-[22px] font-medium text-forest">Timesheets · {period.label}</h2>
           <PrintButton label="Print timesheets" />
@@ -100,7 +98,7 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
-      </section>
+      </section>}
 
       {/* Work-log approvals */}
       <section>
@@ -135,15 +133,15 @@ export default async function AdminPage() {
         {clientOpts.length === 0 ? <p className="text-[15px] prose-muted">No clients yet.</p> : <GenerateReportForm clients={clientOpts} />}
       </section>
 
-      {/* Password resets */}
-      <section>
+      {/* Password resets — admin only */}
+      {admin && <section>
         <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Password resets</h2>
         <p className="mb-3 text-[13px] prose-muted">Email a client or employee a link to set a new password for their portal. Copy their email from the tables below if needed.</p>
         <PasswordResetForm />
-      </section>
+      </section>}
 
-      {/* Employee reset requests */}
-      <section>
+      {/* Employee reset requests — admin only */}
+      {admin && <section>
         <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Employee reset requests</h2>
         <p className="mb-3 text-[13px] prose-muted">Employees can&apos;t reset their own password — approve a request to send them the recovery email.</p>
         {(resetReqs ?? []).length === 0 ? <p className="text-[15px] prose-muted">No pending requests.</p> : (
@@ -157,37 +155,16 @@ export default async function AdminPage() {
             ))}
           </ul>
         )}
-      </section>
-
-      {/* Staff directory */}
-      <section>
-        <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">Staff directory</h2>
-        <div className="mb-4"><AddStaffForm /></div>
-        <div className="overflow-x-auto border border-line-warm">
-          <table className="w-full min-w-[720px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th><th className="p-3 font-medium">Role</th><th className="p-3 font-medium">Code</th><th className="p-3 font-medium text-right">Rate</th><th className="p-3 font-medium">Hourly</th><th className="p-3 font-medium">Active</th><th className="p-3 font-medium">Manage</th></tr></thead>
-            <tbody>
-              {directory.map((s) => (
-                <tr key={s.id} className="border-b border-line-soft/60">
-                  <td className="p-3 font-medium text-charcoal">{s.name || "—"}</td><td className="p-3 prose-muted">{s.email}</td>
-                  <td className="p-3 prose-soft"><RoleEditor staffId={s.id} current={rolesOf(s)} options={ROLE_OPTIONS} /></td><td className="p-3 prose-muted">{s.employee_code || "—"}</td>
-                  <td className="p-3 text-right tabular-nums">{s.hourly ? usd(Number(s.rate || 0)) : "—"}</td>
-                  <td className="p-3">{s.hourly ? "Yes" : "No"}</td><td className="p-3">{s.active ? "Yes" : "No"}</td>
-                  <td className="p-3">{s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      </section>}
 
       {/* Client access & assignment */}
       <section>
-        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Client access &amp; assignment</h2>
-        <p className="mb-3 text-[13px] prose-muted">Ownership is a role. Setting it here clears the client from the unassigned queue everywhere. No passwords or access codes are stored or shown.</p>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Clients</h2>
+        <p className="mb-3 text-[13px] prose-muted">Add a client by hand (they get a portal invite), set the owner and team, status, billing, and 30-day roadmap.</p>
+        <div className="mb-4 border border-line-warm bg-white p-4"><p className="mb-2 text-[13px] font-semibold text-forest">Add a client</p><AddClientForm /></div>
         <div className="overflow-x-auto border border-line-warm">
-          <table className="w-full min-w-[760px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner</th><th className="p-3 font-medium w-60">Team</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th><th className="p-3 font-medium">Delete</th></tr></thead>
+          <table className="w-full min-w-[860px] border-collapse bg-white text-left text-[14px]">
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner</th><th className="p-3 font-medium w-60">Team</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">Billing</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th>{admin && <th className="p-3 font-medium">Delete</th>}</tr></thead>
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id} className="border-b border-line-soft/60">
@@ -196,12 +173,13 @@ export default async function AdminPage() {
                   <td className="p-3"><AssignSelect clientId={c.id} current={c.assigned_to} options={ownerOpts} /></td>
                   <td className="p-3"><AccountTeam clientId={c.id} members={teamByClient.get(c.id) || []} options={teamOpts} /></td>
                   <td className="p-3"><StatusSelect clientId={c.id} current={c.status} /></td>
+                  <td className="p-3"><BillingSelect clientId={c.id} current={(c as any).billing_type || "standard"} /></td>
                   <td className="p-3"><RoadmapCheck clientId={c.id} done={!!c.roadmap_at} /></td>
                   <td className="p-3 prose-muted">{c.rep_code || "—"}</td>
-                  <td className="p-3"><DeleteClientButton clientId={c.id} label={c.business || c.contact || c.email} /></td>
+                  {admin && <td className="p-3"><DeleteClientButton clientId={c.id} label={c.business || c.contact || c.email} /></td>}
                 </tr>
               ))}
-              {clients.length === 0 && <tr><td colSpan={8} className="p-3 prose-muted">No clients yet.</td></tr>}
+              {clients.length === 0 && <tr><td colSpan={admin ? 9 : 8} className="p-3 prose-muted">No clients yet.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getStaffMember, isAdmin, isSalesOrAdmin } from "@/lib/staff";
+import { getStaffMember, isPrivileged, isSalesOrAdmin } from "@/lib/staff";
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
 
@@ -11,9 +11,10 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
 
-  const admin = isAdmin(me), sales = isSalesOrAdmin(me), hourly = me.hourly;
+  const priv = isPrivileged(me), sales = isSalesOrAdmin(me), hourly = me.hourly;
   const tabs: { href: string; label: string }[] = [{ href: "/staff", label: "Dashboard" }];
-  if (admin) tabs.push({ href: "/staff/admin", label: "Admin" });
+  if (priv) tabs.push({ href: "/staff/admin", label: "Admin" });
+  if (priv) tabs.push({ href: "/staff/directory", label: "Directory" });
   tabs.push({ href: "/staff/daily", label: "Daily tasks" });
   tabs.push({ href: "/staff/messages", label: "Messages" });
   tabs.push({ href: "/staff/files", label: "Files" });

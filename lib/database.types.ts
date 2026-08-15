@@ -7,7 +7,9 @@
 
 export type Role =
   | "Virtual assistant"
-  | "Sales / account manager"
+  | "Account manager"
+  | "Sales staff"
+  | "Business Manager"
   | "Submittals specialist"
   | "Documentation specialist"
   | "Design specialist"
@@ -68,6 +70,7 @@ export interface Database {
           retained_since: string | null;
           kickoff_at: string | null;
           roadmap_at: string | null;
+          billing_type: string;
         };
         Insert: {
           id?: string;
@@ -82,6 +85,7 @@ export interface Database {
           retained_since?: string | null;
           kickoff_at?: string | null;
           roadmap_at?: string | null;
+          billing_type?: string;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
       };

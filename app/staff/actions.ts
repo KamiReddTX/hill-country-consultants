@@ -3,7 +3,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getStaffMember, isPrivileged, isAdmin } from "@/lib/staff";
+import { getStaffMember, isPrivileged } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
@@ -50,7 +50,7 @@ export async function forceClockOut(punchId: string, startedAt: string): Promise
  *  Ownership lives on clients.assigned_to and every surface reads it. */
 export async function assignClient(clientId: string, staffId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const db = createClient();
   // assigned_to now holds the owning employee's staff id (was a role string).
   const { error } = await db.from("clients").update({ assigned_to: staffId }).eq("id", clientId);
@@ -79,7 +79,7 @@ export async function deleteClient(clientId: string): Promise<ActionResult> {
 /** Admin only: change a client's status. */
 export async function setClientStatus(clientId: string, status: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const db = createClient();
   const { error } = await db.from("clients").update({ status }).eq("id", clientId);
   if (error) return { error: error.message };
@@ -91,7 +91,7 @@ export async function setClientStatus(clientId: string, status: string): Promise
  *  This is the one onboarding step an admin marks by hand, after the kickoff call. */
 export async function setRoadmapDone(clientId: string, done: boolean): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const db = createClient();
   const { error } = await db.from("clients").update({ roadmap_at: done ? new Date().toISOString() : null }).eq("id", clientId);
   if (error) return { error: error.message };
@@ -149,7 +149,7 @@ export async function markLeadWon(leadId: string): Promise<ActionResult> {
  *  claims the row on first login (link_staff_to_user). */
 export async function addStaff(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const db = createClient();
   const role = String(formData.get("role") || "Virtual assistant");
@@ -240,7 +240,7 @@ export async function denyStaffReset(id: string): Promise<ActionResult> {
  *  are blocked from every staff surface (getStaffMember requires active). */
 export async function setStaffActive(staffId: string, active: boolean): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   if (staffId === me.id && !active) return { error: "You can't suspend your own account." };
   const { error } = await createServiceClient().from("staff").update({ active }).eq("id", staffId);
   if (error) return { error: error.message };
@@ -379,7 +379,7 @@ export async function deleteClientVaultEntry(id: string): Promise<ActionResult> 
 /** Admin only: set the full set of roles an employee holds (multi-role). */
 export async function setStaffRoles(staffId: string, roles: string[]): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isAdmin(me)) return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const clean = Array.from(new Set((roles || []).filter(Boolean)));
   if (clean.length === 0) return { error: "Pick at least one role." };
   const { error } = await createServiceClient().from("staff")
@@ -440,6 +440,43 @@ export async function assignTask(taskId: string, staffId: string | null): Promis
   const { error } = await admin.from("client_tasks").update({ assignee_id: staffId }).eq("id", taskId);
   if (error) return { error: error.message };
   revalidatePath("/staff/daily"); revalidatePath("/staff/delivery");
+  return { ok: true };
+}
+
+/** Admin/BM: create a client account by hand and invite them to the portal. */
+export async function addClient(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const email = String(formData.get("email") || "").trim().toLowerCase();
+  if (!email || !email.includes("@")) return { error: "Enter a valid client email." };
+  const billing = String(formData.get("billing_type") || "standard");
+  const admin = createServiceClient();
+  const { error } = await admin.from("clients").insert({
+    email,
+    business: String(formData.get("business") || "") || null,
+    contact: String(formData.get("contact") || "") || null,
+    phone: String(formData.get("phone") || "") || null,
+    status: "Active",
+    billing_type: ["standard", "comp", "barter"].includes(billing) ? billing : "standard",
+  } as any);
+  if (error) return { error: error.message.includes("duplicate") ? "A client with that email already exists." : error.message };
+  // Invite them to set a password; /auth/callback binds the client row on first login.
+  try {
+    const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+    await admin.auth.admin.inviteUserByEmail(email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined);
+  } catch (e) { console.warn("[addClient] invite", e); }
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin/BM: set a client's billing type — standard, comp (zeroed), or barter. */
+export async function setClientBilling(clientId: string, billingType: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!["standard", "comp", "barter"].includes(billingType)) return { error: "Invalid billing type." };
+  const { error } = await createServiceClient().from("clients").update({ billing_type: billingType }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
   return { ok: true };
 }
 
@@ -567,7 +604,7 @@ export async function approveWorkLog(id: string): Promise<ActionResult> {
  *  7 days of approved hours + deliverables, stored for the client to download. */
 export async function generateWeeklyReport(clientId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const db = createClient();
   const { data: client } = await db.from("clients").select("business,contact,email").eq("id", clientId).maybeSingle();
   if (!client) return { error: "Client not found." };
