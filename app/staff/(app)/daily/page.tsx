@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
+import { getStaffMember, getClients, getDirectory } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
+import { TaskAssignee } from "@/components/staff/task-assignee";
 import { LogWorkForm } from "@/components/staff/log-work-form";
 
 const RECURRING = [
@@ -14,11 +15,13 @@ const RECURRING = [
 export default async function DailyPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  const clients = await getClients();
-  const priv = isPrivileged(me);
+  const [clients, directory] = await Promise.all([getClients(), getDirectory()]);
+  // getClients is RLS-scoped, so every client here is one I can reach (owner, team, or privileged).
   const byId = new Map(clients.map((c) => [c.id, c]));
-  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (priv || !c.assigned_to || c.assigned_to === me.id); };
-  const workable = clients.filter((c) => priv || !c.assigned_to || c.assigned_to === me.id).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
+  const mineOrOpen = (cid: string) => byId.has(cid);
+  const workable = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
+  const assigneeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
+  const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
 
   const db = createClient();
   const [tasks, notes, vault] = await Promise.all([
@@ -47,6 +50,8 @@ export default async function DailyPage() {
                   <p className="text-[12px] text-ink-faint">{info(t.client_id)}</p>
                   <TaskMoveControl taskId={t.id} current={t.column_name} />
                 </div>
+                <div className="mt-1"><span className="text-[11px] text-ink-faint">Worker: {t.assignee_id ? staffName.get(t.assignee_id) || "Assigned" : "unassigned"}</span>
+                  <TaskAssignee taskId={t.id} current={t.assignee_id} options={assigneeOpts} /></div>
               </li>
             ))}
           </ul>

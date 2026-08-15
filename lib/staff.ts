@@ -20,11 +20,16 @@ export function hoursBetween(startISO: string, endISO: string | null) {
   return (new Date(endISO).getTime() - new Date(startISO).getTime()) / 3600000;
 }
 
-export const isAdmin = (s: StaffRow | null) => s?.role === "Administrator";
+/** Every role an employee holds — the roles[] array, falling back to the legacy single role. */
+export const rolesOf = (s: StaffRow | null): string[] =>
+  s?.roles && s.roles.length ? s.roles : s?.role ? [s.role] : [];
+export const hasRole = (s: StaffRow | null, r: string) => rolesOf(s).includes(r);
+
+export const isAdmin = (s: StaffRow | null) => hasRole(s, "Administrator");
 /** Admin or Business Manager — full visibility across every client. */
-export const isPrivileged = (s: StaffRow | null) => s?.role === "Administrator" || s?.role === "Business Manager";
+export const isPrivileged = (s: StaffRow | null) => hasRole(s, "Administrator") || hasRole(s, "Business Manager");
 export const isSalesOrAdmin = (s: StaffRow | null) =>
-  s?.role === "Sales / account manager" || s?.role === "Administrator" || s?.role === "Business Manager";
+  hasRole(s, "Sales / account manager") || isPrivileged(s);
 
 /** All clients (RLS lets any staff read). */
 export async function getClients(): Promise<ClientRow[]> {

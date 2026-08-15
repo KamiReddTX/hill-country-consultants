@@ -14,6 +14,10 @@ import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { PasswordResetForm } from "@/components/staff/password-reset-form";
 import { StaffResetActions } from "@/components/staff/staff-reset-actions";
 import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
+import { RoleEditor } from "@/components/staff/role-editor";
+import { AccountTeam } from "@/components/staff/account-team";
+import { ROLE_OPTIONS } from "@/content/roles";
+import { rolesOf } from "@/lib/staff";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -26,15 +30,23 @@ export default async function AdminPage() {
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
   const clientOpts = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
   const ownerOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: `${s.name || s.email} · ${s.role}` }));
+  const teamOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
   const period = periodOf(0);
 
   const db = createClient();
-  const [{ data: periodPunches }, { data: approvals }, { data: pendingLog }, { data: resetReqs }] = await Promise.all([
+  const [{ data: periodPunches }, { data: approvals }, { data: pendingLog }, { data: resetReqs }, { data: assignments }] = await Promise.all([
     db.from("punches").select("*").gte("started_at", period.startISO).lte("started_at", period.endISO + "T23:59:59Z"),
     db.from("timesheet_approvals").select("*").eq("period_start", period.startISO),
     db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(100),
     db.from("staff_reset_requests").select("*").eq("status", "pending").order("requested_at", { ascending: false }),
+    db.from("client_assignments").select("*"),
   ]);
+  const teamByClient = new Map<string, { id: string; staffId: string; label: string }[]>();
+  (assignments ?? []).forEach((a: any) => {
+    const arr = teamByClient.get(a.client_id) || [];
+    arr.push({ id: a.id, staffId: a.staff_id, label: staffName.get(a.staff_id) || "Staff" });
+    teamByClient.set(a.client_id, arr);
+  });
   const hoursByStaff = new Map<string, number>();
   (periodPunches ?? []).forEach((p) => hoursByStaff.set(p.staff_id, (hoursByStaff.get(p.staff_id) || 0) + Number(p.hours || 0)));
   const approvedSet = new Set((approvals ?? []).map((a) => a.staff_id));
@@ -158,7 +170,7 @@ export default async function AdminPage() {
               {directory.map((s) => (
                 <tr key={s.id} className="border-b border-line-soft/60">
                   <td className="p-3 font-medium text-charcoal">{s.name || "—"}</td><td className="p-3 prose-muted">{s.email}</td>
-                  <td className="p-3 prose-soft">{s.role}</td><td className="p-3 prose-muted">{s.employee_code || "—"}</td>
+                  <td className="p-3 prose-soft"><RoleEditor staffId={s.id} current={rolesOf(s)} options={ROLE_OPTIONS} /></td><td className="p-3 prose-muted">{s.employee_code || "—"}</td>
                   <td className="p-3 text-right tabular-nums">{s.hourly ? usd(Number(s.rate || 0)) : "—"}</td>
                   <td className="p-3">{s.hourly ? "Yes" : "No"}</td><td className="p-3">{s.active ? "Yes" : "No"}</td>
                   <td className="p-3">{s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}</td>
@@ -175,20 +187,21 @@ export default async function AdminPage() {
         <p className="mb-3 text-[13px] prose-muted">Ownership is a role. Setting it here clears the client from the unassigned queue everywhere. No passwords or access codes are stored or shown.</p>
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[760px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th><th className="p-3 font-medium">Delete</th></tr></thead>
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner</th><th className="p-3 font-medium w-60">Team</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th><th className="p-3 font-medium">Delete</th></tr></thead>
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id} className="border-b border-line-soft/60">
                   <td className="p-3 font-medium text-charcoal">{c.business || "—"}</td>
                   <td className="p-3 prose-muted">{c.contact || "—"}<br /><span className="text-[12px]">{c.email}</span></td>
                   <td className="p-3"><AssignSelect clientId={c.id} current={c.assigned_to} options={ownerOpts} /></td>
+                  <td className="p-3"><AccountTeam clientId={c.id} members={teamByClient.get(c.id) || []} options={teamOpts} /></td>
                   <td className="p-3"><StatusSelect clientId={c.id} current={c.status} /></td>
                   <td className="p-3"><RoadmapCheck clientId={c.id} done={!!c.roadmap_at} /></td>
                   <td className="p-3 prose-muted">{c.rep_code || "—"}</td>
                   <td className="p-3"><DeleteClientButton clientId={c.id} label={c.business || c.contact || c.email} /></td>
                 </tr>
               ))}
-              {clients.length === 0 && <tr><td colSpan={7} className="p-3 prose-muted">No clients yet.</td></tr>}
+              {clients.length === 0 && <tr><td colSpan={8} className="p-3 prose-muted">No clients yet.</td></tr>}
             </tbody>
           </table>
         </div>

@@ -3,7 +3,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
-import { getStaffMember, isPrivileged } from "@/lib/staff";
+import { getStaffMember, isPrivileged, isAdmin } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 
@@ -152,10 +152,12 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
   if (me?.role !== "Administrator") return { error: "Admins only." };
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const db = createClient();
+  const role = String(formData.get("role") || "Virtual assistant");
   const { error } = await db.from("staff").insert({
     email,
     name: String(formData.get("name") || "") || null,
-    role: String(formData.get("role") || "Virtual assistant") as any,
+    role: role as any,
+    roles: [role],
     rate: Number(formData.get("rate") || 0),
     employee_code: String(formData.get("employee_code") || "") || null,
     hourly: formData.get("hourly") === "on",
@@ -371,6 +373,73 @@ export async function deleteClientVaultEntry(id: string): Promise<ActionResult> 
   const { error } = await db.from("client_vault").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
+  return { ok: true };
+}
+
+/** Admin only: set the full set of roles an employee holds (multi-role). */
+export async function setStaffRoles(staffId: string, roles: string[]): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Admins only." };
+  const clean = Array.from(new Set((roles || []).filter(Boolean)));
+  if (clean.length === 0) return { error: "Pick at least one role." };
+  const { error } = await createServiceClient().from("staff")
+    .update({ roles: clean, role: clean[0] as any }).eq("id", staffId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** True if the current staffer owns or is privileged over a client (can coordinate its team). */
+async function ownsOrPrivileged(me: any, clientId: string): Promise<boolean> {
+  if (isPrivileged(me)) return true;
+  const { data: c } = await createServiceClient().from("clients").select("assigned_to").eq("id", clientId).maybeSingle();
+  return !!c && (c as any).assigned_to === me.id;
+}
+
+/** True if the current staffer can reach a client (owner, team member, or privileged). */
+async function canReachClient(me: any, clientId: string): Promise<boolean> {
+  if (await ownsOrPrivileged(me, clientId)) return true;
+  const { data: a } = await createServiceClient().from("client_assignments").select("id").eq("client_id", clientId).eq("staff_id", me.id).maybeSingle();
+  return !!a;
+}
+
+/** Owner/BM/admin: add a specialist to an account's team (AM coordination). */
+export async function addClientTeamMember(clientId: string, staffId: string, roleOnAccount?: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await ownsOrPrivileged(me, clientId))) return { error: "Only the account owner or an admin can add team members." };
+  const { error } = await createServiceClient().from("client_assignments")
+    .upsert({ client_id: clientId, staff_id: staffId, role_on_account: roleOnAccount || null, added_by: me.id } as any, { onConflict: "client_id,staff_id" });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/staff/accounts");
+  return { ok: true };
+}
+
+/** Owner/BM/admin: remove a specialist from an account's team. */
+export async function removeClientTeamMember(assignmentId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: a } = await admin.from("client_assignments").select("client_id").eq("id", assignmentId).maybeSingle();
+  if (!a) return { error: "Not found." };
+  if (!(await ownsOrPrivileged(me, (a as any).client_id))) return { error: "Only the account owner or an admin can remove team members." };
+  const { error } = await admin.from("client_assignments").delete().eq("id", assignmentId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/staff/accounts");
+  return { ok: true };
+}
+
+/** Owner/team/admin: assign (or clear) the worker doing a specific task. */
+export async function assignTask(taskId: string, staffId: string | null): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: t } = await admin.from("client_tasks").select("client_id").eq("id", taskId).maybeSingle();
+  if (!t) return { error: "Task not found." };
+  if (!(await canReachClient(me, (t as any).client_id))) return { error: "This isn't your account." };
+  const { error } = await admin.from("client_tasks").update({ assignee_id: staffId }).eq("id", taskId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/daily"); revalidatePath("/staff/delivery");
   return { ok: true };
 }
 

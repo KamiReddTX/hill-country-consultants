@@ -14,7 +14,7 @@ export default async function StaffFilesPage() {
   if (!me) redirect("/staff/login");
   const clients = await getClients();
   const admin = isPrivileged(me);
-  const mine = admin ? clients : clients.filter((c) => c.assigned_to === me.id);
+  const mine = clients;
   const ids = mine.map((c) => c.id);
 
   const db = createClient();

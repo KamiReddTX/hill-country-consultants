@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
+import { getStaffMember, getClients } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { StaffVault } from "@/components/staff/staff-vault";
 import type { VaultRow } from "@/lib/database.types";
@@ -8,8 +8,7 @@ export default async function StaffVaultPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
   const clients = await getClients();
-  const priv = isPrivileged(me);
-  const mine = priv ? clients : clients.filter((c) => c.assigned_to === me.id);
+  const mine = clients;
   const ids = mine.map((c) => c.id);
 
   const db = createClient();

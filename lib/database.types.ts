@@ -27,6 +27,7 @@ export interface Database {
           email: string;
           name: string | null;
           role: Role;
+          roles: string[];
           rate: number;
           employee_code: string | null;
           hourly: boolean;
@@ -39,12 +40,18 @@ export interface Database {
           email: string;
           name?: string | null;
           role?: Role;
+          roles?: string[];
           rate?: number;
           employee_code?: string | null;
           hourly?: boolean;
           active?: boolean;
         };
         Update: Partial<Database["public"]["Tables"]["staff"]["Insert"]>;
+      };
+      client_assignments: {
+        Row: { id: string; client_id: string; staff_id: string; role_on_account: string | null; added_by: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; staff_id: string; role_on_account?: string | null; added_by?: string | null };
+        Update: Partial<Database["public"]["Tables"]["client_assignments"]["Insert"]>;
       };
       clients: {
         Row: {
@@ -145,11 +152,13 @@ export interface Database {
           needs_clarification: boolean;
           charge_cents: number | null;
           charge_status: string;
+          assignee_id: string | null;
         };
         Insert: {
           id?: string;
           client_id: string;
           title: string;
+          assignee_id?: string | null;
           service?: string | null;
           due_date?: string | null;
           column_name?: string;
