@@ -28,7 +28,7 @@ export async function POST(req: Request) {
 
   // Honeypot: a hidden field real visitors never fill. If it's set, accept the
   // request so the bot moves on, but never write the row.
-  if (clean(body.company_website)) return NextResponse.json({ ok: true, persisted: false });
+  if (clean(body.hp_field_x)) return NextResponse.json({ ok: true, persisted: false });
 
   // Cap field lengths so a bad actor can't bloat the row (no external deps).
   const cap = (v: unknown, max: number) => clean(v).slice(0, max);
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return NextResponse.json({ ok: true, persisted: false, debug: { env: { url: !!url, key: !!key } } });
+  if (!url || !key) return NextResponse.json({ ok: true, persisted: false });
 
   const pain = [message, heard ? `Heard about us: ${heard}` : ""].filter(Boolean).join("\n\n");
 
@@ -66,14 +66,8 @@ export async function POST(req: Request) {
       rep_code: referral || null,
       stage: "New lead",
     });
-    if (error) console.error("[inquiry] insert error", error);
-    return NextResponse.json({
-      ok: true,
-      persisted: !error,
-      debug: error ? { message: error.message, details: (error as any).details, hint: (error as any).hint, code: (error as any).code } : undefined,
-    });
-  } catch (e: any) {
-    console.error("[inquiry] exception", e);
-    return NextResponse.json({ ok: true, persisted: false, debug: { exception: String(e?.message || e) } });
+    return NextResponse.json({ ok: true, persisted: !error });
+  } catch {
+    return NextResponse.json({ ok: true, persisted: false });
   }
 }

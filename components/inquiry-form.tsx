@@ -15,7 +15,7 @@ export function InquiryForm() {
   const [error, setError] = useState(false);
   const [form, setForm] = useState({
     name: "", business: "", email: "", phone: "", industry: "", timeline: "", howHeard: "", referral: "", message: "",
-    company_website: "", // honeypot — must stay empty for a real submission
+    hp_field_x: "", // honeypot — neutral name so browser autofill won't fill it; must stay empty
   });
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm((f) => ({ ...f, [k]: e.target.value }));
@@ -60,17 +60,19 @@ export function InquiryForm() {
         }
       }}
     >
-      {/* Honeypot: hidden from people; a bot that fills it is dropped server-side. */}
+      {/* Honeypot: hidden from people; a bot that fills it is dropped server-side.
+          Neutral name + autocomplete off so browser autofill / password managers
+          don't fill it and falsely flag a real visitor. */}
       <div className="sr-only" aria-hidden="true">
-        <label htmlFor="company_website">Company website</label>
+        <label htmlFor="hp_field_x">Leave this field empty</label>
         <input
-          id="company_website"
-          name="company_website"
+          id="hp_field_x"
+          name="hp_field_x"
           type="text"
           tabIndex={-1}
           autoComplete="off"
-          value={form.company_website}
-          onChange={set("company_website")}
+          value={form.hp_field_x}
+          onChange={set("hp_field_x")}
         />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
