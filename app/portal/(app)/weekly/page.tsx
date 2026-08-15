@@ -1,50 +1,48 @@
 import { redirect } from "next/navigation";
-import { getPortalClient, getPortalData, deriveWeekly } from "@/lib/portal";
+import { getPortalClient } from "@/lib/portal";
+import { createClient } from "@/lib/supabase/server";
 
 export default async function WeeklyPage() {
   const client = await getPortalClient();
   if (!client) redirect("/portal/login");
-  const data = await getPortalData(client);
-  const week = deriveWeekly(data);
+
+  const db = createClient();
+  const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();
+  const { data } = await db
+    .from("client_reports")
+    .select("id,name,period_start,period_end,created_at")
+    .eq("client_id", client.id)
+    .gte("created_at", cutoff)
+    .order("created_at", { ascending: false });
+  const reports = data ?? [];
 
   return (
     <div className="flex flex-col gap-6">
       <div>
         <h1 className="font-fraunces text-[32px] font-normal text-forest">Weekly report</h1>
         <span className="rule-gold mb-4 mt-2" />
+        <p className="max-w-[48em] prose-soft">
+          Each week we publish a report of the hours and work delivered on your account. Reports stay here for 30 days —
+          open or download any of them for your files.
+        </p>
       </div>
-      {!week ? (
+
+      {reports.length === 0 ? (
         <p className="border border-dashed border-line-warm bg-white p-6 text-[15px] prose-muted">
-          Nothing delivered yet. Your first weekly report arrives the Friday after your start date — what we delivered,
-          the hours it took, what is in flight, and what is next.
+          No weekly reports yet. Your first appears once your team has logged work and it's published.
         </p>
       ) : (
-        <>
-          <p className="text-[14px] prose-muted">Prepared by your account lead · sent every Friday.</p>
-          <div className="flex flex-wrap gap-6">
-            <div><p className="kicker">Hours this period</p><p className="font-fraunces text-[28px] text-charcoal tabular-nums">{week.totalHours}</p></div>
-            <div><p className="kicker">Delivered</p><p className="font-fraunces text-[28px] text-charcoal tabular-nums">{week.delivered.length}</p></div>
-          </div>
-          <div>
-            <p className="kicker mb-2">Delivered</p>
-            {week.delivered.length === 0 ? <p className="text-[14px] prose-muted">Nothing delivered in this period.</p> : (
-              <ul className="flex flex-col gap-2">
-                {week.delivered.map((d) => (
-                  <li key={d.id} className="flex justify-between border-t border-line-soft pt-2 text-[15px]">
-                    <span className="prose-soft">{d.name}{d.service ? ` · ${d.service}` : ""}</span>
-                    <span className="text-[13px] text-forest">{d.status}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-          <div>
-            <p className="kicker mb-2">Hours by service</p>
-            <ul className="flex flex-col gap-1">
-              {week.byService.map((b) => <li key={b.svc} className="flex justify-between text-[14px]"><span className="prose-soft">{b.svc}</span><span className="tabular-nums prose-muted">{b.hours}h</span></li>)}
-            </ul>
-          </div>
-        </>
+        <ul className="flex flex-col gap-2">
+          {reports.map((r: any) => (
+            <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
+              <div>
+                <p className="font-medium text-charcoal">{r.name}</p>
+                <p className="text-[12px] prose-muted">Published {new Date(r.created_at).toLocaleDateString()}</p>
+              </div>
+              <a href={`/api/client-report/${r.id}`} className="btn-gold text-[13px]">Open / Download</a>
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

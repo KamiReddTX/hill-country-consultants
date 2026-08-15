@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember } from "@/lib/staff";
 import { sendTaskPaymentRequest } from "@/lib/email";
+import { buildWeeklyReportPdf } from "@/lib/reports";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -272,6 +273,40 @@ export async function approveWorkLog(id: string): Promise<ActionResult> {
   const { error } = await db.from("client_work_log").update({ approved: true, approved_by: me.name || me.role, approved_at: new Date().toISOString() }).eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/admin"); revalidatePath("/portal/work-log"); revalidatePath("/portal/weekly");
+  return { ok: true };
+}
+
+/** Admin only: generate & publish this week's PDF report for a client — the last
+ *  7 days of approved hours + deliverables, stored for the client to download. */
+export async function generateWeeklyReport(clientId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const db = createClient();
+  const { data: client } = await db.from("clients").select("business,contact,email").eq("id", clientId).maybeSingle();
+  if (!client) return { error: "Client not found." };
+  const startISO = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+  const endISO = new Date().toISOString().slice(0, 10);
+  const [{ data: wl }, { data: dl }] = await Promise.all([
+    db.from("client_work_log").select("*").eq("client_id", clientId).eq("approved", true).gte("worked_on", startISO).order("worked_on"),
+    db.from("client_deliverables").select("*").eq("client_id", clientId).gte("delivered_on", startISO).order("delivered_on"),
+  ]);
+  const pdf = await buildWeeklyReportPdf({
+    clientName: (client as any).contact || (client as any).email,
+    business: (client as any).business,
+    periodStart: startISO,
+    periodEnd: endISO,
+    workLog: ((wl as any[]) || []).map((w) => ({ worked_on: w.worked_on, service: w.service, task: w.task, performed_by: w.performed_by, hours: Number(w.hours || 0) })),
+    deliverables: ((dl as any[]) || []).map((d) => ({ name: d.name, status: d.status, delivered_on: d.delivered_on })),
+  });
+  const admin = createServiceClient();
+  const path = `${clientId}/${endISO}-weekly-${Date.now()}.pdf`;
+  const up = await admin.storage.from("client-reports").upload(path, Buffer.from(pdf), { contentType: "application/pdf" });
+  if (up.error) return { error: up.error.message };
+  const { error } = await admin.from("client_reports").insert({
+    client_id: clientId, name: `Weekly report · ${startISO} to ${endISO}`, path, period_start: startISO, period_end: endISO,
+  } as any);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/portal/weekly");
   return { ok: true };
 }
 

@@ -9,6 +9,7 @@ import { ForceClockOutButton } from "@/components/staff/force-clockout-button";
 import { ApproveButton } from "@/components/staff/approve-button";
 import { PrintButton } from "@/components/staff/print-button";
 import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
+import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -19,6 +20,7 @@ export default async function AdminPage() {
   const [directory, clients, bookings, onClock] = await Promise.all([getDirectory(), getClients(), getBookings(), getOnTheClock()]);
   const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
+  const clientOpts = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
   const period = periodOf(0);
 
   const db = createClient();
@@ -106,6 +108,13 @@ export default async function AdminPage() {
             </table>
           </div>
         )}
+      </section>
+
+      {/* Weekly reports */}
+      <section>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Weekly reports</h2>
+        <p className="mb-3 text-[13px] prose-muted">Generate this week&apos;s PDF (last 7 days of approved hours + deliverables) and publish it to the client&apos;s Weekly Report tab.</p>
+        {clientOpts.length === 0 ? <p className="text-[15px] prose-muted">No clients yet.</p> : <GenerateReportForm clients={clientOpts} />}
       </section>
 
       {/* Staff directory */}

@@ -169,6 +169,11 @@ export interface Database {
         Insert: { id?: string; task_id: string; client_id: string; name: string; path: string; size?: number | null; uploaded_by?: string };
         Update: Partial<Database["public"]["Tables"]["client_task_files"]["Insert"]>;
       };
+      client_reports: {
+        Row: { id: string; client_id: string; name: string; path: string; period_start: string | null; period_end: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; name: string; path: string; period_start?: string | null; period_end?: string | null };
+        Update: Partial<Database["public"]["Tables"]["client_reports"]["Insert"]>;
+      };
       client_notes: {
         Row: { id: string; client_id: string; body: string; created_at: string };
         Insert: { id?: string; client_id: string; body: string };
