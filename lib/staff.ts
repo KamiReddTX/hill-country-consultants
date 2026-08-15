@@ -21,7 +21,10 @@ export function hoursBetween(startISO: string, endISO: string | null) {
 }
 
 export const isAdmin = (s: StaffRow | null) => s?.role === "Administrator";
-export const isSalesOrAdmin = (s: StaffRow | null) => s?.role === "Sales / account manager" || s?.role === "Administrator";
+/** Admin or Business Manager — full visibility across every client. */
+export const isPrivileged = (s: StaffRow | null) => s?.role === "Administrator" || s?.role === "Business Manager";
+export const isSalesOrAdmin = (s: StaffRow | null) =>
+  s?.role === "Sales / account manager" || s?.role === "Administrator" || s?.role === "Business Manager";
 
 /** All clients (RLS lets any staff read). */
 export async function getClients(): Promise<ClientRow[]> {

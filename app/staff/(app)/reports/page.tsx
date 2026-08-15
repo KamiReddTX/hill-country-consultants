@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, isAdmin } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 
 export default async function ReportsPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  const admin = isAdmin(me);
+  const admin = isPrivileged(me);
   const clients = await getClients();
   const workable = (admin ? clients : clients.filter((c) => !c.assigned_to || c.assigned_to === me.id)).map((c) => ({
     id: c.id,

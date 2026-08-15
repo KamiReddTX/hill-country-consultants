@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, isSalesOrAdmin, getClients } from "@/lib/staff";
+import { getStaffMember, isSalesOrAdmin, getClients, isPrivileged } from "@/lib/staff";
 
 export default async function FollowUpsPage() {
   const me = await getStaffMember();
@@ -7,7 +7,7 @@ export default async function FollowUpsPage() {
   if (!isSalesOrAdmin(me)) return <p className="text-[15px] prose-muted">Follow-ups is for sales and admins.</p>;
   const clients = await getClients();
   const code = (s: string | null | undefined) => (s ?? "").trim().toUpperCase();
-  const mine = clients.filter((c) => (!!me.employee_code && code(c.rep_code) === code(me.employee_code)) || c.assigned_to === me.id);
+  const mine = clients.filter((c) => isPrivileged(me) || (!!me.employee_code && code(c.rep_code) === code(me.employee_code)) || c.assigned_to === me.id);
 
   return (
     <div className="flex flex-col gap-6">

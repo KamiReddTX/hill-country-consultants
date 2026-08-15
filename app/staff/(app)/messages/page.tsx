@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, isAdmin } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { StaffReplyForm } from "@/components/staff/staff-reply-form";
 
@@ -7,7 +7,7 @@ export default async function StaffMessagesPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
   const clients = await getClients();
-  const admin = isAdmin(me);
+  const admin = isPrivileged(me);
   const mine = admin ? clients : clients.filter((c) => c.assigned_to === me.id);
   const ids = mine.map((c) => c.id);
 

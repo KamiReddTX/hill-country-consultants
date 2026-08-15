@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { getStaffMember, getClients, isAdmin } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
   const period = url.searchParams.get("period") || "week";
   const days = PERIOD_DAYS[period] || 7;
   const clientParam = url.searchParams.get("client") || "all";
-  const admin = isAdmin(me);
+  const admin = isPrivileged(me);
 
   const clients = await getClients();
   const byId = new Map(clients.map((c) => [c.id, c]));

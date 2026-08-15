@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, isAdmin } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { AddDeliverableForm } from "@/components/staff/add-deliverable-form";
@@ -10,11 +10,11 @@ import { TaskChargeForm } from "@/components/staff/task-charge-form";
 export default async function DeliveryPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  const admin = isAdmin(me);
+  const admin = isPrivileged(me);
   const clients = await getClients();
   const byId = new Map(clients.map((c) => [c.id, c]));
-  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.id); };
-  const workable = clients.filter((c) => !c.assigned_to || c.assigned_to === me.id).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
+  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (admin || !c.assigned_to || c.assigned_to === me.id); };
+  const workable = clients.filter((c) => admin || !c.assigned_to || c.assigned_to === me.id).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
   const db = createClient();
   const [tasks, deliv, roadmap, files] = await Promise.all([
     db.from("client_tasks").select("*").in("column_name", ["Requested", "In progress", "In review"]),

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { LogWorkForm } from "@/components/staff/log-work-form";
@@ -15,9 +15,10 @@ export default async function DailyPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
   const clients = await getClients();
+  const priv = isPrivileged(me);
   const byId = new Map(clients.map((c) => [c.id, c]));
-  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.id); };
-  const workable = clients.filter((c) => !c.assigned_to || c.assigned_to === me.id).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
+  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (priv || !c.assigned_to || c.assigned_to === me.id); };
+  const workable = clients.filter((c) => priv || !c.assigned_to || c.assigned_to === me.id).map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
 
   const db = createClient();
   const [tasks, notes, vault] = await Promise.all([
