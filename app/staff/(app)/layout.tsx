@@ -19,7 +19,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   if (sales) tabs.push(
     { href: "/staff/intake", label: "Intake" }, { href: "/staff/pipeline", label: "Pipeline" },
     { href: "/staff/accounts", label: "Accounts" }, { href: "/staff/commissions", label: "Commissions" });
-  tabs.push({ href: "/staff/clients", label: "All clients" }, { href: "/staff/delivery", label: "Delivery" });
+  tabs.push({ href: "/staff/clients", label: "All clients" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/reports", label: "Reports" });
   if (sales) tabs.push({ href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
   tabs.push({ href: "/staff/profile", label: "My profile" });
 
