@@ -49,7 +49,7 @@ export async function POST(req: Request) {
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return NextResponse.json({ ok: true, persisted: false });
+  if (!url || !key) return NextResponse.json({ ok: true, persisted: false, debug: { env: { url: !!url, key: !!key } } });
 
   const pain = [message, heard ? `Heard about us: ${heard}` : ""].filter(Boolean).join("\n\n");
 
@@ -66,8 +66,14 @@ export async function POST(req: Request) {
       rep_code: referral || null,
       stage: "New lead",
     });
-    return NextResponse.json({ ok: true, persisted: !error });
-  } catch {
-    return NextResponse.json({ ok: true, persisted: false });
+    if (error) console.error("[inquiry] insert error", error);
+    return NextResponse.json({
+      ok: true,
+      persisted: !error,
+      debug: error ? { message: error.message, details: (error as any).details, hint: (error as any).hint, code: (error as any).code } : undefined,
+    });
+  } catch (e: any) {
+    console.error("[inquiry] exception", e);
+    return NextResponse.json({ ok: true, persisted: false, debug: { exception: String(e?.message || e) } });
   }
 }
