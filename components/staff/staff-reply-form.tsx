@@ -12,7 +12,7 @@ export function StaffReplyForm({ clientId }: { clientId: string }) {
       <textarea
         ref={ref}
         rows={2}
-        placeholder="Reply to the client…"
+        placeholder="Message this client… (start a new thread or reply)"
         className="w-full border border-line-warm px-3 py-2 text-[15px] outline-none focus:border-forest"
       />
       {error && <p className="text-[13px] text-red-700">{error}</p>}
@@ -30,7 +30,7 @@ export function StaffReplyForm({ clientId }: { clientId: string }) {
         }
         className="btn-gold self-start px-5 text-[14px] disabled:opacity-50"
       >
-        {pending ? "Sending…" : "Send reply & email client"}
+        {pending ? "Sending…" : "Send message & email client"}
       </button>
     </div>
   );
