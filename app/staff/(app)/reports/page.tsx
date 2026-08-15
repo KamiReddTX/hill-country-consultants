@@ -6,7 +6,7 @@ export default async function ReportsPage() {
   if (!me) redirect("/staff/login");
   const admin = isAdmin(me);
   const clients = await getClients();
-  const workable = (admin ? clients : clients.filter((c) => !c.assigned_to || c.assigned_to === me.role)).map((c) => ({
+  const workable = (admin ? clients : clients.filter((c) => !c.assigned_to || c.assigned_to === me.id)).map((c) => ({
     id: c.id,
     label: c.business || c.contact || c.email,
   }));

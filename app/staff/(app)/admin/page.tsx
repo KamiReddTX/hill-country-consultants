@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffMember, isAdmin, getDirectory, getClients, getBookings, getOnTheClock, periodOf, usd } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { AssignSelect } from "@/components/staff/assign-select";
+import { DeleteClientButton } from "@/components/staff/delete-client-button";
 import { StatusSelect } from "@/components/staff/status-select";
 import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
@@ -22,6 +23,7 @@ export default async function AdminPage() {
   const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
   const clientOpts = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
+  const ownerOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: `${s.name || s.email} · ${s.role}` }));
   const period = periodOf(0);
 
   const db = createClient();
@@ -152,19 +154,20 @@ export default async function AdminPage() {
         <p className="mb-3 text-[13px] prose-muted">Ownership is a role. Setting it here clears the client from the unassigned queue everywhere. No passwords or access codes are stored or shown.</p>
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[760px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner (role)</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th></tr></thead>
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Business</th><th className="p-3 font-medium">Contact</th><th className="p-3 font-medium w-56">Owner</th><th className="p-3 font-medium w-40">Status</th><th className="p-3 font-medium w-36">30-day roadmap</th><th className="p-3 font-medium">Rep</th><th className="p-3 font-medium">Delete</th></tr></thead>
             <tbody>
               {clients.map((c) => (
                 <tr key={c.id} className="border-b border-line-soft/60">
                   <td className="p-3 font-medium text-charcoal">{c.business || "—"}</td>
                   <td className="p-3 prose-muted">{c.contact || "—"}<br /><span className="text-[12px]">{c.email}</span></td>
-                  <td className="p-3"><AssignSelect clientId={c.id} current={c.assigned_to} /></td>
+                  <td className="p-3"><AssignSelect clientId={c.id} current={c.assigned_to} options={ownerOpts} /></td>
                   <td className="p-3"><StatusSelect clientId={c.id} current={c.status} /></td>
                   <td className="p-3"><RoadmapCheck clientId={c.id} done={!!c.roadmap_at} /></td>
                   <td className="p-3 prose-muted">{c.rep_code || "—"}</td>
+                  <td className="p-3"><DeleteClientButton clientId={c.id} label={c.business || c.contact || c.email} /></td>
                 </tr>
               ))}
-              {clients.length === 0 && <tr><td colSpan={6} className="p-3 prose-muted">No clients yet.</td></tr>}
+              {clients.length === 0 && <tr><td colSpan={7} className="p-3 prose-muted">No clients yet.</td></tr>}
             </tbody>
           </table>
         </div>

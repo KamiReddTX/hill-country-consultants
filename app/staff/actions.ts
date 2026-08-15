@@ -48,12 +48,30 @@ export async function forceClockOut(punchId: string, startedAt: string): Promise
 
 /** Admin only: set the owning role on a client (empty string = unassign).
  *  Ownership lives on clients.assigned_to and every surface reads it. */
-export async function assignClient(clientId: string, role: string): Promise<ActionResult> {
+export async function assignClient(clientId: string, staffId: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (me?.role !== "Administrator") return { error: "Admins only." };
   const db = createClient();
-  const { error } = await db.from("clients").update({ assigned_to: role }).eq("id", clientId);
+  // assigned_to now holds the owning employee's staff id (was a role string).
+  const { error } = await db.from("clients").update({ assigned_to: staffId }).eq("id", clientId);
   if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Admin only: permanently delete a client account and all its data (bookings,
+ *  tasks, notes, vault, work log, deliverables, roadmap, reports — all cascade),
+ *  plus its portal login. Built for clearing test accounts. */
+export async function deleteClient(clientId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const admin = createServiceClient();
+  const { data: client } = await admin.from("clients").select("user_id").eq("id", clientId).maybeSingle();
+  const { error } = await admin.from("clients").delete().eq("id", clientId);
+  if (error) return { error: error.message };
+  // Remove the portal login so the email can be reused for a fresh test.
+  const uid = (client as any)?.user_id;
+  if (uid) { try { await admin.auth.admin.deleteUser(uid); } catch (e) { console.warn("[deleteClient] auth", e); } }
   revalidatePath("/staff/admin"); revalidatePath("/staff");
   return { ok: true };
 }

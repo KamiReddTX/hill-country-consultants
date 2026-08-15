@@ -1,9 +1,17 @@
 "use client";
 import { useTransition } from "react";
 import { assignClient } from "@/app/staff/actions";
-import { ROLE_OPTIONS } from "@/content/roles";
 
-export function AssignSelect({ clientId, current }: { clientId: string; current: string }) {
+/** Owner picker — lists employees; stores the chosen staff id on the client. */
+export function AssignSelect({
+  clientId,
+  current,
+  options,
+}: {
+  clientId: string;
+  current: string;
+  options: { id: string; label: string }[];
+}) {
   const [pending, start] = useTransition();
   return (
     <select
@@ -13,7 +21,9 @@ export function AssignSelect({ clientId, current }: { clientId: string; current:
       className="min-h-touch w-full border border-line-warm bg-white px-3 text-[14px] outline-none focus:border-forest"
     >
       <option value="">Unassigned</option>
-      {ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+      {options.map((o) => (
+        <option key={o.id} value={o.id}>{o.label}</option>
+      ))}
     </select>
   );
 }

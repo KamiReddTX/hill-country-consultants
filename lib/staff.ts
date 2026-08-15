@@ -31,7 +31,7 @@ export async function getClients(): Promise<ClientRow[]> {
 }
 /** Clients owned by this staff's role, plus unassigned (visible to everyone). */
 export function splitClients(clients: ClientRow[], staff: StaffRow) {
-  const mine = clients.filter((c) => c.assigned_to && c.assigned_to === staff.role);
+  const mine = clients.filter((c) => c.assigned_to && c.assigned_to === staff.id);
   const unassigned = clients.filter((c) => !c.assigned_to);
   return { mine, unassigned };
 }

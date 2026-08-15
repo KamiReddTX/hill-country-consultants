@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData, deriveOnboarding, money } from "@/lib/portal";
+import { createServiceClient } from "@/lib/supabase/server";
 import { SITE } from "@/content/site";
 import { KickoffStep } from "@/components/portal/kickoff-step";
 
@@ -8,7 +9,12 @@ export default async function OnboardingPage() {
   if (!client) redirect("/portal/login");
   const data = await getPortalData(client);
   const ob = deriveOnboarding(data);
-  const lead = client.assigned_to || "Assigned within 48 hours";
+  // assigned_to holds the owning employee's staff id — resolve it to a name.
+  let lead = "Assigned within 48 hours";
+  if (client.assigned_to && /^[0-9a-f-]{36}$/i.test(client.assigned_to)) {
+    const { data: s } = await createServiceClient().from("staff").select("name,email").eq("id", client.assigned_to).maybeSingle();
+    lead = (s as any)?.name || (s as any)?.email || lead;
+  }
 
   return (
     <div className="flex flex-col gap-10">

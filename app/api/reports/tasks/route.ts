@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 
   const clients = await getClients();
   const byId = new Map(clients.map((c) => [c.id, c]));
-  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.role); };
+  const mineOrOpen = (cid: string) => { const c = byId.get(cid); return !!c && (!c.assigned_to || c.assigned_to === me.id); };
 
   const cutoff = new Date(Date.now() - days * 86400000).toISOString();
   const db = createClient();
