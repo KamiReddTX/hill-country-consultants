@@ -829,8 +829,8 @@ export async function addDeliverable(formData: FormData): Promise<ActionResult> 
 
 // ── Calendar ────────────────────────────────────────────────────────────────
 
-/** Employee: add an event to your OWN calendar, or (shareable) to a teammate's.
- *  Any active staffer may add; RLS + is_staff() enforce staff-only. */
+/** Employee: add an event to your OWN calendar, a teammate's (shareable), or a
+ *  CLIENT's calendar. Target: "" = me, "staff:<id>" = teammate, "client:<id>". */
 export async function addCalendarEvent(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
@@ -838,14 +838,30 @@ export async function addCalendarEvent(formData: FormData): Promise<ActionResult
   if (!title) return { error: "Give the event a title." };
   const event_date = String(formData.get("event_date") || "");
   if (!event_date) return { error: "Pick a date." };
-  const target = String(formData.get("staff_id") || "") || me.id;
-  const { error } = await createClient().from("staff_events").insert({
-    staff_id: target, created_by: me.id, title, event_date,
-    event_time: String(formData.get("event_time") || "") || null,
-    note: String(formData.get("note") || "") || null,
-  });
+  const event_time = String(formData.get("event_time") || "") || null;
+  const note = String(formData.get("note") || "") || null;
+  const target = String(formData.get("target") || "");
+  const db = createClient();
+  if (target.startsWith("client:")) {
+    const clientId = target.slice(7);
+    const { error } = await db.from("client_events").insert({ client_id: clientId, title, event_date, event_time, note, created_by_role: "staff", created_by_name: me.name || me.email });
+    if (error) return { error: error.message };
+  } else {
+    const staffId = target.startsWith("staff:") ? target.slice(6) : me.id;
+    const { error } = await db.from("staff_events").insert({ staff_id: staffId, created_by: me.id, title, event_date, event_time, note });
+    if (error) return { error: error.message };
+  }
+  revalidatePath("/staff/calendar"); revalidatePath("/portal/calendar");
+  return { ok: true };
+}
+
+/** Delete a client-calendar event (RLS: anyone who can access the client). */
+export async function deleteClientEvent(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const { error } = await createClient().from("client_events").delete().eq("id", id);
   if (error) return { error: error.message };
-  revalidatePath("/staff/calendar");
+  revalidatePath("/staff/calendar"); revalidatePath("/portal/calendar");
   return { ok: true };
 }
 
@@ -861,7 +877,8 @@ export async function deleteCalendarEvent(id: string): Promise<ActionResult> {
 
 // ── Internal messaging ────────────────────────────────────────────────────────
 
-/** Send a 1:1 DM to a teammate. Admins/BMs can read all DMs (oversight). */
+/** Send a 1:1 DM to a teammate. Admins/BMs can read all DMs (oversight).
+ *  The recipient gets an email that a message is waiting. */
 export async function sendDirectMessage(recipientId: string, body: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
@@ -870,7 +887,41 @@ export async function sendDirectMessage(recipientId: string, body: string): Prom
   if (!recipientId || recipientId === me.id) return { error: "Pick a teammate to message." };
   const { error } = await createClient().from("direct_messages").insert({ sender_id: me.id, recipient_id: recipientId, body: text });
   if (error) return { error: error.message };
-  revalidatePath("/staff/messages");
+  // Notify the recipient by email (look up their address with the service client;
+  // RLS won't let one staffer read another's row).
+  try {
+    const admin = createServiceClient();
+    const { data: r } = await admin.from("staff").select("email,personal_email,active").eq("id", recipientId).maybeSingle();
+    const to = (r as any)?.email;
+    if (to && (r as any)?.active) {
+      const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+      await sendTeammateMessageAlert({ to, from: me.name || me.email, portalUrl: site ? `${site}/staff/messages?view=dm&with=${me.id}` : "" });
+    }
+  } catch (e) { console.warn("[sendDirectMessage] email", e); }
+  revalidatePath("/staff/messages"); revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Mark a DM conversation with a teammate as read (clears my unread badge). */
+export async function markDmRead(withId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me || !withId) return { error: "Not signed in." };
+  const { error } = await createClient().from("direct_messages")
+    .update({ read_at: new Date().toISOString() })
+    .eq("recipient_id", me.id).eq("sender_id", withId).is("read_at", null);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages"); revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Mark a channel as read up to now (clears my unread badge for it). */
+export async function markChannelRead(channelId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me || !channelId) return { error: "Not signed in." };
+  const { error } = await createClient().from("channel_reads")
+    .upsert({ staff_id: me.id, channel_id: channelId, last_read_at: new Date().toISOString() }, { onConflict: "staff_id,channel_id" });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages"); revalidatePath("/staff");
   return { ok: true };
 }
 
@@ -887,14 +938,49 @@ export async function postChannelMessage(channelId: string, body: string): Promi
   return { ok: true };
 }
 
-/** Create a shared channel. */
+/** Admin/BM: create a shared channel. */
 export async function createChannel(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!me) return { error: "Not signed in." };
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const name = String(formData.get("name") || "").trim().replace(/^#/, "").toLowerCase().replace(/\s+/g, "-");
   if (!name) return { error: "Name the channel." };
-  const { error } = await createClient().from("channels").insert({ name, description: String(formData.get("description") || "") || null, created_by: me.id });
+  const { error } = await createClient().from("channels").insert({ name, description: String(formData.get("description") || "") || null, created_by: me!.id });
   if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
+
+/** Admin/BM: rename / re-describe / set post policy / archive a channel. */
+export async function updateChannel(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const id = String(formData.get("id") || "");
+  if (!id) return { error: "Missing channel." };
+  const patch: any = {};
+  const name = String(formData.get("name") || "").trim().replace(/^#/, "").toLowerCase().replace(/\s+/g, "-");
+  if (name) patch.name = name;
+  patch.description = String(formData.get("description") || "") || null;
+  const policy = String(formData.get("post_policy") || "");
+  if (policy === "all" || policy === "restricted") patch.post_policy = policy;
+  if (formData.get("archived") != null) patch.archived = String(formData.get("archived")) === "true";
+  const { error } = await createClient().from("channels").update(patch).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
+
+/** Admin/BM: set exactly who may post in a restricted channel (replaces the list). */
+export async function setChannelPosters(channelId: string, staffIds: string[]): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!channelId) return { error: "Missing channel." };
+  const db = createClient();
+  await db.from("channel_posters").delete().eq("channel_id", channelId);
+  if (staffIds.length) {
+    const rows = staffIds.map((sid) => ({ channel_id: channelId, staff_id: sid }));
+    const { error } = await db.from("channel_posters").insert(rows);
+    if (error) return { error: error.message };
+  }
   revalidatePath("/staff/messages");
   return { ok: true };
 }

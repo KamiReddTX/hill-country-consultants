@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getStaffMember, isPrivileged, isSalesOrAdmin, isSalesLead } from "@/lib/staff";
+import { getStaffMember, isPrivileged, isSalesOrAdmin, isSalesLead, getMessageUnreads } from "@/lib/staff";
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
 
@@ -12,7 +12,8 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   if (!me) redirect("/staff/login");
 
   const priv = isPrivileged(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
-  const tabs: { href: string; label: string }[] = [{ href: "/staff/profile", label: "My profile" }];
+  const unread = await getMessageUnreads(me.id).catch(() => ({ total: 0 } as any));
+  const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff/profile", label: "My profile" }];
   // Manager overview + tools
   if (priv || sales) tabs.push({ href: "/staff", label: "Dashboard" });
   if (priv) tabs.push({ href: "/staff/admin", label: "Admin" }, { href: "/staff/directory", label: "Directory" });
@@ -26,7 +27,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/vault", label: "Vault" },
     { href: "/staff/files", label: "Files" },
     { href: "/staff/weekly", label: "Weekly report" },
-    { href: "/staff/messages", label: "Messages" },
+    { href: "/staff/messages", label: "Messages", badge: unread.total || undefined },
   );
   if (hourly) tabs.push({ href: "/staff/clock", label: "Timesheet" });
   // Sales tabs

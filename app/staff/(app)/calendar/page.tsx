@@ -8,6 +8,7 @@ import { DeleteEventButton } from "@/components/staff/delete-event-button";
 
 type Item =
   | { type: "event"; label: string; time: string | null; note: string | null; id: string }
+  | { type: "clientevent"; label: string; time: string | null; sub: string }
   | { type: "task"; label: string; sub: string }
   | { type: "review"; label: string; sub: string };
 
@@ -39,8 +40,9 @@ export default async function StaffCalendarPage({ searchParams }: { searchParams
   const ids = clients.map((c) => c.id);
   const db = createClient();
 
-  const [{ data: events }, { data: tasks }, { data: roster }] = await Promise.all([
+  const [{ data: events }, { data: cEvents }, { data: tasks }, { data: roster }] = await Promise.all([
     db.from("staff_events").select("*").eq("staff_id", me.id).gte("event_date", monthStart).lte("event_date", monthEnd),
+    ids.length ? db.from("client_events").select("*").in("client_id", ids).gte("event_date", monthStart).lte("event_date", monthEnd) : Promise.resolve({ data: [] as any[] }),
     ids.length ? db.from("client_tasks").select("client_id,title,due_date,column_name").in("client_id", ids) : Promise.resolve({ data: [] as any[] }),
     db.rpc("staff_roster"),
   ]);
@@ -49,6 +51,7 @@ export default async function StaffCalendarPage({ searchParams }: { searchParams
   const push = (date: string, it: Item) => { const a = cells.get(date) || []; a.push(it); cells.set(date, a); };
 
   (events ?? []).forEach((e: any) => push(e.event_date, { type: "event", label: e.title, time: e.event_time, note: e.note, id: e.id }));
+  (cEvents ?? []).forEach((e: any) => push(e.event_date, { type: "clientevent", label: e.title, time: e.event_time, sub: cname(e.client_id) }));
   (tasks ?? []).forEach((t: any) => {
     if (t.due_date && t.column_name !== "Delivered" && t.due_date >= monthStart && t.due_date <= monthEnd)
       push(t.due_date, { type: "task", label: t.title, sub: cname(t.client_id) });
@@ -62,6 +65,7 @@ export default async function StaffCalendarPage({ searchParams }: { searchParams
   });
 
   const mates = ((roster ?? []) as any[]).filter((r) => r.id !== me.id).map((r) => ({ id: r.id, name: r.name, email: r.email }));
+  const clientOpts = clients.map((c: any) => ({ id: c.id, label: c.business || c.contact || c.email }));
 
   // Build the grid cells (leading blanks + days), padded to full weeks.
   const grid: (number | null)[] = [];
@@ -79,6 +83,8 @@ export default async function StaffCalendarPage({ searchParams }: { searchParams
           <DeleteEventButton id={it.id} />
         </div>
       );
+    if (it.type === "clientevent")
+      return <div key={i} className="truncate bg-orange-100 px-1.5 py-0.5 text-[11px] leading-tight text-orange-900" title={`Client event · ${it.sub}`}>◆ {it.time ? `${it.time} ` : ""}{it.label}</div>;
     if (it.type === "task")
       return <div key={i} className="truncate bg-gold/25 px-1.5 py-0.5 text-[11px] leading-tight text-charcoal" title={`Task due · ${it.sub}`}>▸ {it.label}</div>;
     return <div key={i} className="truncate bg-blue-100 px-1.5 py-0.5 text-[11px] leading-tight text-blue-900" title={it.sub}>● {it.label}</div>;
@@ -99,11 +105,12 @@ export default async function StaffCalendarPage({ searchParams }: { searchParams
           <Link href={`/staff/calendar?m=${nextM}`} className="btn-outline px-3 py-1.5 text-[13px]">Next →</Link>
           <Link href="/staff/calendar" className="ml-1 text-[12px] link-underline">Today</Link>
         </div>
-        <CalendarAddEvent mates={mates} defaultDate={monthStart} />
+        <CalendarAddEvent mates={mates} clients={clientOpts} defaultDate={monthStart} />
       </div>
 
       <div className="flex flex-wrap items-center gap-4 text-[12px] prose-muted">
         <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 bg-forest" /> Your events</span>
+        <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 bg-orange-200" /> Client events</span>
         <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 bg-gold/40" /> Task due</span>
         <span className="flex items-center gap-1"><span className="inline-block h-3 w-3 bg-blue-200" /> 30-day review</span>
       </div>

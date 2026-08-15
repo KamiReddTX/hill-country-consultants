@@ -107,3 +107,35 @@ export async function getStaffMember(): Promise<StaffRow | null> {
   const { data } = await db.from("staff").select("*").eq("user_id", user.id).eq("active", true).maybeSingle();
   return data ?? null;
 }
+
+export type MessageUnreads = {
+  dmTotal: number; chanTotal: number; total: number;
+  byMate: Map<string, number>; byChannel: Map<string, number>;
+};
+
+/** Unread message counts for the nav badge and the Messages sidebars.
+ *  DMs: direct_messages received with no read_at. Channels: messages after the
+ *  employee's last_read marker (or all, if they've never opened it). Safe to call
+ *  on every staff page — a couple of cheap counts scoped by RLS. */
+export async function getMessageUnreads(meId: string): Promise<MessageUnreads> {
+  const db = createClient();
+  const [{ data: dms }, { data: reads }, { data: chans }] = await Promise.all([
+    db.from("direct_messages").select("sender_id").eq("recipient_id", meId).is("read_at", null),
+    db.from("channel_reads").select("channel_id,last_read_at").eq("staff_id", meId),
+    db.from("channels").select("id").eq("archived", false),
+  ]);
+  const byMate = new Map<string, number>();
+  (dms ?? []).forEach((d: any) => byMate.set(d.sender_id, (byMate.get(d.sender_id) || 0) + 1));
+  const readMap = new Map<string, string>((reads ?? []).map((r: any) => [r.channel_id, r.last_read_at]));
+  const byChannel = new Map<string, number>();
+  await Promise.all((chans ?? []).map(async (c: any) => {
+    let q = db.from("channel_messages").select("id", { count: "exact", head: true }).eq("channel_id", c.id).neq("author_id", meId);
+    const last = readMap.get(c.id);
+    if (last) q = q.gt("created_at", last);
+    const { count } = await q;
+    if (count) byChannel.set(c.id, count);
+  }));
+  const dmTotal = (dms ?? []).length;
+  const chanTotal = [...byChannel.values()].reduce((a, b) => a + b, 0);
+  return { dmTotal, chanTotal, total: dmTotal + chanTotal, byMate, byChannel };
+}

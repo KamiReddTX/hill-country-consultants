@@ -6,6 +6,7 @@ const TABS = [
   { href: "/portal", label: "Onboarding" },
   { href: "/portal/roadmap", label: "Roadmap" },
   { href: "/portal/tasks", label: "Task board" },
+  { href: "/portal/calendar", label: "Calendar" },
   { href: "/portal/vault", label: "Shared vault" },
   { href: "/portal/work-log", label: "Work log" },
   { href: "/portal/weekly", label: "Weekly report" },

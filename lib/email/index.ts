@@ -128,6 +128,14 @@ export async function sendClientMessageAlert(opts: { to: string; from: string; p
   await send(opts.to, `New reply in your client portal`, shell("You have a new message", body));
 }
 
+/** Tell an employee a teammate sent them a DM in the staff portal. */
+export async function sendTeammateMessageAlert(opts: { to: string; from: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> sent you a direct message in the staff portal.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your messages</a></p>` : ""}`;
+  await send(opts.to, `New message from ${opts.from}`, shell("You have a new message", body));
+}
+
 /** Welcome a new employee: create-password link, then log in to set up their profile. */
 export async function sendEmployeeWelcome(opts: { to: string; name: string | null; actionUrl: string }) {
   const body = `

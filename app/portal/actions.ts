@@ -146,6 +146,35 @@ export async function addMessage(formData: FormData): Promise<ActionResult> {
   return { ok: true };
 }
 
+/** Client adds an event to their own calendar (visible to their account team). */
+export async function addClientEvent(formData: FormData): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const title = String(formData.get("title") || "").trim();
+  if (!title) return { error: "Give the event a title." };
+  const event_date = String(formData.get("event_date") || "");
+  if (!event_date) return { error: "Pick a date." };
+  const { error } = await createClient().from("client_events").insert({
+    client_id: client.id, title, event_date,
+    event_time: String(formData.get("event_time") || "") || null,
+    note: String(formData.get("note") || "") || null,
+    created_by_role: "client", created_by_name: client.contact || client.business || client.email,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/portal/calendar"); revalidatePath("/staff/calendar");
+  return { ok: true };
+}
+
+/** Client removes an event from their calendar. */
+export async function deleteClientEvent(id: string): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const { error } = await createClient().from("client_events").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/portal/calendar");
+  return { ok: true };
+}
+
 /** Sign out of the portal. */
 export async function signOut() {
   const db = createClient();
