@@ -70,10 +70,9 @@ export default async function OnboardingPage() {
 
       <section>
         <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">Your team</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2">
           {[
-            { role: "Account lead", name: lead, owns: "Your single point of contact — scope, the 30-day roadmap, reviews and escalation." },
-            { role: "Your virtual assistant", name: lead, owns: "The daily work: inbox and calendar, CRM, vendor follow-up, document formatting, filing." },
+            { role: "Your account lead", name: lead, owns: "Your single point of contact — the daily work plus scope, the 30-day roadmap, reviews and escalation." },
             { role: "Service specialists", name: "Assigned per service line", owns: "Submittals, documentation, design, media and grants specialists on the lines you use." },
           ].map((t) => (
             <div key={t.role} className="border border-line-warm bg-white p-5">

@@ -4,6 +4,25 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
+import { sendStaffTaskAlert, sendStaffMessageAlert } from "@/lib/email";
+import type { ClientRow } from "@/lib/database.types";
+
+/** Email the client's assigned VA/AM (a single owner). No-op if unassigned. */
+async function notifyAssignedStaff(
+  client: ClientRow,
+  build: (email: string) => Promise<void>,
+): Promise<void> {
+  try {
+    const aid = (client as any).assigned_to as string | null;
+    if (!aid || !/^[0-9a-f-]{36}$/i.test(aid)) return;
+    const { data: s } = await createServiceClient().from("staff").select("email").eq("id", aid).maybeSingle();
+    const email = (s as any)?.email;
+    if (email) await build(email);
+  } catch (e) { console.warn("[notifyAssignedStaff]", e); }
+}
+
+const siteUrl = () => process.env.NEXT_PUBLIC_SITE_URL || "";
+const clientLabel = (c: ClientRow) => c.business || c.contact || c.email;
 
 /**
  * Client submits a task: full description, date needed, and any documents.
@@ -43,7 +62,10 @@ export async function addTaskRequest(formData: FormData): Promise<ActionResult> 
       }
     } catch (e) { console.error("[addTaskRequest] upload", e); }
   }
-  revalidatePath("/portal/tasks");
+  await notifyAssignedStaff(client, (to) =>
+    sendStaffTaskAlert({ to, clientName: clientLabel(client), title, due: due || "", portalUrl: siteUrl() ? `${siteUrl()}/staff/daily` : "" }),
+  );
+  revalidatePath("/portal/tasks"); revalidatePath("/staff/daily");
   return { ok: true };
 }
 
@@ -117,6 +139,9 @@ export async function addMessage(formData: FormData): Promise<ActionResult> {
   const db = createClient();
   const { error } = await db.from("client_notes").insert({ client_id: client.id, body, sender: "client", author_name: client.contact || null });
   if (error) return { error: error.message };
+  await notifyAssignedStaff(client, (to) =>
+    sendStaffMessageAlert({ to, clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff/messages` : "" }),
+  );
   revalidatePath("/portal/messages"); revalidatePath("/staff/messages");
   return { ok: true };
 }

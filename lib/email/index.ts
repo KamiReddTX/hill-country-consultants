@@ -84,6 +84,25 @@ export async function sendWeeklyReport(opts: { to: string; business: string; sum
   await send(opts.to, `Your weekly report`, shell("Weekly report", body));
 }
 
+/** Alert the assigned VA/AM that a client submitted a new task request. */
+export async function sendStaffTaskAlert(opts: { to: string; clientName: string; title: string; due: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${opts.clientName}</strong> submitted a new task request.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">${opts.title}</p>
+    ${opts.due ? `<p style="font-size:14px;line-height:1.6;color:#3a3f38">Needed by: <strong>${opts.due}</strong></p>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">It's sitting in <strong>Requested</strong> on their board.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your board</a></p>` : ""}`;
+  await send(opts.to, `New task from ${opts.clientName}`, shell("New task request", body));
+}
+
+/** Alert the assigned VA/AM that a client sent a new message. */
+export async function sendStaffMessageAlert(opts: { to: string; clientName: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${opts.clientName}</strong> sent you a message in the portal.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open Messages</a></p>` : ""}`;
+  await send(opts.to, `New message from ${opts.clientName}`, shell("New client message", body));
+}
+
 /** Invite the client to set up the shared password vault with their account team. */
 export async function sendVaultInvite(opts: { to: string; from: string; portalUrl: string }) {
   const body = `
