@@ -12,6 +12,8 @@ import { PrintButton } from "@/components/staff/print-button";
 import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { PasswordResetForm } from "@/components/staff/password-reset-form";
+import { StaffResetActions } from "@/components/staff/staff-reset-actions";
+import { SuspendStaffButton } from "@/components/staff/suspend-staff-button";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -27,10 +29,11 @@ export default async function AdminPage() {
   const period = periodOf(0);
 
   const db = createClient();
-  const [{ data: periodPunches }, { data: approvals }, { data: pendingLog }] = await Promise.all([
+  const [{ data: periodPunches }, { data: approvals }, { data: pendingLog }, { data: resetReqs }] = await Promise.all([
     db.from("punches").select("*").gte("started_at", period.startISO).lte("started_at", period.endISO + "T23:59:59Z"),
     db.from("timesheet_approvals").select("*").eq("period_start", period.startISO),
     db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(100),
+    db.from("staff_reset_requests").select("*").eq("status", "pending").order("requested_at", { ascending: false }),
   ]);
   const hoursByStaff = new Map<string, number>();
   (periodPunches ?? []).forEach((p) => hoursByStaff.set(p.staff_id, (hoursByStaff.get(p.staff_id) || 0) + Number(p.hours || 0)));
@@ -127,13 +130,30 @@ export default async function AdminPage() {
         <PasswordResetForm />
       </section>
 
+      {/* Employee reset requests */}
+      <section>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Employee reset requests</h2>
+        <p className="mb-3 text-[13px] prose-muted">Employees can&apos;t reset their own password — approve a request to send them the recovery email.</p>
+        {(resetReqs ?? []).length === 0 ? <p className="text-[15px] prose-muted">No pending requests.</p> : (
+          <ul className="flex flex-col gap-2">
+            {(resetReqs ?? []).map((r: any) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
+                <div><p className="font-medium text-charcoal">{r.email}</p>
+                  <p className="text-[12px] prose-muted">Requested {new Date(r.requested_at).toLocaleString()}</p></div>
+                <StaffResetActions id={r.id} />
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
       {/* Staff directory */}
       <section>
         <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">Staff directory</h2>
         <div className="mb-4"><AddStaffForm /></div>
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[720px] border-collapse bg-white text-left text-[14px]">
-            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th><th className="p-3 font-medium">Role</th><th className="p-3 font-medium">Code</th><th className="p-3 font-medium text-right">Rate</th><th className="p-3 font-medium">Hourly</th><th className="p-3 font-medium">Active</th></tr></thead>
+            <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Name</th><th className="p-3 font-medium">Email</th><th className="p-3 font-medium">Role</th><th className="p-3 font-medium">Code</th><th className="p-3 font-medium text-right">Rate</th><th className="p-3 font-medium">Hourly</th><th className="p-3 font-medium">Active</th><th className="p-3 font-medium">Manage</th></tr></thead>
             <tbody>
               {directory.map((s) => (
                 <tr key={s.id} className="border-b border-line-soft/60">
@@ -141,6 +161,7 @@ export default async function AdminPage() {
                   <td className="p-3 prose-soft">{s.role}</td><td className="p-3 prose-muted">{s.employee_code || "—"}</td>
                   <td className="p-3 text-right tabular-nums">{s.hourly ? usd(Number(s.rate || 0)) : "—"}</td>
                   <td className="p-3">{s.hourly ? "Yes" : "No"}</td><td className="p-3">{s.active ? "Yes" : "No"}</td>
+                  <td className="p-3">{s.id === me.id ? <span className="text-[12px] text-ink-faint">You</span> : <SuspendStaffButton staffId={s.id} active={s.active} />}</td>
                 </tr>
               ))}
             </tbody>

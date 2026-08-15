@@ -193,6 +193,59 @@ export async function sendPasswordReset(email: string, portal: "client" | "staff
   return { ok: true };
 }
 
+/** PUBLIC (staff login screen): file a password-reset request for an employee.
+ *  No email is sent here — an admin must approve it first. We only record a
+ *  request if the email actually belongs to a staff member. */
+export async function requestStaffReset(email: string): Promise<ActionResult> {
+  const clean = String(email || "").trim().toLowerCase();
+  if (!clean || !clean.includes("@")) return { error: "Enter a valid work email." };
+  const admin = createServiceClient();
+  const { data: staff } = await admin.from("staff").select("id").eq("email", clean).maybeSingle();
+  // Don't reveal whether the address is a real employee; only record if it is.
+  if (staff) await admin.from("staff_reset_requests").insert({ email: clean, status: "pending" });
+  return { ok: true };
+}
+
+/** Admin only: approve an employee reset request — sends the recovery email. */
+export async function approveStaffReset(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const admin = createServiceClient();
+  const { data: reqRow } = await admin.from("staff_reset_requests").select("email,status").eq("id", id).maybeSingle();
+  if (!reqRow) return { error: "Request not found." };
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const { error } = await createClient().auth.resetPasswordForEmail(
+    (reqRow as any).email,
+    site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined,
+  );
+  if (error) return { error: error.message };
+  await admin.from("staff_reset_requests").update({ status: "approved", handled_by: me.id, handled_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin only: deny an employee reset request (no email sent). */
+export async function denyStaffReset(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  await createServiceClient().from("staff_reset_requests")
+    .update({ status: "denied", handled_by: me.id, handled_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin only: suspend or reactivate an employee. Suspended (active=false) staff
+ *  are blocked from every staff surface (getStaffMember requires active). */
+export async function setStaffActive(staffId: string, active: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (staffId === me.id && !active) return { error: "You can't suspend your own account." };
+  const { error } = await createServiceClient().from("staff").update({ active }).eq("id", staffId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
 export async function signOutStaff() {
   const db = createClient();
   await db.auth.signOut();

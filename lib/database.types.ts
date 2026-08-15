@@ -174,6 +174,11 @@ export interface Database {
         Insert: { id?: string; client_id: string; name: string; path: string; period_start?: string | null; period_end?: string | null };
         Update: Partial<Database["public"]["Tables"]["client_reports"]["Insert"]>;
       };
+      staff_reset_requests: {
+        Row: { id: string; email: string; status: string; requested_at: string; handled_by: string | null; handled_at: string | null };
+        Insert: { id?: string; email: string; status?: string; handled_by?: string | null; handled_at?: string | null };
+        Update: Partial<Database["public"]["Tables"]["staff_reset_requests"]["Insert"]>;
+      };
       client_notes: {
         Row: { id: string; client_id: string; body: string; created_at: string };
         Insert: { id?: string; client_id: string; body: string };

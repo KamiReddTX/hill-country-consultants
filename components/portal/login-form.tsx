@@ -11,6 +11,8 @@ export function ClientLoginForm({ welcome }: { welcome?: boolean }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [resetMsg, setResetMsg] = useState("");
+  const [resetBusy, setResetBusy] = useState(false);
 
   async function submit(e: FormEvent) {
     e.preventDefault();
@@ -21,6 +23,16 @@ export function ClientLoginForm({ welcome }: { welcome?: boolean }) {
     if (error) { setError("That email or password didn't match. Check your welcome email, or call 470-478-1590."); return; }
     router.push("/portal");
     router.refresh();
+  }
+
+  async function sendReset() {
+    const clean = email.trim().toLowerCase();
+    if (!clean || !clean.includes("@")) { setResetMsg("Enter your email above first, then tap this again."); return; }
+    setResetMsg(""); setResetBusy(true);
+    const db = createClient();
+    await db.auth.resetPasswordForEmail(clean, { redirectTo: `${window.location.origin}/auth/callback?next=/portal` });
+    setResetBusy(false);
+    setResetMsg("If that email has an account, a reset link is on its way. Check your inbox.");
   }
 
   const field = "min-h-touch w-full border border-line-warm bg-white px-4 py-3 text-[16px] outline-none focus:border-forest";
@@ -46,6 +58,12 @@ export function ClientLoginForm({ welcome }: { welcome?: boolean }) {
           </label>
           {error && <p className="text-[14px] text-red-700">{error}</p>}
           <button disabled={busy} className="btn-gold">{busy ? "Signing in…" : "Sign in"}</button>
+          <div className="border-t border-line-soft pt-3">
+            <button type="button" onClick={sendReset} disabled={resetBusy} className="link-underline text-[14px] text-forest disabled:opacity-50">
+              {resetBusy ? "Sending…" : "Forgot your password? Email me a reset link"}
+            </button>
+            {resetMsg && <p className="mt-1 text-[13px] prose-muted">{resetMsg}</p>}
+          </div>
         </form>
         <p className="text-[14px] prose-muted">
           Accounts are created when you book a service. Trouble signing in?{" "}
