@@ -17,6 +17,7 @@ export const SITE = {
   publishingImprint: "Redd Ladys Chronicles",
   kickoffUrl: "https://calendar.app.google/mk7fbVrrCJKY1uge9",
   reviewUrl: "https://calendar.app.google/6qv6gbPeiTbW3UTH8",
+  consultUrl: "https://calendar.app.google/5bFgNbAkDbjy8gu79",
 } as const;
 
 /** Primary header navigation (matches the prototype's top nav). */
