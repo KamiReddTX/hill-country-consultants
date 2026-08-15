@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients } from "@/lib/staff";
+import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { AddDeliverableForm } from "@/components/staff/add-deliverable-form";
@@ -10,6 +10,7 @@ import { TaskChargeForm } from "@/components/staff/task-charge-form";
 export default async function DeliveryPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
+  const admin = isPrivileged(me);
   const clients = await getClients();
   // getClients is RLS-scoped — every client here is one I can reach (owner, team, or privileged).
   const byId = new Map(clients.map((c) => [c.id, c]));

@@ -91,11 +91,12 @@ export async function setClientStatus(clientId: string, status: string): Promise
  *  This is the one onboarding step an admin marks by hand, after the kickoff call. */
 export async function setRoadmapDone(clientId: string, done: boolean): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
-  const db = createClient();
-  const { error } = await db.from("clients").update({ roadmap_at: done ? new Date().toISOString() : null }).eq("id", clientId);
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
+  // clients.roadmap_at is admin-write under RLS, so go through the service client (action-gated above).
+  const { error } = await createServiceClient().from("clients").update({ roadmap_at: done ? new Date().toISOString() : null }).eq("id", clientId);
   if (error) return { error: error.message };
-  revalidatePath("/staff/admin");
+  revalidatePath("/staff/admin"); revalidatePath("/staff/onboarding"); revalidatePath("/portal");
   return { ok: true };
 }
 
@@ -646,7 +647,8 @@ export async function approveWorkLog(id: string): Promise<ActionResult> {
  *  7 days of approved hours + deliverables, stored for the client to download. */
 export async function generateWeeklyReport(clientId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
   const db = createClient();
   const { data: client } = await db.from("clients").select("business,contact,email").eq("id", clientId).maybeSingle();
   if (!client) return { error: "Client not found." };
@@ -672,7 +674,7 @@ export async function generateWeeklyReport(clientId: string): Promise<ActionResu
     client_id: clientId, name: `Weekly report · ${startISO} to ${endISO}`, path, period_start: startISO, period_end: endISO,
   } as any);
   if (error) return { error: error.message };
-  revalidatePath("/staff/admin"); revalidatePath("/portal/weekly");
+  revalidatePath("/staff/admin"); revalidatePath("/staff/weekly"); revalidatePath("/portal/weekly");
   return { ok: true };
 }
 
