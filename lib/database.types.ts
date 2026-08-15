@@ -207,6 +207,9 @@ export interface Database {
           performed_by: string | null;
           hours: number;
           created_at: string;
+          approved: boolean;
+          approved_by: string | null;
+          approved_at: string | null;
         };
         Insert: {
           id?: string;
@@ -216,6 +219,9 @@ export interface Database {
           task?: string | null;
           performed_by?: string | null;
           hours?: number;
+          approved?: boolean;
+          approved_by?: string | null;
+          approved_at?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["client_work_log"]["Insert"]>;
       };

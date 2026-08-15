@@ -36,7 +36,7 @@ export async function getPortalData(client: ClientRow): Promise<PortalData> {
     db.from("bookings").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     db.from("client_tasks").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     db.from("client_vault").select("*").eq("client_id", id).order("updated_at", { ascending: false }),
-    db.from("client_work_log").select("*").eq("client_id", id).order("worked_on", { ascending: false }),
+    db.from("client_work_log").select("*").eq("client_id", id).eq("approved", true).order("worked_on", { ascending: false }),
     db.from("client_deliverables").select("*").eq("client_id", id).order("delivered_on", { ascending: false }),
     db.from("client_notes").select("*").eq("client_id", id).order("created_at", { ascending: false }),
     db.from("client_task_files").select("id,task_id,name,created_at").eq("client_id", id),

@@ -263,6 +263,18 @@ export async function sendTaskPaymentLink(taskId: string, amount: string): Promi
   return { ok: true };
 }
 
+/** Admin only: approve a logged work entry so its hours appear on the client's
+ *  Work Log (and weekly report). Only approved time is shown to the client. */
+export async function approveWorkLog(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (me?.role !== "Administrator") return { error: "Admins only." };
+  const db = createClient();
+  const { error } = await db.from("client_work_log").update({ approved: true, approved_by: me.name || me.role, approved_at: new Date().toISOString() }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/portal/work-log"); revalidatePath("/portal/weekly");
+  return { ok: true };
+}
+
 /** Staff: log one work-log entry for a client. Stamped with the signed-in staffer. */
 export async function logWork(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();

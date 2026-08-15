@@ -8,6 +8,7 @@ import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { ForceClockOutButton } from "@/components/staff/force-clockout-button";
 import { ApproveButton } from "@/components/staff/approve-button";
 import { PrintButton } from "@/components/staff/print-button";
+import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -17,12 +18,14 @@ export default async function AdminPage() {
 
   const [directory, clients, bookings, onClock] = await Promise.all([getDirectory(), getClients(), getBookings(), getOnTheClock()]);
   const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
+  const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
   const period = periodOf(0);
 
   const db = createClient();
-  const [{ data: periodPunches }, { data: approvals }] = await Promise.all([
+  const [{ data: periodPunches }, { data: approvals }, { data: pendingLog }] = await Promise.all([
     db.from("punches").select("*").gte("started_at", period.startISO).lte("started_at", period.endISO + "T23:59:59Z"),
     db.from("timesheet_approvals").select("*").eq("period_start", period.startISO),
+    db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(100),
   ]);
   const hoursByStaff = new Map<string, number>();
   (periodPunches ?? []).forEach((p) => hoursByStaff.set(p.staff_id, (hoursByStaff.get(p.staff_id) || 0) + Number(p.hours || 0)));
@@ -77,6 +80,32 @@ export default async function AdminPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      {/* Work-log approvals */}
+      <section>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Work-log approvals</h2>
+        <p className="mb-3 text-[13px] prose-muted">Hours a VA/AM logged against a client. Approve to publish them to the client&apos;s Work Log and weekly report.</p>
+        {(pendingLog ?? []).length === 0 ? <p className="text-[15px] prose-muted">No entries waiting for approval.</p> : (
+          <div className="overflow-x-auto border border-line-warm">
+            <table className="w-full min-w-[720px] border-collapse bg-white text-left text-[14px]">
+              <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Date</th><th className="p-3 font-medium">Client</th><th className="p-3 font-medium">Service</th><th className="p-3 font-medium">Task</th><th className="p-3 font-medium">By</th><th className="p-3 font-medium text-right">Hours</th><th className="p-3 font-medium">Approve</th></tr></thead>
+              <tbody>
+                {(pendingLog ?? []).map((w: any) => (
+                  <tr key={w.id} className="border-b border-line-soft/60">
+                    <td className="p-3 prose-muted">{w.worked_on}</td>
+                    <td className="p-3 text-charcoal">{clientName.get(w.client_id) || "Client"}</td>
+                    <td className="p-3 prose-soft">{w.service || "—"}</td>
+                    <td className="p-3 prose-soft">{w.task || "—"}</td>
+                    <td className="p-3 prose-muted">{w.performed_by || "—"}</td>
+                    <td className="p-3 text-right tabular-nums">{Number(w.hours).toFixed(1)}</td>
+                    <td className="p-3"><WorkLogApproveButton id={w.id} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
       {/* Staff directory */}
