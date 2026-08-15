@@ -826,3 +826,88 @@ export async function addDeliverable(formData: FormData): Promise<ActionResult> 
   revalidatePath("/staff/delivery"); revalidatePath("/portal/files"); revalidatePath("/portal/weekly");
   return { ok: true };
 }
+
+// ── Calendar ────────────────────────────────────────────────────────────────
+
+/** Employee: add an event to your OWN calendar, or (shareable) to a teammate's.
+ *  Any active staffer may add; RLS + is_staff() enforce staff-only. */
+export async function addCalendarEvent(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const title = String(formData.get("title") || "").trim();
+  if (!title) return { error: "Give the event a title." };
+  const event_date = String(formData.get("event_date") || "");
+  if (!event_date) return { error: "Pick a date." };
+  const target = String(formData.get("staff_id") || "") || me.id;
+  const { error } = await createClient().from("staff_events").insert({
+    staff_id: target, created_by: me.id, title, event_date,
+    event_time: String(formData.get("event_time") || "") || null,
+    note: String(formData.get("note") || "") || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/calendar");
+  return { ok: true };
+}
+
+/** Delete a calendar event (RLS: owner, creator, or privileged). */
+export async function deleteCalendarEvent(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const { error } = await createClient().from("staff_events").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/calendar");
+  return { ok: true };
+}
+
+// ── Internal messaging ────────────────────────────────────────────────────────
+
+/** Send a 1:1 DM to a teammate. Admins/BMs can read all DMs (oversight). */
+export async function sendDirectMessage(recipientId: string, body: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const text = String(body || "").trim();
+  if (!text) return { error: "Write a message first." };
+  if (!recipientId || recipientId === me.id) return { error: "Pick a teammate to message." };
+  const { error } = await createClient().from("direct_messages").insert({ sender_id: me.id, recipient_id: recipientId, body: text });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
+
+/** Post a message to a shared channel (all staff can read). */
+export async function postChannelMessage(channelId: string, body: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const text = String(body || "").trim();
+  if (!text) return { error: "Write a message first." };
+  if (!channelId) return { error: "Pick a channel." };
+  const { error } = await createClient().from("channel_messages").insert({ channel_id: channelId, author_id: me.id, author_name: me.name || me.email, body: text });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
+
+/** Create a shared channel. */
+export async function createChannel(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const name = String(formData.get("name") || "").trim().replace(/^#/, "").toLowerCase().replace(/\s+/g, "-");
+  if (!name) return { error: "Name the channel." };
+  const { error } = await createClient().from("channels").insert({ name, description: String(formData.get("description") || "") || null, created_by: me.id });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
+
+/** Add a staff-only note on a client. The client NEVER sees these — they're a
+ *  private team scratchpad on the account, retained across VA changes. */
+export async function addClientStaffNote(clientId: string, body: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const text = String(body || "").trim();
+  if (!text) return { error: "Write a note first." };
+  const { error } = await createClient().from("client_staff_notes").insert({ client_id: clientId, author_id: me.id, author_name: me.name || me.email, body: text });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/messages");
+  return { ok: true };
+}
