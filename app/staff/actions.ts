@@ -8,6 +8,7 @@ import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { uploadNoteFiles } from "@/lib/message-files";
+import { getClientEmails } from "@/lib/client-contacts";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -283,7 +284,8 @@ export async function staffReplyMessage(formData: FormData): Promise<ActionResul
   const inbound = process.env.INBOUND_EMAIL_DOMAIN;
   const replyTo = inbound && (c as any).reply_token ? `reply+${(c as any).reply_token}@${inbound}` : me.email;
   try {
-    if ((c as any).email) await sendClientMessageAlert({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo, message: text || (saved ? `Sent you ${saved} file${saved > 1 ? "s" : ""}.` : "") });
+    const to = await getClientEmails(clientId, (c as any).email); // primary + all contacts on file
+    if (to.length) await sendClientMessageAlert({ to, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo, message: text || (saved ? `Sent you ${saved} file${saved > 1 ? "s" : ""}.` : "") });
   } catch (e) { console.warn("[staffReplyMessage] email", e); }
   revalidatePath("/staff/messages"); revalidatePath("/portal/messages");
   return { ok: true };
@@ -830,6 +832,51 @@ export async function addDeliverable(formData: FormData): Promise<ActionResult> 
   });
   if (error) return { error: error.message };
   revalidatePath("/staff/delivery"); revalidatePath("/portal/files"); revalidatePath("/portal/weekly");
+  return { ok: true };
+}
+
+// ── Client contacts & suspension (admin/BM) ───────────────────────────────────
+
+/** Admin/BM: add an extra contact (name/email/phone/title) to a client. */
+export async function addClientContact(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const clientId = String(formData.get("clientId") || "");
+  const email = String(formData.get("email") || "").trim();
+  const name = String(formData.get("name") || "").trim();
+  if (!clientId) return { error: "Missing client." };
+  if (!email && !name) return { error: "Add at least a name or email." };
+  const { error } = await createClient().from("client_contacts").insert({
+    client_id: clientId, name: name || null, email: email || null,
+    phone: String(formData.get("phone") || "") || null, title: String(formData.get("title") || "") || null,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin/BM: remove an extra contact. */
+export async function deleteClientContact(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const { error } = await createClient().from("client_contacts").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin");
+  return { ok: true };
+}
+
+/** Admin/BM: suspend (or reactivate) a client account, e.g. for non-payment.
+ *  Suspended clients are blocked from the portal until reactivated. */
+export async function setClientSuspended(clientId: string, suspended: boolean, reason?: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const { error } = await createClient().from("clients").update({
+    suspended,
+    suspended_reason: suspended ? (reason || "Non-payment") : null,
+    suspended_at: suspended ? new Date().toISOString() : null,
+  }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/admin"); revalidatePath("/portal");
   return { ok: true };
 }
 

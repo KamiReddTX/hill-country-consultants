@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import crypto from "crypto";
 import { createServiceClient } from "@/lib/supabase/server";
 import { sendStaffMessageAlert, sendClientMessageAlert } from "@/lib/email";
+import { getClientEmails } from "@/lib/client-contacts";
 
 export const runtime = "nodejs";
 
@@ -122,7 +123,8 @@ export async function POST(req: NextRequest) {
         if (to) await sendStaffMessageAlert({ to, clientName: (client as any).business || (client as any).contact || "Your client", portalUrl: site ? `${site}/staff/messages` : "", replyTo, message: preview });
       }
     } else {
-      if ((client as any).email) await sendClientMessageAlert({ to: (client as any).email, from: authorName || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo, message: preview });
+      const to = await getClientEmails(clientId, (client as any).email);
+      if (to.length) await sendClientMessageAlert({ to, from: authorName || "Your account team", portalUrl: site ? `${site}/portal/messages` : "", replyTo, message: preview });
     }
   } catch (e) { console.warn("[inbound] forward", e); }
 

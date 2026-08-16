@@ -15,6 +15,7 @@ import { StaffResetActions } from "@/components/staff/staff-reset-actions";
 import { AccountTeam } from "@/components/staff/account-team";
 import { AddClientForm } from "@/components/staff/add-client-form";
 import { BillingSelect } from "@/components/staff/billing-select";
+import { ClientContactsManager } from "@/components/staff/client-contacts-manager";
 import { money } from "@/lib/portal";
 
 export default async function AdminPage() {
@@ -48,6 +49,10 @@ export default async function AdminPage() {
   const hoursByStaff = new Map<string, number>();
   (periodPunches ?? []).forEach((p) => hoursByStaff.set(p.staff_id, (hoursByStaff.get(p.staff_id) || 0) + Number(p.hours || 0)));
   const approvedSet = new Set((approvals ?? []).map((a) => a.staff_id));
+
+  const { data: allContacts } = await db.from("client_contacts").select("*").order("created_at", { ascending: true });
+  const contactsByClient = new Map<string, any[]>();
+  (allContacts ?? []).forEach((c: any) => { const a = contactsByClient.get(c.client_id) || []; a.push(c); contactsByClient.set(c.client_id, a); });
 
   return (
     <div className="flex flex-col gap-12">
@@ -182,6 +187,26 @@ export default async function AdminPage() {
               {clients.length === 0 && <tr><td colSpan={admin ? 9 : 8} className="p-3 prose-muted">No clients yet.</td></tr>}
             </tbody>
           </table>
+        </div>
+      </section>
+
+      {/* Client contacts & account status */}
+      <section>
+        <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Contacts &amp; account status</h2>
+        <p className="mb-3 text-[13px] prose-muted">Add extra people on a client account (every email here receives client messages), and suspend or reactivate an account — e.g. for non-payment. A suspended client can&apos;t open their portal.</p>
+        <div className="flex flex-col gap-2">
+          {clients.map((c) => (
+            <details key={c.id} className="border border-line-warm bg-white">
+              <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">
+                {c.business || c.contact || c.email}
+                {(c as any).suspended ? <span className="ml-2 text-[12px] font-semibold text-red-700">· Suspended</span> : null}
+              </summary>
+              <div className="border-t border-line-soft p-4">
+                <ClientContactsManager clientId={c.id} contacts={contactsByClient.get(c.id) || []} suspended={!!(c as any).suspended} reason={(c as any).suspended_reason || ""} />
+              </div>
+            </details>
+          ))}
+          {clients.length === 0 && <p className="text-[13px] prose-muted">No clients yet.</p>}
         </div>
       </section>
 

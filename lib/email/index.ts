@@ -11,7 +11,7 @@ const fromAddress = (from.match(/<(.+?)>/)?.[1]) || from;
 /** Escape user/staff-authored text before dropping it into HTML email bodies. */
 const esc = (s: string) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c] as string));
 
-async function send(to: string, subject: string, html: string, replyTo?: string, fromName?: string) {
+async function send(to: string | string[], subject: string, html: string, replyTo?: string, fromName?: string) {
   const resend = client();
   if (!resend) { console.warn("[email] RESEND_API_KEY not set — skipped:", subject); return; }
   // Keep the authenticated domain address, but show the sender's name when given,
@@ -131,7 +131,7 @@ export async function sendVaultInvite(opts: { to: string; from: string; portalUr
 
 /** Tell a client their VA/AM sent a message. The message is included, and
  *  Reply-To is the employee, so the client can answer them straight from email. */
-export async function sendClientMessageAlert(opts: { to: string; from: string; portalUrl: string; replyTo?: string; message?: string }) {
+export async function sendClientMessageAlert(opts: { to: string | string[]; from: string; portalUrl: string; replyTo?: string; message?: string }) {
   const body = `
     <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.from)}</strong> sent you a message.</p>
     ${opts.message ? `<div style="font-size:15px;line-height:1.6;color:#3a3f38;border-left:3px solid #c2a24a;padding:2px 0 2px 14px;margin:12px 0;white-space:pre-wrap">${esc(opts.message)}</div>` : ""}

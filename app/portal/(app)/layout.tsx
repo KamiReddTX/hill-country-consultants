@@ -13,6 +13,31 @@ export default async function PortalLayout({ children }: { children: ReactNode }
   // Signed in (middleware guarantees a user) but not a client → send to staff or login.
   if (!client) redirect("/portal/login");
 
+  // Suspended (e.g. non-payment): block the portal with a notice until reactivated.
+  if ((client as any).suspended) {
+    return (
+      <div className="min-h-screen bg-cream">
+        <header className="border-b border-line bg-white">
+          <div className="shell flex flex-wrap items-center justify-between gap-3 py-4">
+            <div>
+              <p className="kicker">Client portal</p>
+              <p className="font-fraunces text-[20px] text-forest">{client.business || client.contact || "Your account"}</p>
+            </div>
+            <SignOutButton />
+          </div>
+        </header>
+        <main className="shell py-16">
+          <div className="mx-auto max-w-[40em] border-2 border-gold bg-white p-8 text-center">
+            <h1 className="font-fraunces text-[26px] text-forest">Your account is on hold</h1>
+            <span className="rule-gold mx-auto my-3" />
+            <p className="text-[15px] prose-soft">Access to your portal is temporarily paused{(client as any).suspended_reason ? ` (${(client as any).suspended_reason})` : ""}. Please reach out so we can get you back up and running.</p>
+            <p className="mt-4 text-[15px]"><a className="link-underline" href="mailto:info@hillcountryconsultants.com">info@hillcountryconsultants.com</a> · 470-478-1590</p>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-cream">
       <header className="border-b border-line bg-white">
