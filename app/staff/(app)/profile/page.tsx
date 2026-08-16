@@ -4,6 +4,8 @@ import { createClient } from "@/lib/supabase/server";
 import { ProfileEditForm } from "@/components/staff/profile-edit-form";
 import { AvatarUpload } from "@/components/staff/avatar-upload";
 import { SignDocumentButton } from "@/components/staff/sign-document-button";
+import { DocusignSignButton } from "@/components/staff/docusign-sign-button";
+import { docusignConfigured } from "@/lib/docusign";
 
 export default async function ProfilePage() {
   const me = await getStaffMember();
@@ -18,6 +20,7 @@ export default async function ProfilePage() {
   const rows = (docs ?? []) as any[];
   const paystubs = rows.filter((d) => d.kind === "paystub");
   const toSign = rows.filter((d) => d.requires_signature && !d.signed_at);
+  const dsEnabled = docusignConfigured();
   const otherDocs = rows.filter((d) => d.kind !== "paystub" && !(d.requires_signature && !d.signed_at));
 
   const managed: [string, string][] = [
@@ -60,7 +63,10 @@ export default async function ProfilePage() {
             {toSign.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2">
                 <a href={`/api/staff-doc/${d.id}`} className="link-underline text-[14px]" target="_blank" rel="noreferrer">{d.name} <span className="text-[11px] text-ink-faint">· {d.kind} · read it first</span></a>
-                <SignDocumentButton docId={d.id} />
+                <span className="flex flex-wrap items-center gap-2">
+                  {dsEnabled && <DocusignSignButton docId={d.id} />}
+                  <SignDocumentButton docId={d.id} />
+                </span>
               </li>
             ))}
           </ul>

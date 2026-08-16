@@ -9,6 +9,7 @@ import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEm
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { uploadNoteFiles } from "@/lib/message-files";
 import { getClientEmails } from "@/lib/client-contacts";
+import { docusignConfigured, createEnvelope, recipientViewUrl } from "@/lib/docusign";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -639,6 +640,33 @@ export async function signOutStaff() {
   const db = createClient();
   await db.auth.signOut();
   revalidatePath("/staff");
+}
+
+/** Employee: sign one of their documents through DocuSign (embedded signing).
+ *  Returns an embedded signing URL to send the browser to. */
+export async function startDocusignSigning(docId: string): Promise<{ url?: string; error?: string }> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!docusignConfigured()) return { error: "DocuSign isn't set up yet — ask your administrator." };
+  const admin = createServiceClient();
+  const { data: doc } = await admin.from("staff_documents").select("*").eq("id", docId).maybeSingle();
+  if (!doc || (doc as any).staff_id !== me.id) return { error: "Document not found." };
+  const { data: file, error: dErr } = await admin.storage.from("staff-docs").download((doc as any).path);
+  if (dErr || !file) return { error: "Couldn't load the document file." };
+  const buf = Buffer.from(await file.arrayBuffer());
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  try {
+    const envelopeId = await createEnvelope({
+      pdfBase64: buf.toString("base64"), docName: (doc as any).name || "Document",
+      signerEmail: me.email, signerName: me.name || me.email, clientUserId: me.id,
+    });
+    await admin.from("staff_documents").update({ docusign_envelope_id: envelopeId, docusign_status: "sent" }).eq("id", docId);
+    const url = await recipientViewUrl({
+      envelopeId, signerEmail: me.email, signerName: me.name || me.email, clientUserId: me.id,
+      returnUrl: `${site}/api/docusign-return?doc=${docId}`,
+    });
+    return { url };
+  } catch (e) { console.warn("[docusign] start", e); return { error: "DocuSign error — check the setup." }; }
 }
 
 /** Admin only: approve a two-week timesheet for a staff member. */
