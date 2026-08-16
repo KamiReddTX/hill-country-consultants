@@ -725,7 +725,9 @@ export async function sendTaskPaymentLink(taskId: string, amount: string): Promi
   const db = createClient();
   const { data: task } = await db.from("client_tasks").select("id,title,client_id").eq("id", taskId).maybeSingle();
   if (!task) return { error: "Task not found." };
-  const { data: client } = await db.from("clients").select("email").eq("id", (task as any).client_id).maybeSingle();
+  const { data: client } = await db.from("clients").select("email,billing_type").eq("id", (task as any).client_id).maybeSingle();
+  const bt = (client as any)?.billing_type;
+  if (bt === "comp" || bt === "barter") return { error: `This is a ${bt} account — no charges are sent. Just deliver the task.` };
   const { error } = await db.from("client_tasks").update({ charge_cents: cents, charge_status: "sent" }).eq("id", taskId);
   if (error) return { error: error.message };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
