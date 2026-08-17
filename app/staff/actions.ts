@@ -865,6 +865,63 @@ export async function addDeliverable(formData: FormData): Promise<ActionResult> 
   return { ok: true };
 }
 
+// ── Internal document library + assignment (admin/BM) ─────────────────────────
+
+/** Admin/BM: add a reusable document template to the library. */
+export async function uploadDocumentTemplate(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const file = formData.getAll("files").find((f): f is File => f instanceof File && f.size > 0);
+  if (!file) return { error: "Choose a file (PDF recommended for signing)." };
+  const name = String(formData.get("name") || file.name).trim();
+  const kind = String(formData.get("kind") || "document");
+  const requires_signature = formData.get("requires_signature") != null;
+  const admin = createServiceClient();
+  const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
+  const path = `templates/${Date.now()}-${safe}`;
+  const up = await admin.storage.from("staff-docs").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type || "application/octet-stream" });
+  if (up.error) return { error: up.error.message };
+  const { error } = await admin.from("document_templates").insert({ name, kind, path, requires_signature, created_by: me!.id });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Admin/BM: remove a template from the library (does not touch already-assigned copies). */
+export async function deleteDocumentTemplate(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const { error } = await createServiceClient().from("document_templates").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Admin/BM: assign a template to specific employees and/or everyone in a role.
+ *  Creates a staff_documents row (to complete / e-sign) for each target. */
+export async function assignTemplate(templateId: string, opts: { staffIds?: string[]; role?: string }): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: tpl } = await admin.from("document_templates").select("*").eq("id", templateId).maybeSingle();
+  if (!tpl) return { error: "Template not found." };
+  const set = new Set<string>(opts.staffIds || []);
+  if (opts.role) {
+    const { data: staff } = await admin.from("staff").select("id,roles,role").eq("active", true);
+    (staff ?? []).forEach((s: any) => { if ((Array.isArray(s.roles) && s.roles.includes(opts.role)) || s.role === opts.role) set.add(s.id); });
+  }
+  const targets = [...set];
+  if (!targets.length) return { error: "No employees matched." };
+  const rows = targets.map((sid) => ({
+    staff_id: sid, name: (tpl as any).name, kind: (tpl as any).kind, path: (tpl as any).path,
+    requires_signature: (tpl as any).requires_signature, uploaded_by: me!.name || me!.email, template_id: templateId,
+  }));
+  const { error } = await admin.from("staff_documents").insert(rows);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory"); revalidatePath("/staff/profile");
+  return { ok: true, count: targets.length } as any;
+}
+
 // ── Client contacts & suspension (admin/BM) ───────────────────────────────────
 
 /** Admin/BM: add an extra contact (name/email/phone/title) to a client. */

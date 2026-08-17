@@ -9,6 +9,7 @@ import { CommissionInput } from "@/components/staff/commission-input";
 import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
 import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
 import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
+import { DocumentLibrary } from "@/components/staff/document-library";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -16,7 +17,10 @@ export default async function DirectoryPage() {
   if (!isPrivileged(me)) return <p className="text-[15px] prose-muted">The Directory is for administrators and business managers only.</p>;
 
   const directory = await getDirectory();
-  const { data: allDocs } = await createClient().from("staff_documents").select("*").order("created_at", { ascending: false });
+  const db = createClient();
+  const { data: allDocs } = await db.from("staff_documents").select("*").order("created_at", { ascending: false });
+  const { data: templates } = await db.from("document_templates").select("*").order("created_at", { ascending: false });
+  const employeeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
   const docsByStaff = new Map<string, any[]>();
   (allDocs ?? []).forEach((d: any) => { const a = docsByStaff.get(d.staff_id) || []; a.push(d); docsByStaff.set(d.staff_id, a); });
 
@@ -60,6 +64,12 @@ export default async function DirectoryPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Internal document library</h2>
+        <p className="mb-3 text-[13px] prose-muted">Keep reusable paperwork (W-9, NDA, contract&hellip;) here, then assign it to specific employees or to everyone in a role — it lands on each person&apos;s profile to complete and e-sign. Use PDFs so they can be DocuSigned.</p>
+        <DocumentLibrary templates={(templates ?? []) as any} roleOptions={ROLE_OPTIONS} employees={employeeOpts} />
       </section>
 
       <section>
