@@ -99,7 +99,8 @@ export async function POST(req: NextRequest) {
   // can lag a beat behind. Retry the retrieve until the body is present.
   let bodyText = "";
   let retrieveOk = false;
-  const bodyTries = 5;                      // maxDuration is 60s, so we can wait
+  let diag = "no-fetch";                     // TEMP: surfaced in the note so we can see why
+  const bodyTries = 5;                       // maxDuration is 60s, so we can wait
   for (let attempt = 0; attempt < bodyTries; attempt++) {
     try {
       const r = await fetch(`${API}/emails/receiving/${emailId}?html_format=cid`, auth);
@@ -111,14 +112,18 @@ export async function POST(req: NextRequest) {
         // reply, keep the raw text (trimmed) instead of losing it entirely.
         bodyText = (cleaned || raw).slice(0, 8000).trim();
         retrieveOk = true;
+        diag = bodyText ? "ok" : "empty-body";
         if (bodyText) break;               // got real content — stop retrying
         console.warn("[inbound] retrieve ok but empty body, attempt", attempt);
       } else {
+        diag = `http-${r.status}`;
         console.warn("[inbound] retrieve status", r.status, "attempt", attempt);
       }
-    } catch (e) { console.warn("[inbound] fetch body", e); }
+    } catch (e: any) { diag = `err-${String(e?.message || e).slice(0, 40)}`; console.warn("[inbound] fetch body", e); }
     if (attempt < bodyTries - 1) await sleep(1000 * (attempt + 1)); // 1,2,3,4s
   }
+  if (!emailId) diag = "no-email-id";
+  if (!key) diag = "no-api-key";
 
   let sender: "client" | "staff" = "client";
   let authorName: string | null = (client as any).contact || null;
@@ -151,7 +156,7 @@ export async function POST(req: NextRequest) {
   if (!bodyText) {
     bodyText = attCount > 0
       ? `(sent ${attCount} attachment${attCount > 1 ? "s" : ""})`
-      : "(no message text)";
+      : `(no message text — diag:${diag})`;   // TEMP diagnostic tag
   }
 
   const { data: note, error } = await admin.from("client_notes")
