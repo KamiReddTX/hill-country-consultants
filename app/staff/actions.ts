@@ -914,7 +914,7 @@ export async function assignTemplate(templateId: string, opts: { staffIds?: stri
   if (!targets.length) return { error: "No employees matched." };
   const rows = targets.map((sid) => ({
     staff_id: sid, name: (tpl as any).name, kind: (tpl as any).kind, path: (tpl as any).path,
-    requires_signature: (tpl as any).requires_signature, uploaded_by: me!.name || me!.email, template_id: templateId,
+    requires_signature: (tpl as any).requires_signature, uploaded_by: me!.id, template_id: templateId,
   }));
   const { error } = await admin.from("staff_documents").insert(rows);
   if (error) return { error: error.message };
