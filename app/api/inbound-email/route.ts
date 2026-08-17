@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
   if (!bodyText) {
     bodyText = attCount > 0
       ? `(sent ${attCount} attachment${attCount > 1 ? "s" : ""})`
-      : `(no message text — diag:${diag})`;   // TEMP diagnostic tag
+      : "(no message text)";
   }
 
   const { data: note, error } = await admin.from("client_notes")
