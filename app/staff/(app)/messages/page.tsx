@@ -7,10 +7,8 @@ import { MessageComposer } from "@/components/staff/message-composer";
 import { CreateChannelForm } from "@/components/staff/create-channel-form";
 import { ChannelAdmin } from "@/components/staff/channel-admin";
 import { MarkRead } from "@/components/staff/mark-read";
+import { LocalTime } from "@/components/local-time";
 
-function when(s: string) {
-  return new Date(s).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
-}
 function dot(n?: number) {
   return n ? <span className="ml-1.5 inline-flex min-w-[18px] items-center justify-center rounded-full bg-gold px-1.5 py-0.5 text-[11px] font-semibold leading-none text-forest">{n}</span> : null;
 }
@@ -91,7 +89,7 @@ async function ClientsView({ db, admin }: { db: any; admin: boolean }) {
               <ul className="flex flex-col gap-2">
                 {thread.map((n: any) => (
                   <li key={n.id} className={`max-w-[80%] px-3 py-2 text-[14px] ${n.sender === "staff" ? "ml-auto bg-forest text-white" : "bg-cream/60 text-charcoal"}`}>
-                    <p className="mb-0.5 text-[11px] opacity-70">{n.sender === "staff" ? (n.author_name || "Team") : "Client"} · {when(n.created_at)}</p>
+                    <p className="mb-0.5 text-[11px] opacity-70">{n.sender === "staff" ? (n.author_name || "Team") : "Client"} · <LocalTime iso={n.created_at} /></p>
                     {n.body && <p className="whitespace-pre-wrap">{n.body}</p>}
                     {(filesByNote.get(n.id) || []).map((f: any) => (
                       <a key={f.id} href={`/api/message-file/${f.id}`} target="_blank" rel="noreferrer" className={`mt-1 block text-[12px] underline ${n.sender === "staff" ? "text-white/90" : "text-forest"}`}>📎 {f.name}</a>
@@ -109,7 +107,7 @@ async function ClientsView({ db, admin }: { db: any; admin: boolean }) {
                   <ul className="flex flex-col gap-1">
                     {team.map((n: any) => (
                       <li key={n.id} className="border-l-2 border-gold bg-cream/30 px-3 py-1.5 text-[13px]">
-                        <span className="text-[11px] text-ink-faint">{n.author_name || "Team"} · {when(n.created_at)}</span>
+                        <span className="text-[11px] text-ink-faint">{n.author_name || "Team"} · <LocalTime iso={n.created_at} /></span>
                         <p className="whitespace-pre-wrap text-charcoal">{n.body}</p>
                       </li>
                     ))}
@@ -162,7 +160,7 @@ async function DmView({ db, meId, withId, byMate }: { db: any; meId: string; wit
               <ul className="flex flex-col gap-2">
                 {thread.map((n: any) => (
                   <li key={n.id} className={`max-w-[80%] px-3 py-2 text-[14px] ${n.sender_id === meId ? "ml-auto bg-forest text-white" : "bg-cream/60 text-charcoal"}`}>
-                    <p className="mb-0.5 text-[11px] opacity-70">{nameOf.get(n.sender_id) || "—"} · {when(n.created_at)}</p>
+                    <p className="mb-0.5 text-[11px] opacity-70">{nameOf.get(n.sender_id) || "—"} · <LocalTime iso={n.created_at} /></p>
                     <p className="whitespace-pre-wrap">{n.body}</p>
                   </li>
                 ))}
@@ -220,7 +218,7 @@ async function ChannelsView({ db, meId, admin, chId, byChannel }: { db: any; meI
               <ul className="flex flex-col gap-2">
                 {msgs.map((n: any) => (
                   <li key={n.id} className="border-b border-line-soft/60 pb-2 text-[14px]">
-                    <p className="text-[12px]"><span className="font-medium text-forest">{n.author_name || "—"}</span> <span className="text-ink-faint">· {when(n.created_at)}</span></p>
+                    <p className="text-[12px]"><span className="font-medium text-forest">{n.author_name || "—"}</span> <span className="text-ink-faint">· <LocalTime iso={n.created_at} /></span></p>
                     <p className="whitespace-pre-wrap text-charcoal">{n.body}</p>
                   </li>
                 ))}
@@ -270,7 +268,7 @@ async function SearchView({ db, q }: { db: any; q?: string }) {
       <ul className="flex flex-col gap-1">
         {rows.map((r: any) => (
           <li key={r.id} className="border-b border-line-soft/60 py-1.5 text-[14px]">
-            <p className="text-[12px] text-ink-faint">{line(r)} · {when(r.created_at)}</p>
+            <p className="text-[12px] text-ink-faint">{line(r)} · <LocalTime iso={r.created_at} /></p>
             <p className="whitespace-pre-wrap text-charcoal">{r.body}</p>
           </li>
         ))}
@@ -308,7 +306,7 @@ async function OversightView({ db }: { db: any }) {
         <ul className="flex flex-col gap-1">
           {list.map((n: any) => (
             <li key={n.id} className="border-b border-line-soft/60 py-2 text-[14px]">
-              <p className="text-[12px] text-ink-faint">{nameOf.get(n.sender_id) || "—"} → {nameOf.get(n.recipient_id) || "—"} · {when(n.created_at)}</p>
+              <p className="text-[12px] text-ink-faint">{nameOf.get(n.sender_id) || "—"} → {nameOf.get(n.recipient_id) || "—"} · <LocalTime iso={n.created_at} /></p>
               <p className="whitespace-pre-wrap text-charcoal">{n.body}</p>
             </li>
           ))}

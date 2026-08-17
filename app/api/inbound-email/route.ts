@@ -5,6 +5,7 @@ import { sendStaffMessageAlert, sendClientMessageAlert } from "@/lib/email";
 import { getClientEmails } from "@/lib/client-contacts";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 const API = "https://api.resend.com";
 const emailOf = (s: string) => (String(s || "").match(/<([^>]+)>/)?.[1] || String(s || "")).trim().toLowerCase();
@@ -97,7 +98,8 @@ export async function POST(req: NextRequest) {
   // can lag a beat behind. Retry the retrieve until the body is present.
   let bodyText = "";
   let retrieveOk = false;
-  for (let attempt = 0; attempt < 4; attempt++) {
+  const bodyTries = 3;
+  for (let attempt = 0; attempt < bodyTries; attempt++) {
     try {
       const r = await fetch(`${API}/emails/receiving/${emailId}?html_format=cid`, auth);
       if (r.ok) {
@@ -113,7 +115,7 @@ export async function POST(req: NextRequest) {
         console.warn("[inbound] retrieve status", r.status);
       }
     } catch (e) { console.warn("[inbound] fetch body", e); }
-    await sleep(700 * (attempt + 1));      // 0.7s, 1.4s, 2.1s backoff
+    if (attempt < bodyTries - 1) await sleep(600 * (attempt + 1)); // 0.6s, 1.2s
   }
 
   let sender: "client" | "staff" = "client";
@@ -127,18 +129,18 @@ export async function POST(req: NextRequest) {
   // about what came through, even before downloads finish.
   const expected: number = Array.isArray(data.attachments) ? data.attachments.length : 0;
   let attList: any[] = [];
-  if (expected > 0 || !bodyText) {
-    for (let attempt = 0; attempt < 4; attempt++) {
+  if (expected > 0) {
+    const attTries = 3;
+    for (let attempt = 0; attempt < attTries; attempt++) {
       try {
         const ar = await fetch(`${API}/emails/receiving/${emailId}/attachments`, auth);
         if (ar.ok) {
           const al = await ar.json();
           attList = Array.isArray(al?.data) ? al.data : [];
-          if (attList.some((a: any) => a.download_url) || attList.length >= expected) break;
+          if (attList.some((a: any) => a.download_url)) break;
         }
       } catch (e) { console.warn("[inbound] list attachments", e); }
-      if (expected === 0) break;
-      await sleep(700 * (attempt + 1));
+      if (attempt < attTries - 1) await sleep(600 * (attempt + 1));
     }
   }
   const attCount = Math.max(attList.length, expected);

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { MessageForm } from "@/components/portal/message-form";
+import { LocalTime } from "@/components/local-time";
 
 export default async function MessagesPage() {
   const client = await getPortalClient();
@@ -57,7 +58,7 @@ export default async function MessagesPage() {
                     {(filesByNote.get(n.id) || []).map((f: any) => (
                       <a key={f.id} href={`/api/message-file/${f.id}`} target="_blank" rel="noreferrer" className="mt-1 block text-[13px] text-forest underline underline-offset-2 hover:text-gold">📎 {f.name}</a>
                     ))}
-                    <p className="mt-1 text-[11px] text-ink-faint">{new Date(n.created_at).toLocaleString()}</p>
+                    <p className="mt-1 text-[11px] text-ink-faint"><LocalTime iso={n.created_at} /></p>
                   </div>
                 </li>
               );
