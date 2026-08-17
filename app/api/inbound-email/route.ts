@@ -9,6 +9,7 @@ export const runtime = "nodejs";
 const API = "https://api.resend.com";
 const emailOf = (s: string) => (String(s || "").match(/<([^>]+)>/)?.[1] || String(s || "")).trim().toLowerCase();
 const safeName = (n: string) => String(n || "file").replace(/[^\w.\-]+/g, "_").slice(0, 120);
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /** Verify a Svix-signed Resend webhook (svix-id/timestamp/signature headers). */
 function verify(secret: string, id: string, ts: string, sigHeader: string, payload: string): boolean {
@@ -25,22 +26,39 @@ function verify(secret: string, id: string, ts: string, sigHeader: string, paylo
   } catch { return false; }
 }
 
-/** Strip quoted history / signatures from a plain-text reply (best effort). */
+/** Turn reply HTML into readable text: drop quoted history, keep line breaks so
+ *  the plain-text quote cutters below can still find "On ... wrote:" markers. */
+function htmlToText(html: string): string {
+  if (!html) return "";
+  let s = String(html);
+  s = s.replace(/<style[\s\S]*?<\/style>/gi, " ").replace(/<script[\s\S]*?<\/script>/gi, " ");
+  // Remove common quoted-reply containers before anything else.
+  s = s.replace(/<blockquote[\s\S]*?<\/blockquote>/gi, "\n");
+  s = s.replace(/<div[^>]*class="[^"]*(gmail_quote|yahoo_quoted|moz-cite-prefix)[^"]*"[\s\S]*?<\/div>/gi, "\n");
+  // Preserve structural breaks as newlines.
+  s = s.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|tr|h[1-6])>/gi, "\n");
+  s = s.replace(/<[^>]+>/g, " ");
+  s = s.replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&quot;/g, '"').replace(/&#39;/g, "'");
+  // Collapse runs of spaces/tabs but keep newlines.
+  s = s.replace(/[ \t]+/g, " ").replace(/[ \t]*\n[ \t]*/g, "\n").replace(/\n{3,}/g, "\n\n");
+  return s.trim();
+}
+
+/** Strip quoted history / signatures from a reply (best effort). */
 function cleanReply(text: string): string {
   if (!text) return "";
-  let out = text;
+  let out = text.replace(/\r\n/g, "\n");
   const cutters = [
-    /\r?\nOn .+wrote:[\s\S]*$/,
-    /\r?\n-----Original Message-----[\s\S]*$/i,
-    /\r?\n________________________________[\s\S]*$/,
-    /\r?\n>[\s\S]*$/,
-    /\r?\nFrom: .+[\s\S]*$/,
+    /\n?On .{0,200}\bwrote:[\s\S]*$/,          // Gmail/Apple: "On <date> <name> wrote:"
+    /\n-{3,}\s*Original Message\s*-{3,}[\s\S]*$/i,
+    /\n_{5,}[\s\S]*$/,                          // Outlook divider
+    /\n>{1,}.*[\s\S]*$/,                        // quoted ">" lines to the end
+    /\nFrom: .+[\s\S]*$/,                       // Outlook header block
+    /\nSent from my \w+[\s\S]*$/i,              // mobile signature
   ];
   for (const c of cutters) out = out.replace(c, "");
   return out.trim();
 }
-
-const stripHtml = (html: string) => String(html || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/\s+/g, " ").trim();
 
 export async function POST(req: NextRequest) {
   const payload = await req.text();
@@ -73,12 +91,30 @@ export async function POST(req: NextRequest) {
   const clientId = (client as any).id as string;
 
   const key = process.env.RESEND_API_KEY;
+  const auth = { headers: { Authorization: `Bearer ${key}` } };
+
+  // The webhook fires the instant the email lands; the parsed body + attachments
+  // can lag a beat behind. Retry the retrieve until the body is present.
   let bodyText = "";
-  try {
-    const r = await fetch(`${API}/emails/receiving/${emailId}`, { headers: { Authorization: `Bearer ${key}` } });
-    const em = await r.json();
-    bodyText = cleanReply(em.text || stripHtml(em.html) || "");
-  } catch (e) { console.warn("[inbound] fetch body", e); }
+  let retrieveOk = false;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    try {
+      const r = await fetch(`${API}/emails/receiving/${emailId}?html_format=cid`, auth);
+      if (r.ok) {
+        const em = await r.json();
+        const raw = String(em?.text || "").trim() || htmlToText(em?.html || "");
+        const cleaned = cleanReply(raw);
+        // Never drop the message: if quote-stripping empties a bottom-posted
+        // reply, keep the raw text (trimmed) instead of losing it entirely.
+        bodyText = (cleaned || raw).slice(0, 8000).trim();
+        retrieveOk = true;
+        if (bodyText) break;               // got real content — stop retrying
+      } else {
+        console.warn("[inbound] retrieve status", r.status);
+      }
+    } catch (e) { console.warn("[inbound] fetch body", e); }
+    await sleep(700 * (attempt + 1));      // 0.7s, 1.4s, 2.1s backoff
+  }
 
   let sender: "client" | "staff" = "client";
   let authorName: string | null = (client as any).contact || null;
@@ -87,33 +123,60 @@ export async function POST(req: NextRequest) {
     if (staff) { sender = "staff"; authorName = (staff as any).name || (staff as any).email; }
   }
 
+  // Fetch the attachment list (also with retry) so the stored note is honest
+  // about what came through, even before downloads finish.
+  const expected: number = Array.isArray(data.attachments) ? data.attachments.length : 0;
+  let attList: any[] = [];
+  if (expected > 0 || !bodyText) {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      try {
+        const ar = await fetch(`${API}/emails/receiving/${emailId}/attachments`, auth);
+        if (ar.ok) {
+          const al = await ar.json();
+          attList = Array.isArray(al?.data) ? al.data : [];
+          if (attList.some((a: any) => a.download_url) || attList.length >= expected) break;
+        }
+      } catch (e) { console.warn("[inbound] list attachments", e); }
+      if (expected === 0) break;
+      await sleep(700 * (attempt + 1));
+    }
+  }
+  const attCount = Math.max(attList.length, expected);
+
+  // Honest placeholder only when there is genuinely no text.
+  if (!bodyText) {
+    bodyText = attCount > 0
+      ? `(sent ${attCount} attachment${attCount > 1 ? "s" : ""})`
+      : "(no message text)";
+  }
+
   const { data: note, error } = await admin.from("client_notes")
-    .insert({ client_id: clientId, body: bodyText || "(sent an attachment)", sender, author_name: authorName })
+    .insert({ client_id: clientId, body: bodyText, sender, author_name: authorName })
     .select("id").single();
   if (error) return NextResponse.json({ error: error.message }, { status: 200 });
   const noteId = (note as any).id;
 
   let attached = 0;
-  try {
-    const ar = await fetch(`${API}/emails/receiving/${emailId}/attachments`, { headers: { Authorization: `Bearer ${key}` } });
-    const al = await ar.json();
-    for (const a of (al?.data || []).slice(0, 10)) {
-      if (!a.download_url) continue;
+  for (const a of attList.slice(0, 10)) {
+    if (!a.download_url) continue;
+    try {
       const fr = await fetch(a.download_url);
+      if (!fr.ok) { console.warn("[inbound] attachment download", fr.status); continue; }
       const buf = Buffer.from(await fr.arrayBuffer());
       const path = `messages/${clientId}/${Date.now()}-${safeName(a.filename)}`;
       const up = await admin.storage.from("client-files").upload(path, buf, { contentType: a.content_type || "application/octet-stream" });
       if (!up.error) {
         await admin.from("note_files").insert({ note_id: noteId, client_id: clientId, name: String(a.filename || "file").slice(0, 200), path, size: a.size, uploaded_by: authorName || sender });
         attached++;
-      }
-    }
-  } catch (e) { console.warn("[inbound] attachments", e); }
+      } else { console.warn("[inbound] upload", up.error.message); }
+    } catch (e) { console.warn("[inbound] attachment", e); }
+  }
 
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
   const inbound = process.env.INBOUND_EMAIL_DOMAIN;
   const replyTo = inbound ? `reply+${(client as any).reply_token}@${inbound}` : undefined;
-  const preview = bodyText || (attached ? `Sent ${attached} file${attached > 1 ? "s" : ""}.` : "");
+  const hasText = retrieveOk && !/^\((sent \d+ attachment|no message text)/.test(bodyText);
+  const preview = hasText ? bodyText : (attached ? `Sent ${attached} file${attached > 1 ? "s" : ""}.` : bodyText);
   try {
     if (sender === "client") {
       const aid = (client as any).assigned_to;
@@ -128,5 +191,5 @@ export async function POST(req: NextRequest) {
     }
   } catch (e) { console.warn("[inbound] forward", e); }
 
-  return NextResponse.json({ ok: true, sender, attached }, { status: 200 });
+  return NextResponse.json({ ok: true, sender, attached, hasText }, { status: 200 });
 }
