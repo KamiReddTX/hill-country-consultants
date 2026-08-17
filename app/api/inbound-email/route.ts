@@ -76,7 +76,8 @@ export async function POST(req: NextRequest) {
   if (event?.type !== "email.received") return NextResponse.json({}, { status: 200 });
 
   const data = event.data || {};
-  const emailId: string = data.email_id;
+  const emailId: string = data.email_id || data.id || event.id;
+  if (!emailId) { console.warn("[inbound] no email_id in payload", Object.keys(data)); }
   const from = emailOf(data.from);
   const selfDomain = (process.env.EMAIL_FROM || "").toLowerCase();
   if (from && selfDomain.includes(from)) return NextResponse.json({}, { status: 200 });
@@ -98,7 +99,7 @@ export async function POST(req: NextRequest) {
   // can lag a beat behind. Retry the retrieve until the body is present.
   let bodyText = "";
   let retrieveOk = false;
-  const bodyTries = 3;
+  const bodyTries = 5;                      // maxDuration is 60s, so we can wait
   for (let attempt = 0; attempt < bodyTries; attempt++) {
     try {
       const r = await fetch(`${API}/emails/receiving/${emailId}?html_format=cid`, auth);
@@ -111,11 +112,12 @@ export async function POST(req: NextRequest) {
         bodyText = (cleaned || raw).slice(0, 8000).trim();
         retrieveOk = true;
         if (bodyText) break;               // got real content — stop retrying
+        console.warn("[inbound] retrieve ok but empty body, attempt", attempt);
       } else {
-        console.warn("[inbound] retrieve status", r.status);
+        console.warn("[inbound] retrieve status", r.status, "attempt", attempt);
       }
     } catch (e) { console.warn("[inbound] fetch body", e); }
-    if (attempt < bodyTries - 1) await sleep(600 * (attempt + 1)); // 0.6s, 1.2s
+    if (attempt < bodyTries - 1) await sleep(1000 * (attempt + 1)); // 1,2,3,4s
   }
 
   let sender: "client" | "staff" = "client";
@@ -130,7 +132,7 @@ export async function POST(req: NextRequest) {
   const expected: number = Array.isArray(data.attachments) ? data.attachments.length : 0;
   let attList: any[] = [];
   if (expected > 0) {
-    const attTries = 3;
+    const attTries = 4;
     for (let attempt = 0; attempt < attTries; attempt++) {
       try {
         const ar = await fetch(`${API}/emails/receiving/${emailId}/attachments`, auth);
@@ -138,9 +140,9 @@ export async function POST(req: NextRequest) {
           const al = await ar.json();
           attList = Array.isArray(al?.data) ? al.data : [];
           if (attList.some((a: any) => a.download_url)) break;
-        }
+        } else { console.warn("[inbound] attachments status", ar.status); }
       } catch (e) { console.warn("[inbound] list attachments", e); }
-      if (attempt < attTries - 1) await sleep(600 * (attempt + 1));
+      if (attempt < attTries - 1) await sleep(1000 * (attempt + 1));
     }
   }
   const attCount = Math.max(attList.length, expected);
