@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
-import { getStaffMember, isPrivileged, isSalesOrAdmin, isSalesLead, getMessageUnreads } from "@/lib/staff";
+import { getStaffMember, isAdmin, isPrivileged, isSalesOrAdmin, isSalesLead, getMessageUnreads } from "@/lib/staff";
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
 
@@ -11,12 +11,13 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
 
-  const priv = isPrivileged(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
+  const priv = isPrivileged(me), admin = isAdmin(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
   const unread = await getMessageUnreads(me.id).catch(() => ({ total: 0 } as any));
   const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff/profile", label: "My profile" }];
   // Manager overview + tools
   if (priv || sales) tabs.push({ href: "/staff", label: "Dashboard" });
   if (priv) tabs.push({ href: "/staff/admin", label: "Admin" }, { href: "/staff/directory", label: "Directory" });
+  if (admin) tabs.push({ href: "/staff/payroll", label: "Payroll" });
   if (salesLead) tabs.push({ href: "/staff/sales", label: "Sales" });
   // Everyday work tabs — every employee's job surface (scoped to their clients)
   tabs.push(
@@ -36,7 +37,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/accounts", label: "Accounts" }, { href: "/staff/commissions", label: "Commissions" },
     { href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
   // Manager operations
-  if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "All clients" }, { href: "/staff/reports", label: "Reports" });
+  if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "Clients" }, { href: "/staff/reports", label: "Reports" });
 
   return (
     <div className="min-h-screen bg-cream">
