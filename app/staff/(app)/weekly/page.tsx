@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { LocalTime } from "@/components/local-time";
 import { getStaffMember, getClients } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
@@ -33,7 +34,7 @@ export default async function StaffWeeklyPage() {
           <ul className="flex flex-col gap-2">
             {rows.map((r) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
-                <div><p className="font-medium text-charcoal">{name(r.client_id)}</p><p className="text-[12px] prose-muted">{r.name} · published {new Date(r.created_at).toLocaleDateString()}</p></div>
+                <div><p className="font-medium text-charcoal">{name(r.client_id)}</p><p className="text-[12px] prose-muted">{r.name} · published <LocalTime iso={r.created_at} mode="date" /></p></div>
                 <a href={`/api/client-report/${r.id}`} className="link-underline text-[13px]">Open</a>
               </li>
             ))}

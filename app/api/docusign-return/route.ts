@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServiceClient } from "@/lib/supabase/server";
 import { envelopeStatus, combinedPdf } from "@/lib/docusign";
+import { getStaffMember } from "@/lib/staff";
 
 export const runtime = "nodejs";
 
@@ -12,7 +13,10 @@ export async function GET(req: NextRequest) {
   const event = url.searchParams.get("event");
   const site = process.env.NEXT_PUBLIC_SITE_URL || url.origin;
 
-  if (docId && event === "signing_complete") {
+  // Only process for a signed-in staff member (the employee who just signed);
+  // the write is additionally gated on the real DocuSign envelope status below.
+  const me = await getStaffMember();
+  if (me && docId && event === "signing_complete") {
     try {
       const admin = createServiceClient();
       const { data: doc } = await admin.from("staff_documents").select("*").eq("id", docId).maybeSingle();

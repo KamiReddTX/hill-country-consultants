@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
-import { LocalTime } from "@/components/local-time";
+import { VaultManager } from "@/components/portal/vault-manager";
 
 const HANDOFF = [
   "Your account team sends you a vault invitation from our password manager — check the sender is hillcountryconsultants.com.",
@@ -33,22 +33,7 @@ export default async function VaultPage() {
 
       <div>
         <p className="kicker mb-3">Accounts we hold</p>
-        {vault.length === 0 ? (
-          <p className="border border-dashed border-line-warm bg-white p-6 text-[15px] prose-muted">Nothing registered yet. Once your team has access to an account, it appears here.</p>
-        ) : (
-          <ul className="divide-y divide-line-soft border-y border-line-soft">
-            {vault.map((v) => (
-              <li key={v.id} className="flex flex-wrap items-center justify-between gap-3 py-4">
-                <div className="min-w-0">
-                  <p className="text-[15.5px] font-medium text-charcoal">{v.name}</p>
-                  <p className="text-[13px] prose-muted">{v.username ? `${v.username} · ` : ""}{v.url || "no URL"}{v.purpose ? ` · ${v.purpose}` : ""}</p>
-                  <p className="text-[12px] text-ink-faint">Updated <LocalTime iso={v.updated_at} mode="date" /></p>
-                </div>
-                <span className={`text-[12px] font-semibold ${v.needs_resync ? "text-red-700" : "text-forest"}`}>{v.needs_resync ? "Needs re-sync" : "In sync"}</span>
-              </li>
-            ))}
-          </ul>
-        )}
+        <VaultManager rows={vault} />
       </div>
 
       <div>

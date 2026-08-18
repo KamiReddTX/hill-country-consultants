@@ -88,6 +88,10 @@ export interface Database {
           kickoff_at: string | null;
           roadmap_at: string | null;
           billing_type: string;
+          suspended: boolean | null;
+          suspended_reason: string | null;
+          suspended_at: string | null;
+          reply_token: string | null;
         };
         Insert: {
           id?: string;
@@ -103,6 +107,10 @@ export interface Database {
           kickoff_at?: string | null;
           roadmap_at?: string | null;
           billing_type?: string;
+          suspended?: boolean | null;
+          suspended_reason?: string | null;
+          suspended_at?: string | null;
+          reply_token?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
       };

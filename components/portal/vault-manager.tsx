@@ -2,6 +2,7 @@
 import { useState, useTransition } from "react";
 import { addVaultEntry, setResync, deleteVaultEntry } from "@/app/portal/actions";
 import type { VaultRow } from "@/lib/database.types";
+import { LocalTime } from "@/components/local-time";
 
 export function VaultManager({ rows }: { rows: VaultRow[] }) {
   const [pending, start] = useTransition();
@@ -26,7 +27,7 @@ export function VaultManager({ rows }: { rows: VaultRow[] }) {
                 <p className="text-[13px] prose-muted">
                   {v.username ? `${v.username} · ` : ""}{v.url || "no URL"}{v.purpose ? ` · ${v.purpose}` : ""}
                 </p>
-                <p className="text-[12px] text-ink-faint">Updated {new Date(v.updated_at).toLocaleDateString()}</p>
+                <p className="text-[12px] text-ink-faint">Updated <LocalTime iso={v.updated_at} mode="date" /></p>
               </div>
               <div className="flex items-center gap-2">
                 <span className={`text-[12px] font-semibold ${v.needs_resync ? "text-red-700" : "text-forest"}`}>

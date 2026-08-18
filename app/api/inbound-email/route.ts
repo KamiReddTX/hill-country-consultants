@@ -70,6 +70,11 @@ export async function POST(req: NextRequest) {
   if (!secret || !verify(secret, id, ts, sig, payload)) {
     return NextResponse.json({ error: "bad signature" }, { status: 401 });
   }
+  // Reject stale/replayed webhooks (timestamp older than 5 minutes).
+  const tsNum = Number(ts);
+  if (!tsNum || Math.abs(Date.now() / 1000 - tsNum) > 300) {
+    return NextResponse.json({ error: "stale timestamp" }, { status: 401 });
+  }
 
   let event: any;
   try { event = JSON.parse(payload); } catch { return NextResponse.json({}, { status: 200 }); }

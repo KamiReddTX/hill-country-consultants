@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { LocalTime } from "@/components/local-time";
 import { getStaffMember, getClients, rolesOf, usd } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { ProfileEditForm } from "@/components/staff/profile-edit-form";
@@ -107,7 +108,7 @@ export default async function ProfilePage() {
           <ul className="flex flex-col gap-2">
             {paystubs.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-3">
-                <span className="text-[14px] text-charcoal">{d.name} <span className="text-[12px] prose-muted">· {new Date(d.created_at).toLocaleDateString()}</span></span>
+                <span className="text-[14px] text-charcoal">{d.name} <span className="text-[12px] prose-muted">· <LocalTime iso={d.created_at} mode="date" /></span></span>
                 <a href={`/api/staff-doc/${d.id}`} className="btn-gold text-[13px]">Download</a>
               </li>
             ))}
@@ -121,7 +122,7 @@ export default async function ProfilePage() {
           <ul className="flex flex-col gap-2">
             {otherDocs.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-3">
-                <span className="text-[14px] text-charcoal">{d.name} <span className="text-[12px] prose-muted">· {d.kind}{d.signed_at ? ` · signed ${new Date(d.signed_at).toLocaleDateString()}` : ""}</span></span>
+                <span className="text-[14px] text-charcoal">{d.name} <span className="text-[12px] prose-muted">· {d.kind}{d.signed_at ? <> · signed <LocalTime iso={d.signed_at} mode="date" /></> : ""}</span></span>
                 <a href={`/api/staff-doc/${d.id}`} className="link-underline text-[13px]">Open</a>
               </li>
             ))}

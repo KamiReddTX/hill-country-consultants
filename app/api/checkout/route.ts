@@ -17,7 +17,8 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const body = await req.json();
+  let body: any;
+  try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid request." }, { status: 400 }); }
   const items: { id: string; qty: number }[] = (body.items || []).filter((i: any) => bookItemById(i.id));
   const payMode: "full" | "deposit" = body.payMode === "deposit" ? "deposit" : "full";
   if (!items.length) return NextResponse.json({ error: "No payable items in the cart." }, { status: 400 });

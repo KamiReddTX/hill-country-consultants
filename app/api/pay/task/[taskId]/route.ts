@@ -23,6 +23,8 @@ export async function GET(req: NextRequest, { params }: { params: { taskId: stri
   const t = task as any;
   if (!t) return NextResponse.redirect(`${site}/portal/tasks`);
   if (t.charge_status === "paid") return NextResponse.redirect(`${site}/portal/tasks?paid=1`);
+  // Only honor links for a charge that was actually issued (matches the Pay button state).
+  if (t.charge_status !== "sent") return NextResponse.redirect(`${site}/portal/tasks`);
   const cents = t.charge_cents || 0;
   if (cents < 100) return NextResponse.redirect(`${site}/portal/tasks`);
 

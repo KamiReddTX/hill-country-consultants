@@ -33,6 +33,7 @@ const clientLabel = (c: ClientRow) => c.business || c.contact || c.email;
 export async function addTaskRequest(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const details = String(formData.get("details") || "").trim();
   if (!details) return { error: "Describe exactly what you need us to do." };
   const due = String(formData.get("due") || "") || null;
@@ -74,6 +75,7 @@ export async function addTaskRequest(formData: FormData): Promise<ActionResult> 
 export async function approveTask(taskId: string): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const { error } = await createClient().rpc("client_approve_task", { p_task: taskId });
   if (error) return { error: error.message };
   revalidatePath("/portal/tasks");
@@ -84,6 +86,7 @@ export async function approveTask(taskId: string): Promise<ActionResult> {
 export async function requestChanges(taskId: string): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const { error } = await createClient().rpc("client_request_changes", { p_task: taskId });
   if (error) return { error: error.message };
   revalidatePath("/portal/tasks");
@@ -94,6 +97,7 @@ export async function requestChanges(taskId: string): Promise<ActionResult> {
 export async function addVaultEntry(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const name = String(formData.get("name") || "").trim();
   if (!name) return { error: "Give the entry a name (e.g. the tool it's for)." };
   const db = createClient();
@@ -114,6 +118,7 @@ export async function addVaultEntry(formData: FormData): Promise<ActionResult> {
 export async function setResync(id: string, needs: boolean): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const db = createClient();
   const { error } = await db.from("client_vault").update({ needs_resync: needs, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) return { error: error.message };
@@ -124,6 +129,7 @@ export async function setResync(id: string, needs: boolean): Promise<ActionResul
 export async function deleteVaultEntry(id: string): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const db = createClient();
   const { error } = await db.from("client_vault").delete().eq("id", id);
   if (error) return { error: error.message };
@@ -136,6 +142,7 @@ export async function deleteVaultEntry(id: string): Promise<ActionResult> {
 export async function addMessage(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const body = String(formData.get("body") || "").trim();
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   if (!body && files.length === 0) return { error: "Write a message or attach a file." };
@@ -158,6 +165,7 @@ export async function addMessage(formData: FormData): Promise<ActionResult> {
 export async function addClientEvent(formData: FormData): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const title = String(formData.get("title") || "").trim();
   if (!title) return { error: "Give the event a title." };
   const event_date = String(formData.get("event_date") || "");
@@ -177,6 +185,7 @@ export async function addClientEvent(formData: FormData): Promise<ActionResult> 
 export async function deleteClientEvent(id: string): Promise<ActionResult> {
   const client = await getPortalClient();
   if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const { error } = await createClient().from("client_events").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/portal/calendar");
