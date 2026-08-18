@@ -150,6 +150,22 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </section>
       )}
 
+      {key === "submittals" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Inside a sample package</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">Every package is assembled on your letterhead and built to move through review cleanly. A redacted sample:</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {["Cover page (your letterhead)", "Submittal index", "OEM cut sheet", "Marked product selections", "Compliance checklist", "Transmittal"].map((lbl) => (
+                <ImageSlot key={lbl} label={lbl} src="" />
+              ))}
+            </div>
+            <p className="mt-4 text-[12px] prose-muted">Redacted samples shown for format; no confidential project information is displayed.</p>
+          </div>
+        </section>
+      )}
+
       <section className="section-white">
         <div className="shell py-16">
           <h2 className="font-fraunces text-[24px] font-medium text-forest">Rates</h2>
