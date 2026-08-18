@@ -14,10 +14,10 @@ const fmt = (iso: string, mode: Mode, tz?: string) => {
 };
 
 /** Renders a timestamp in the viewer's own timezone. Server render (and first
- *  client paint) use Central so there's no hydration mismatch and no blank
+ *  client paint) use Eastern so there's no hydration mismatch and no blank
  *  flash; on mount it re-formats to the browser's local timezone. */
 export function LocalTime({ iso, mode = "datetime" }: { iso: string; mode?: Mode }) {
-  const [s, setS] = useState(() => fmt(iso, mode, "America/Chicago"));
+  const [s, setS] = useState(() => fmt(iso, mode, "America/New_York"));
   useEffect(() => { setS(fmt(iso, mode)); }, [iso, mode]);
   return <span suppressHydrationWarning>{s}</span>;
 }

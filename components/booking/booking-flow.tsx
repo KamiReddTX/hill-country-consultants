@@ -28,7 +28,7 @@ const seedQuotes = (q: string): Quotes => {
   return out;
 };
 
-// ── Business-hours calendar (Central). Wed & Sun closed; Sat by appointment. ──
+// ── Business-hours calendar (Eastern). Wed & Sun closed; Sat by appointment. ──
 const SLOTS_STD = ["9:00 AM", "10:00 AM", "11:00 AM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM"];
 const SLOTS_LATE = ["11:00 AM", "12:00 PM", "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM", "5:00 PM", "6:00 PM"];
 const SLOTS_SAT = ["10:00 AM", "11:00 AM", "12:00 PM"];
@@ -38,7 +38,7 @@ const slotNoteForDow = (dow: number) =>
     ? "Saturday is by preapproved appointment — we confirm before it is booked."
     : dow === 2 || dow === 4
     ? "Tuesday and Thursday we open and close two hours later."
-    : "All times Central.";
+    : "All times Eastern.";
 
 const GROUPS = Array.from(new Set(BOOK_ITEMS.map((b) => b.group)));
 

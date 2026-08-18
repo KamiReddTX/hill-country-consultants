@@ -72,6 +72,24 @@ export async function sendPurchaseAdminAlert(opts: {
   await send(to, `New booking · ${opts.amount} · ${opts.ref}`, shell("New paid booking", body), opts.email || undefined);
 }
 
+/** Internal alert when someone submits an employment application. Reply-to is
+ *  the applicant so a reply reaches them directly. Recipient is ADMIN_NOTIFY_EMAIL. */
+export async function sendApplicationAlert(opts: {
+  name: string; email: string; phone: string; position: string; location: string; portalUrl: string; hasResume: boolean;
+}) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  const row = (k: string, v: string) =>
+    `<tr><td style="padding:2px 16px 2px 0;color:#6b6552;white-space:nowrap">${k}</td><td style="padding:2px 0"><strong>${esc(v || "—")}</strong></td></tr>`;
+  const body = `
+    <p style="font-size:16px;line-height:1.6">New employment application${opts.position ? ` — <strong>${esc(opts.position)}</strong>` : ""}.</p>
+    <table style="font-size:14px;line-height:1.6;color:#3a3f38;border-collapse:collapse;margin:8px 0 16px">
+      ${row("Name", opts.name)}${row("Email", opts.email)}${row("Phone", opts.phone)}${row("Location", opts.location)}${row("Résumé", opts.hasResume ? "attached (in portal)" : "none")}
+    </table>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Review in the staff Directory</a></p>` : ""}
+    <p style="font-size:13px;color:#6b6552">Reply to this email to reach the applicant directly.</p>`;
+  await send(to, `New application${opts.position ? ` · ${opts.position}` : ""} · ${opts.name}`, shell("New employment application", body), opts.email || undefined);
+}
+
 /** Ask a client to pay an additional charge before a task starts. */
 export async function sendTaskPaymentRequest(opts: { to: string; amount: string; payUrl: string; taskTitle: string }) {
   const body = `

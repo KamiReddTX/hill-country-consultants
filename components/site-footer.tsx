@@ -60,7 +60,7 @@ export function SiteFooter() {
             <span className="whitespace-nowrap">Tue &amp; Thu 11–7</span>
             <span className="whitespace-nowrap">Wed &amp; Sun closed</span>
             <span className="whitespace-nowrap">Sat by appointment</span>
-            <span className="whitespace-nowrap text-white/60">Central</span>
+            <span className="whitespace-nowrap text-white/60">Eastern</span>
           </div>
         </div>
       </div>

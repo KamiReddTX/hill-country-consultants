@@ -10,6 +10,7 @@ import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
 import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
 import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
 import { DocumentLibrary } from "@/components/staff/document-library";
+import { LocalTime } from "@/components/local-time";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -20,6 +21,7 @@ export default async function DirectoryPage() {
   const db = createClient();
   const { data: allDocs } = await db.from("staff_documents").select("*").order("created_at", { ascending: false });
   const { data: templates } = await db.from("document_templates").select("*").order("created_at", { ascending: false });
+  const { data: applications } = await db.from("job_applications").select("*").order("created_at", { ascending: false });
   const employeeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
   const docsByStaff = new Map<string, any[]>();
   (allDocs ?? []).forEach((d: any) => { const a = docsByStaff.get(d.staff_id) || []; a.push(d); docsByStaff.set(d.staff_id, a); });
@@ -64,6 +66,40 @@ export default async function DirectoryPage() {
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Employment applications</h2>
+        <p className="mb-3 text-[13px] prose-muted">People who applied through the public Careers page. Open one for full details; résumés download securely and you can reply by email.</p>
+        {(applications ?? []).length === 0 ? <p className="text-[15px] prose-muted">No applications yet.</p> : (
+          <div className="flex flex-col gap-2">
+            {(applications ?? []).map((a: any) => (
+              <details key={a.id} className="border border-line-warm bg-white">
+                <summary className="min-h-touch cursor-pointer list-none px-4 py-3">
+                  <span className="flex flex-wrap items-center gap-x-3">
+                    <span className="text-[15px] font-medium text-charcoal">{a.name}</span>
+                    {a.position && <span className="text-[12px] text-forest">{a.position}</span>}
+                    {a.employment_type && <span className="text-[11px] uppercase tracking-wide text-ink-faint">{a.employment_type}</span>}
+                    <span className="text-[12px] prose-muted">· <LocalTime iso={a.created_at} mode="date" /></span>
+                  </span>
+                </summary>
+                <div className="grid gap-x-8 gap-y-1 border-t border-line-soft p-4 text-[14px] md:grid-cols-2">
+                  <p><span className="text-ink-faint">Email:</span> <a href={`mailto:${a.email}`} className="link-underline">{a.email}</a></p>
+                  <p><span className="text-ink-faint">Phone:</span> {a.phone || "—"}</p>
+                  <p><span className="text-ink-faint">Location:</span> {a.location || "—"}</p>
+                  <p><span className="text-ink-faint">Availability:</span> {a.availability || "—"}</p>
+                  <p><span className="text-ink-faint">Desired pay:</span> {a.desired_pay || "—"}</p>
+                  <p><span className="text-ink-faint">Heard via:</span> {a.referral || "—"}</p>
+                  {a.portfolio_url && <p className="md:col-span-2"><span className="text-ink-faint">Portfolio:</span> <a href={a.portfolio_url} target="_blank" rel="noreferrer" className="link-underline break-all">{a.portfolio_url}</a></p>}
+                  {a.skills && <p className="md:col-span-2"><span className="text-ink-faint">Skills:</span> {a.skills}</p>}
+                  {a.experience && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Experience:</span> {a.experience}</p>}
+                  {a.why && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Why HCC:</span> {a.why}</p>}
+                  <p className="pt-1 md:col-span-2">{a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[13px]">Download résumé</a> : <span className="text-[12px] prose-muted">No résumé attached.</span>}</p>
+                </div>
+              </details>
+            ))}
+          </div>
+        )}
       </section>
 
       <section>

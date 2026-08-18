@@ -41,7 +41,7 @@ export default function GetStartedPage() {
               <p className="mt-3 text-[15px] prose-muted">{SITE.locations}, {SITE.serving}.</p>
             </div>
             <div>
-              <p className="kicker mb-3">Hours (Central)</p>
+              <p className="kicker mb-3">Hours (Eastern)</p>
               <ul className="flex flex-col gap-1.5">
                 {HOURS.map((h) => (
                   <li key={h.d} className="flex justify-between gap-6 text-[15px] prose-soft">

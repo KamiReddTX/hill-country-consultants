@@ -42,6 +42,7 @@ export const FOOTER_NAV: { href: string; label: string }[] = [
   { href: "/training", label: "Training" },
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
+  { href: "/careers", label: "Careers" },
   { href: "/get-started", label: "Get Started" },
 ];
 
@@ -52,7 +53,7 @@ export const LEGAL_NAV: { href: string; label: string }[] = [
   { href: "/privacy", label: "Privacy Policy" },
 ];
 
-/** Business hours — all times Central. Drives the booking calendar. */
+/** Business hours — all times Eastern. Drives the booking calendar. */
 export const HOURS: { d: string; h: string }[] = [
   { d: "Monday", h: "9:00 AM – 5:00 PM" },
   { d: "Tuesday", h: "11:00 AM – 7:00 PM" },
