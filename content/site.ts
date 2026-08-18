@@ -18,6 +18,9 @@ export const SITE = {
   kickoffUrl: "https://calendar.app.google/mk7fbVrrCJKY1uge9",
   reviewUrl: "https://calendar.app.google/6qv6gbPeiTbW3UTH8",
   consultUrl: "https://calendar.app.google/5bFgNbAkDbjy8gu79",
+  // Photographer's scheduling link for marketing photo-shoot consultations.
+  // Paste the real Calendly/Google Appointments URL here (leave "" to disable).
+  photographerUrl: "",
 } as const;
 
 /** Primary header navigation (matches the prototype's top nav). */

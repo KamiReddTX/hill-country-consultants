@@ -114,6 +114,11 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
       };
+      client_checklist_items: {
+        Row: { id: string; client_id: string; section: string | null; label: string; done: boolean; done_at: string | null; position: number; created_by: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; section?: string | null; label: string; done?: boolean; done_at?: string | null; position?: number; created_by?: string | null };
+        Update: Partial<Database["public"]["Tables"]["client_checklist_items"]["Insert"]>;
+      };
       client_roadmap: {
         Row: { id: string; client_id: string; phase: string; status: string; note: string | null; updated_at: string };
         Insert: { id?: string; client_id: string; phase: string; status?: string; note?: string | null; updated_at?: string };

@@ -1137,3 +1137,99 @@ export async function addClientStaffNote(clientId: string, body: string): Promis
   revalidatePath("/staff/messages");
   return { ok: true };
 }
+
+// ── Client checklists ────────────────────────────────────────────────────────
+// Freeform, per-client checklists the account team builds to stay on task
+// (e.g. a branding client's launch cycle). Items can be grouped by section.
+// The client sees progress read-only; only the team edits.
+
+async function nextChecklistPos(admin: any, clientId: string): Promise<number> {
+  const { data } = await admin.from("client_checklist_items").select("position").eq("client_id", clientId).order("position", { ascending: false }).limit(1).maybeSingle();
+  return ((data as any)?.position ?? 0);
+}
+
+/** Staff (team/privileged): add one checklist item, optionally under a section. */
+export async function addChecklistItem(clientId: string, label: string, section?: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
+  const text = String(label || "").trim();
+  if (!text) return { error: "Enter the item." };
+  const admin = createServiceClient();
+  const pos = (await nextChecklistPos(admin, clientId)) + 1;
+  const { error } = await admin.from("client_checklist_items").insert({
+    client_id: clientId, label: text.slice(0, 500), section: (section || "").trim() || null, position: pos, created_by: me.name || me.email,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/checklists"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff: bulk-add from pasted text. Each non-empty line is an item; a line
+ *  starting with "## " (or "#") starts a new section for the lines that follow.
+ *  Leading bullets/checkboxes ("- ", "* ", "[ ] ") are stripped. */
+export async function addChecklistItemsBulk(clientId: string, text: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
+  const admin = createServiceClient();
+  let pos = await nextChecklistPos(admin, clientId);
+  let section: string | null = null;
+  const rows: any[] = [];
+  for (const raw of String(text || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line) continue;
+    const h = line.match(/^#{1,3}\s+(.*)$/);
+    if (h) { section = (h[1].trim().slice(0, 200)) || null; continue; }
+    const label = line.replace(/^[-*•☐☑\[\]\sxX]+/, "").trim();
+    if (!label) continue;
+    pos += 1;
+    rows.push({ client_id: clientId, label: label.slice(0, 500), section, position: pos, created_by: me.name || me.email });
+  }
+  if (rows.length === 0) return { error: "Nothing to add — paste one item per line." };
+  const { error } = await admin.from("client_checklist_items").insert(rows);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/checklists"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff: toggle an item done / not-done. */
+export async function toggleChecklistItem(id: string, done: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: item } = await admin.from("client_checklist_items").select("client_id").eq("id", id).maybeSingle();
+  if (!item) return { error: "Not found." };
+  if (!(await canReachClient(me, (item as any).client_id))) return { error: "This isn't your client." };
+  const { error } = await admin.from("client_checklist_items").update({ done, done_at: done ? new Date().toISOString() : null }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/checklists"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff: delete one item. */
+export async function deleteChecklistItem(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: item } = await admin.from("client_checklist_items").select("client_id").eq("id", id).maybeSingle();
+  if (!item) return { ok: true };
+  if (!(await canReachClient(me, (item as any).client_id))) return { error: "This isn't your client." };
+  const { error } = await admin.from("client_checklist_items").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/checklists"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff: delete a whole section (or the ungrouped items when section is empty). */
+export async function deleteChecklistSection(clientId: string, section: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
+  const admin = createServiceClient();
+  const base = admin.from("client_checklist_items").delete().eq("client_id", clientId);
+  const { error } = await (section ? base.eq("section", section) : base.is("section", null));
+  if (error) return { error: error.message };
+  revalidatePath("/staff/checklists"); revalidatePath("/portal");
+  return { ok: true };
+}

@@ -24,6 +24,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/onboarding", label: "Onboarding" },
     { href: "/staff/calendar", label: "Calendar" },
     { href: "/staff/tasks", label: "Task board" },
+    { href: "/staff/checklists", label: "Checklists" },
     { href: "/staff/work-log", label: "Work log" },
     { href: "/staff/vault", label: "Vault" },
     { href: "/staff/files", label: "Files" },

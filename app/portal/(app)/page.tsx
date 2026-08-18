@@ -1,14 +1,25 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData, deriveOnboarding, money } from "@/lib/portal";
-import { createServiceClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { SITE } from "@/content/site";
 import { KickoffStep } from "@/components/portal/kickoff-step";
+import { PhotoShootButton } from "@/components/portal/photo-shoot-button";
 
 export default async function OnboardingPage() {
   const client = await getPortalClient();
   if (!client) redirect("/portal/login");
   const data = await getPortalData(client);
   const ob = deriveOnboarding(data);
+
+  // Read-only checklist the account team maintains for this client (e.g. a
+  // branding launch cycle). Grouped by section, in order.
+  const { data: checklist } = await createClient()
+    .from("client_checklist_items").select("*").eq("client_id", client.id).order("position", { ascending: true });
+  const cl = (checklist ?? []) as any[];
+  const clDone = cl.filter((i) => i.done).length;
+  const clGroups: { section: string | null; items: any[] }[] = [];
+  { const idx = new Map<string, number>(); for (const it of cl) { const k = it.section || ""; if (!idx.has(k)) { idx.set(k, clGroups.length); clGroups.push({ section: it.section, items: [] }); } clGroups[idx.get(k)!].items.push(it); } }
+  const clPct = cl.length ? Math.round((clDone / cl.length) * 100) : 0;
   // assigned_to holds the owning employee's staff id — resolve it to a name.
   let lead = "Assigned within 48 hours";
   if (client.assigned_to && /^[0-9a-f-]{36}$/i.test(client.assigned_to)) {
@@ -45,6 +56,39 @@ export default async function OnboardingPage() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {cl.length > 0 && (
+        <section>
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <h2 className="font-fraunces text-[22px] font-medium text-forest">Your checklist</h2>
+            <span className="text-[13px] prose-muted">{clDone} of {cl.length} done · {clPct}%</span>
+          </div>
+          <div className="mt-2 h-1.5 w-full max-w-md bg-line-soft"><div className="h-1.5 bg-gold" style={{ width: `${clPct}%` }} /></div>
+          <div className="mt-4 flex flex-col gap-4">
+            {clGroups.map((g, gi) => (
+              <div key={gi}>
+                {g.section && <p className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-forest">{g.section}</p>}
+                <ul className="flex flex-col gap-1">
+                  {g.items.map((it) => (
+                    <li key={it.id} className="flex items-start gap-2 text-[15px]">
+                      <span className={`mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center border text-[10px] leading-none ${it.done ? "border-forest bg-forest text-white" : "border-line-warm bg-white text-transparent"}`}>✓</span>
+                      <span className={it.done ? "text-ink-faint line-through" : "text-charcoal"}>{it.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <section>
+        <h2 className="mb-2 font-fraunces text-[22px] font-medium text-forest">Marketing photo shoot</h2>
+        <div className="border border-line-warm bg-white p-5">
+          <p className="mb-3 max-w-[48em] text-[15px] prose-soft">Ready for fresh brand photography? Book a consultation with our photographer. Your account manager coordinates the shoot and it&apos;s billed through your HCC account — no separate vendor to set up.</p>
+          <PhotoShootButton url={SITE.photographerUrl} />
+        </div>
       </section>
 
       <section>

@@ -211,3 +211,29 @@ export async function markKickoffScheduled(): Promise<{ ok?: boolean; error?: st
   revalidatePath("/portal");
   return { ok: true };
 }
+
+/**
+ * Client requests a marketing photo shoot. Logs a task in their board for the
+ * Account Manager to coordinate and bill through HCC, and emails the assigned
+ * staffer. The client is then sent to the photographer's calendar (handled on
+ * the client side after this resolves).
+ */
+export async function requestPhotoShoot(): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
+  const title = "Marketing photo shoot consultation";
+  const { error } = await createClient().from("client_tasks").insert({
+    client_id: client.id,
+    title,
+    details: "Client requested a marketing photo shoot and was sent to the photographer's calendar to set up a consultation. Coordinate the appointment with the photographer and bill it through HCC (add a charge to this task).",
+    column_name: "Requested",
+    created_by: "client",
+  });
+  if (error) return { error: error.message };
+  await notifyAssignedStaff(client, (to) =>
+    sendStaffTaskAlert({ to, clientName: clientLabel(client), title, due: "", portalUrl: siteUrl() ? `${siteUrl()}/staff/daily` : "" }),
+  );
+  revalidatePath("/portal/tasks"); revalidatePath("/staff/daily");
+  return { ok: true };
+}
