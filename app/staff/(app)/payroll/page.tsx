@@ -6,6 +6,7 @@ import { ApproveButton } from "@/components/staff/approve-button";
 import { PrintButton } from "@/components/staff/print-button";
 import { PasswordResetForm } from "@/components/staff/password-reset-form";
 import { StaffResetActions } from "@/components/staff/staff-reset-actions";
+import { LocalTime } from "@/components/local-time";
 
 /** Payroll & access — team-facing admin operations that used to live on the
  *  Admin tab: who's on the clock, timesheets/payroll, and password resets. */
@@ -42,7 +43,7 @@ export default async function PayrollPage() {
               return (
                 <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
                   <div><p className="font-medium text-charcoal">{staffName.get(p.staff_id) || "Unknown"}</p>
-                    <p className="text-[13px] prose-muted">Since {new Date(p.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })} · ~{el.toFixed(1)}h{el > 4 ? " · over 4h" : ""}{p.note ? ` · ${p.note}` : ""}</p></div>
+                    <p className="text-[13px] prose-muted">Since <LocalTime iso={p.started_at} mode="time" /> · ~{el.toFixed(1)}h{el > 4 ? " · over 4h" : ""}{p.note ? ` · ${p.note}` : ""}</p></div>
                   <ForceClockOutButton punchId={p.id} startedAt={p.started_at} />
                 </li>
               );
@@ -95,7 +96,7 @@ export default async function PayrollPage() {
             {(resetReqs ?? []).map((r: any) => (
               <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
                 <div><p className="font-medium text-charcoal">{r.email}</p>
-                  <p className="text-[12px] prose-muted">Requested {new Date(r.requested_at).toLocaleString()}</p></div>
+                  <p className="text-[12px] prose-muted">Requested <LocalTime iso={r.requested_at} /></p></div>
                 <StaffResetActions id={r.id} />
               </li>
             ))}

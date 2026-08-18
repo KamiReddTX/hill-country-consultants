@@ -4,6 +4,7 @@ import { getStaffMember, isPrivileged, getClients, getBookings } from "@/lib/sta
 import { createClient } from "@/lib/supabase/server";
 import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
 import { money } from "@/lib/portal";
+import { LocalTime } from "@/components/local-time";
 
 /** Admin — slim cross-client operations. Per-client management now lives on the
  *  Clients tab; team pay & password resets live on the Payroll tab. What remains
@@ -64,7 +65,7 @@ export default async function AdminPage() {
               <li key={b.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
                 <div><p className="font-medium text-charcoal">{clientName.get((b as any).client_id) || b.ref} · {money(b.paid_cents)} <span className="text-[12px] text-ink-faint">({b.pay_mode})</span></p>
                   <p className="text-[13px] prose-muted">{b.ref} · start {b.start_date || "TBC"}{b.class_name ? ` · ${b.class_name}` : ""} · {(b.items || []).length} item(s)</p>
-                  {b.consent_at && <p className="text-[11px] text-ink-faint">Consent {new Date(b.consent_at).toLocaleDateString()} · IP {b.consent_ip || "—"}</p>}
+                  {b.consent_at && <p className="text-[11px] text-ink-faint">Consent <LocalTime iso={b.consent_at} mode="date" /> · IP {b.consent_ip || "—"}</p>}
                 </div>
               </li>
             ))}

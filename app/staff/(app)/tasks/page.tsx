@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, getDirectory, isPrivileged } from "@/lib/staff";
+import { getStaffMember, getClients, getStaffOptions, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskWorkflowButton } from "@/components/staff/task-workflow-button";
 import { TaskChargeForm } from "@/components/staff/task-charge-form";
@@ -12,11 +12,11 @@ export default async function StaffTaskBoardPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
   const admin = isPrivileged(me);
-  const [clients, directory] = await Promise.all([getClients(), getDirectory()]);
+  const [clients, staffOptions] = await Promise.all([getClients(), getStaffOptions()]);
   const byId = new Map(clients.map((c) => [c.id, c]));
   const name = (cid: string) => byId.get(cid)?.business || byId.get(cid)?.contact || "Client";
-  const assigneeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
-  const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
+  const assigneeOpts = staffOptions;
+  const staffName = new Map(staffOptions.map((o) => [o.id, o.label]));
 
   const db = createClient();
   const [{ data: tasks }, { data: files }] = await Promise.all([

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, getClients, getDirectory } from "@/lib/staff";
+import { getStaffMember, getClients, getStaffOptions } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { TaskMoveControl } from "@/components/staff/task-move-control";
 import { TaskAssignee } from "@/components/staff/task-assignee";
@@ -15,13 +15,13 @@ const RECURRING = [
 export default async function DailyPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  const [clients, directory] = await Promise.all([getClients(), getDirectory()]);
+  const [clients, staffOptions] = await Promise.all([getClients(), getStaffOptions()]);
   // getClients is RLS-scoped, so every client here is one I can reach (owner, team, or privileged).
   const byId = new Map(clients.map((c) => [c.id, c]));
   const mineOrOpen = (cid: string) => byId.has(cid);
   const workable = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
-  const assigneeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
-  const staffName = new Map(directory.map((s) => [s.id, s.name || s.email]));
+  const assigneeOpts = staffOptions;
+  const staffName = new Map(staffOptions.map((o) => [o.id, o.label]));
 
   const db = createClient();
   const [tasks, notes, vault] = await Promise.all([

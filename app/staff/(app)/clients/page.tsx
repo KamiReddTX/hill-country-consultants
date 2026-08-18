@@ -12,6 +12,7 @@ import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { DeleteClientButton } from "@/components/staff/delete-client-button";
 import { ClientContactsManager } from "@/components/staff/client-contacts-manager";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
+import { LocalTime } from "@/components/local-time";
 
 /** Clients hub — one expandable row per client with everything about them:
  *  account setup, contacts & suspension, bookings, weekly reports, recent work
@@ -154,7 +155,7 @@ export default async function ClientsPage() {
                   <GenerateReportForm clients={[{ id: c.id, label }]} />
                   {rp.length > 0 && (
                     <ul className="mt-2 flex flex-col gap-0.5">
-                      {rp.map((r: any) => <li key={r.id} className="text-[12px] prose-muted">{r.name} · {new Date(r.created_at).toLocaleDateString()}</li>)}
+                      {rp.map((r: any) => <li key={r.id} className="text-[12px] prose-muted">{r.name} · <LocalTime iso={r.created_at} mode="date" /></li>)}
                     </ul>
                   )}
                 </div>

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
+import { LocalTime } from "@/components/local-time";
 
 const HANDOFF = [
   "Your account team sends you a vault invitation from our password manager — check the sender is hillcountryconsultants.com.",
@@ -41,7 +42,7 @@ export default async function VaultPage() {
                 <div className="min-w-0">
                   <p className="text-[15.5px] font-medium text-charcoal">{v.name}</p>
                   <p className="text-[13px] prose-muted">{v.username ? `${v.username} · ` : ""}{v.url || "no URL"}{v.purpose ? ` · ${v.purpose}` : ""}</p>
-                  <p className="text-[12px] text-ink-faint">Updated {new Date(v.updated_at).toLocaleDateString()}</p>
+                  <p className="text-[12px] text-ink-faint">Updated <LocalTime iso={v.updated_at} mode="date" /></p>
                 </div>
                 <span className={`text-[12px] font-semibold ${v.needs_resync ? "text-red-700" : "text-forest"}`}>{v.needs_resync ? "Needs re-sync" : "In sync"}</span>
               </li>

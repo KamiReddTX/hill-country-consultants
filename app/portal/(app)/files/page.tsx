@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
+import { LocalTime } from "@/components/local-time";
 import { createClient } from "@/lib/supabase/server";
 
 function kb(n: number | null) {
@@ -36,7 +37,7 @@ export default async function FilesPage() {
             {(files ?? []).map((f: any) => (
               <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-4">
                 <div><p className="text-[15px] text-charcoal">{f.name}</p>
-                  <p className="text-[12px] prose-muted">{kb(f.size)}{f.uploaded_by ? ` · shared by ${f.uploaded_by}` : ""} · {new Date(f.created_at).toLocaleDateString()}</p></div>
+                  <p className="text-[12px] prose-muted">{kb(f.size)}{f.uploaded_by ? ` · shared by ${f.uploaded_by}` : ""} · <LocalTime iso={f.created_at} mode="date" /></p></div>
                 <a href={`/api/client-file/${f.id}`} className="btn-gold text-[13px]">Open / Download</a>
               </li>
             ))}

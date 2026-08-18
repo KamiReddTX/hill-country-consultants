@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getPortalClient } from "@/lib/portal";
+import { LocalTime } from "@/components/local-time";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function WeeklyPage() {
@@ -37,7 +38,7 @@ export default async function WeeklyPage() {
             <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-line-warm bg-white p-4">
               <div>
                 <p className="font-medium text-charcoal">{r.name}</p>
-                <p className="text-[12px] prose-muted">Published {new Date(r.created_at).toLocaleDateString()}</p>
+                <p className="text-[12px] prose-muted">Published <LocalTime iso={r.created_at} mode="date" /></p>
               </div>
               <a href={`/api/client-report/${r.id}`} className="btn-gold text-[13px]">Open / Download</a>
             </li>

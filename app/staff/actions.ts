@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { uploadNoteFiles } from "@/lib/message-files";
 import { getClientEmails } from "@/lib/client-contacts";
@@ -55,7 +55,7 @@ export async function forceClockOut(punchId: string, startedAt: string): Promise
 export async function assignClient(clientId: string, staffId: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isPrivileged(me)) return { error: "Admins and business managers only." };
-  const db = createClient();
+  const db = createServiceClient(); // clients write policy is admin-only; guarded above so service-role is safe
   // assigned_to now holds the owning employee's staff id (was a role string).
   const { error } = await db.from("clients").update({ assigned_to: staffId }).eq("id", clientId);
   if (error) return { error: error.message };
@@ -84,7 +84,7 @@ export async function deleteClient(clientId: string): Promise<ActionResult> {
 export async function setClientStatus(clientId: string, status: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isPrivileged(me)) return { error: "Admins and business managers only." };
-  const db = createClient();
+  const db = createServiceClient(); // clients write policy is admin-only; guarded above
   const { error } = await db.from("clients").update({ status }).eq("id", clientId);
   if (error) return { error: error.message };
   revalidatePath("/staff/admin");
@@ -777,9 +777,9 @@ export async function sendTaskPaymentLink(taskId: string, amount: string): Promi
  *  Work Log (and weekly report). Only approved time is shown to the client. */
 export async function approveWorkLog(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
-  const db = createClient();
-  const { error } = await db.from("client_work_log").update({ approved: true, approved_by: me.name || me.role, approved_at: new Date().toISOString() }).eq("id", id);
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const db = createServiceClient(); // work-log write is privileged; guarded above
+  const { error } = await db.from("client_work_log").update({ approved: true, approved_by: me!.name || me!.role, approved_at: new Date().toISOString() }).eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/admin"); revalidatePath("/portal/work-log"); revalidatePath("/portal/weekly");
   return { ok: true };
@@ -957,7 +957,7 @@ export async function deleteClientContact(id: string): Promise<ActionResult> {
 export async function setClientSuspended(clientId: string, suspended: boolean, reason?: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isPrivileged(me)) return { error: "Admins and business managers only." };
-  const { error } = await createClient().from("clients").update({
+  const { error } = await createServiceClient().from("clients").update({ // clients write policy is admin-only; guarded above
     suspended,
     suspended_reason: suspended ? (reason || "Non-payment") : null,
     suspended_at: suspended ? new Date().toISOString() : null,

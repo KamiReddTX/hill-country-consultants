@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
 import { TaskRequestForm } from "@/components/portal/task-request-form";
 import { TaskReviewActions } from "@/components/portal/task-review-actions";
+import { LocalTime } from "@/components/local-time";
 
 const COLUMNS = ["Requested", "In progress", "In review", "Delivered"];
 
@@ -71,7 +72,7 @@ export default async function TasksPage() {
                       {t.needs_clarification && col === "In progress" && <p className="mt-1 text-[11px] text-gold">Sent back for changes</p>}
                       {col === "In review" && <TaskReviewActions taskId={t.id} />}
                       {col === "Delivered" && t.approved_at && (
-                        <p className="mt-1 text-[11px] text-forest">Approved {new Date(t.approved_at).toLocaleDateString()}</p>
+                        <p className="mt-1 text-[11px] text-forest">Approved <LocalTime iso={t.approved_at} mode="date" /></p>
                       )}
                     </li>
                   );
