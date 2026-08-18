@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ImageSlot } from "@/components/image-slot";
 import { RateLines } from "@/components/rate-lines";
+import { ProjectSampleBoard } from "@/components/services/project-sample-board";
 import {
   SERVICE_DETAILS, SERVICE_META, SERVICE_SLUGS, SERVICE_GROUPS, isServiceKey,
 } from "@/content/services";
@@ -65,6 +66,14 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
             <ul className="grid gap-3 md:grid-cols-3">
               {d.forWho.map((x, i) => <li key={i} className="border-t border-line-soft pt-3 text-[16px] prose-soft">{x}</li>)}
             </ul>
+            {d.examples && (
+              <div className="mt-8">
+                <p className="kicker mb-3">What we can manage</p>
+                <div className="flex flex-wrap gap-2">
+                  {d.examples.map((x, i) => <span key={i} className="border border-line-warm bg-cream/40 px-3 py-1.5 text-[14px] text-charcoal">{x}</span>)}
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}
@@ -127,6 +136,16 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+      )}
+
+      {key === "pm" && (
+        <section className="section-white">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">See it in action</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <ProjectSampleBoard />
           </div>
         </section>
       )}

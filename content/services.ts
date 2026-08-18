@@ -41,6 +41,7 @@ export interface ServiceDetail {
   how: string;
   // Extended detail (optional — each renders only when present).
   forWho?: string[];
+  examples?: string[];
   deliverables?: string[];
   provide?: string[];
   process?: { t: string; d: string }[];
@@ -121,6 +122,62 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     expect: ["A named coordinator and a regular status cadence", "One active project at Foundation, up to three concurrent at Momentum, program-level at Enterprise", "Weekly status at minimum; same-day on blockers", "Scope and milestones approved in writing before work starts", "A close-out wrap summary at the end"],
     scope: "We coordinate — we do not provide stamped or licensed construction management or engineering.",
     how: HOW,
+    forWho: [
+      "Owners juggling a launch, build, or initiative on top of running the business.",
+      "Teams with a project that keeps slipping because no one owns the moving parts.",
+      "Anyone who needs one place to see status, deadlines, and who owes what.",
+    ],
+    examples: [
+      "Business launches", "Construction documentation projects", "Website & app projects",
+      "Publishing projects", "Events", "Vendor onboarding", "Product launches", "Internal operations & process projects",
+    ],
+    deliverables: [
+      "A shared, live task and status board — one source of truth for the whole project.",
+      "Regular status updates and documented meeting notes with action items.",
+      "Vendors and subcontractors coordinated, kept on schedule and on deliverable.",
+      "Proactive flags on risks, blockers, and slipping dates.",
+      "A written project plan and timeline where your tier includes it.",
+      "A close-out summary at the end.",
+    ],
+    provide: [
+      "A clear goal, deadline, and any hard constraints.",
+      "Access to the people, vendors, and tools involved.",
+      "Decisions when we flag something that needs your call.",
+    ],
+    process: [
+      { t: "Strategy session", d: "A free 30-minute call to define the goal, scope, and what 'done' looks like." },
+      { t: "Plan & board setup", d: "We stand up the task/status board and, where your tier includes it, a written project plan and timeline for your approval." },
+      { t: "Coordination", d: "We drive tasks, deadlines, and dependencies, coordinate vendors, and keep everyone moving in the right order." },
+      { t: "Status & meetings", d: "Regular status updates and documented meetings with action items; blockers flagged the same day." },
+      { t: "Close-out", d: "A wrap summary of what was delivered, what's outstanding, and any handoff notes." },
+    ],
+    timeline: "Timelines are set by the project, not a fixed clock. We agree the plan and milestones up front and report against them on a regular cadence, with blockers surfaced the same day.",
+    revisions: "The plan and board are living documents — we adjust scope, sequence, and dates with you as the project evolves, rather than working to a fixed 'revision round.'",
+    software: [
+      "A shared task/status board — your client-portal board, or your existing tool.",
+      "Calendar and meeting tools for scheduling and notes.",
+      "Document and file storage for plans, notes, and deliverables.",
+      "Wherever possible, the project tools your team already uses.",
+    ],
+    notIncluded: [
+      "Stamped or licensed construction management, engineering, or architectural services.",
+      "Vendor contracts and payments — you hold those; we coordinate.",
+      "The specialty production itself (design, publishing, web, submittals) — separate service lines we can manage.",
+    ],
+    addOns: [
+      "Additional concurrent projects beyond your tier.",
+      "Any specialty service line as the work being managed.",
+      "A written project plan & timeline where your tier doesn't include it by default.",
+    ],
+    afterPurchase: "We schedule the strategy session, define scope and 'done,' and stand up your board — and a written plan where your tier includes it — for approval. Then coordination begins and you track everything from your portal.",
+    faqs: [
+      { q: "What kinds of projects can you manage?", a: "Business launches, construction documentation projects, website and app builds, publishing projects, events, vendor onboarding, product launches, and internal operations or process projects — among others. If it has moving parts, deadlines, and people to coordinate, we can run it." },
+      { q: "Do you run our meetings?", a: "It depends on the project and your tier. On some engagements we facilitate and document meetings; on others we schedule and take notes while you lead. We set that expectation during the strategy session." },
+      { q: "Do you handle our vendors and pay them?", a: "We coordinate vendors and subcontractors — schedules, deliverables, and communication — but you hold the contracts and make the payments. We keep everyone on track; you keep control of the money and the agreements." },
+      { q: "Do I get a written project plan?", a: "Where your tier includes it, yes — a documented plan and timeline you approve before work begins. Otherwise, planning lives on your shared task board so you still see the full picture." },
+      { q: "How many projects can you run at once?", a: "One active project at Foundation, up to three concurrent at Momentum, and program-level coordination at Enterprise." },
+      { q: "Is this construction management?", a: "No. We coordinate and document; we do not provide stamped or licensed construction management, engineering, or architectural services." },
+    ],
   },
   submittals: {
     headline: "Get Your Submittals Handled",
