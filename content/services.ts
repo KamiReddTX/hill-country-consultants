@@ -39,6 +39,18 @@ export interface ServiceDetail {
   expect: string[];
   scope: string;
   how: string;
+  // Extended detail (optional — each renders only when present).
+  forWho?: string[];
+  deliverables?: string[];
+  provide?: string[];
+  process?: { t: string; d: string }[];
+  timeline?: string;
+  revisions?: string;
+  notIncluded?: string[];
+  addOns?: string[];
+  software?: string[];
+  afterPurchase?: string;
+  faqs?: { q: string; a: string }[];
 }
 
 export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
@@ -49,6 +61,58 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     expect: ["An assigned assistant and a dedicated block of hours each business day — 2, 5, or 8 by tier", "Same-business-day acknowledgment; tasks actioned in agreed priority", "Secure handling of logins and credentials", "A shared task board so you always see status", "A weekly work summary"],
     scope: "Hours are capped by tier; overage is billed at $55 Foundation / $50 Momentum / $40 Enterprise per hour. Not a substitute for licensed bookkeeping, legal, or tax services.",
     how: HOW,
+    forWho: [
+      "Owners and operators buried in the inbox, scheduling, and follow-up they can't afford to keep doing themselves.",
+      "Small teams that need administrative capacity without hiring, onboarding, and running payroll.",
+      "Professionals who need a reliable second set of hands on recurring back-office work.",
+    ],
+    deliverables: [
+      "A managed inbox and calendar, kept current every business day.",
+      "Updated CRM records and organized, correctly named files.",
+      "Formatted documents, prepared correspondence, and light research results.",
+      "Booked travel and logistics with itineraries.",
+      "Follow-ups sent and tracked with your clients, vendors, and subcontractors.",
+      "A weekly written summary of everything completed and the hours used.",
+    ],
+    provide: [
+      "Access to the tools we'll work in — we set up a secure shared password vault, never plain-text logins.",
+      "A short intro to your priorities, your preferences, and who's who.",
+      "Timely answers when we flag something that needs your decision.",
+    ],
+    process: [
+      { t: "Strategy session", d: "A free 30-minute call to map the recurring work and recommend the right tier or scope." },
+      { t: "Onboarding — week one", d: "Kickoff call, a 30-day roadmap, secure credential handoff through the vault, and your shared task board goes live." },
+      { t: "Daily work", d: "Your assistant works the agreed hours each business day in your priority order; you watch status on the task board." },
+      { t: "Weekly summary", d: "Every week, a written summary of tasks completed and hours used, reconciled against your allotment." },
+      { t: "Reviews", d: "Scheduled reviews on your tier's cadence to adjust priorities and scope as your needs change." },
+    ],
+    timeline: "Onboarding completes in week one, then recurring work runs continuously each business day. Turnaround on any individual task depends on its scope and your priority order rather than a fixed clock — anything time-sensitive is flagged and sequenced first.",
+    revisions: "Administrative work is done to your standard and adjusted until it's right — there's no fixed 'revision round' the way a one-off deliverable has.",
+    software: [
+      "Google Workspace and Microsoft 365 — email, calendar, docs, sheets, slides.",
+      "Common CRMs and project-management / task tools.",
+      "Scheduling and calendar-management tools.",
+      "Document and file-storage platforms.",
+      "Wherever possible, we work in the tools you already use.",
+    ],
+    notIncluded: [
+      "Licensed bookkeeping, accounting, tax, or legal services.",
+      "Work beyond your purchased hours (billed as overage at your tier rate).",
+      "Specialty production — design, publishing, media, web, submittals — which are their own service lines.",
+    ],
+    addOns: [
+      "Additional hour blocks beyond your tier, billed as overage: $55 Foundation / $50 Momentum / $40 Enterprise per hour.",
+      "Any specialty service line as a standalone scope, or as an included allowance at higher tiers.",
+    ],
+    afterPurchase: "You're routed straight into onboarding: a kickoff call, your 30-day roadmap, secure credential handoff through the shared vault, and your task board and client portal go live in week one — so from day one you see every request, its status, and your weekly summary.",
+    faqs: [
+      { q: "How is time tracked, and what counts against my hours?", a: "Your assistant logs hours by task. All task work — inbox, scheduling, CRM, follow-up, research, document prep, and coordination — counts against your monthly allotment, and you get a weekly summary of tasks completed and hours used." },
+      { q: "Do unused hours roll over?", a: "No. Hours are a monthly allotment and reset each month; unused hours don't carry forward. If you regularly need more, we'll right-size your tier." },
+      { q: "Can my assistant communicate with my customers directly?", a: "Yes. With your direction, your assistant can email, schedule, and follow up with your customers on your behalf, representing your business." },
+      { q: "What if I need more than my hours in a given month?", a: "Additional time is billed as overage at your tier rate ($55 Foundation / $50 Momentum / $40 Enterprise per hour), and we flag it before you cross the line so there are no surprises." },
+      { q: "How do you handle my logins securely?", a: "Through a shared password-manager vault — you hold the master password and we never see or store logins in plain text. At offboarding, access is returned or revoked the same day." },
+      { q: "Is this a substitute for a bookkeeper or attorney?", a: "No. We handle administrative and coordination work; licensed bookkeeping, tax, and legal services are outside our scope, and we'll flag anything that needs a licensed professional." },
+    ],
   },
   pm: {
     headline: "Project Management & Coordination",

@@ -57,6 +57,18 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </div>
       </section>
 
+      {d.forWho && (
+        <section className="section-white">
+          <div className="shell py-14">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Who it&apos;s for</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <ul className="grid gap-3 md:grid-cols-3">
+              {d.forWho.map((x, i) => <li key={i} className="border-t border-line-soft pt-3 text-[16px] prose-soft">{x}</li>)}
+            </ul>
+          </div>
+        </section>
+      )}
+
       <section className="section-cream">
         <div className="shell grid gap-12 py-16 md:grid-cols-2">
           <div>
@@ -80,6 +92,45 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </div>
       </section>
 
+      {(d.deliverables || d.provide) && (
+        <section className="section-white">
+          <div className="shell grid gap-12 py-16 md:grid-cols-2">
+            {d.deliverables && (
+              <div>
+                <h2 className="font-fraunces text-[24px] font-medium text-forest">What you receive</h2>
+                <span className="rule-gold mb-6 mt-3" />
+                <ul className="flex flex-col gap-3">{d.deliverables.map((x, i) => <li key={i} className="border-t border-line-soft pt-3 text-[16px] prose-soft">{x}</li>)}</ul>
+              </div>
+            )}
+            {d.provide && (
+              <div>
+                <h2 className="font-fraunces text-[24px] font-medium text-forest">What you provide</h2>
+                <span className="rule-gold mb-6 mt-3" />
+                <ul className="flex flex-col gap-3">{d.provide.map((x, i) => <li key={i} className="border-t border-line-soft pt-3 text-[16px] prose-soft">{x}</li>)}</ul>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
+
+      {d.process && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">How it works</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <ol className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+              {d.process.map((s, i) => (
+                <li key={i} className="border border-line-warm bg-white p-5">
+                  <p className="kicker mb-1">Step {i + 1}</p>
+                  <p className="font-fraunces text-[18px] text-forest">{s.t}</p>
+                  <p className="mt-1 text-[15px] prose-soft">{s.d}</p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+      )}
+
       <section className="section-white">
         <div className="shell py-16">
           <h2 className="font-fraunces text-[24px] font-medium text-forest">Rates</h2>
@@ -94,6 +145,56 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
               <p className="kicker mb-2">How to start</p>
               <p className="text-[16px] prose-soft">{d.how}</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {(d.timeline || d.revisions || d.software || d.notIncluded || d.addOns) && (
+        <section className="section-cream">
+          <div className="shell grid gap-10 py-16 md:grid-cols-2">
+            {d.timeline && <div><p className="kicker mb-2">Timeline</p><p className="text-[16px] prose-soft">{d.timeline}</p></div>}
+            {d.revisions && <div><p className="kicker mb-2">Revisions</p><p className="text-[16px] prose-soft">{d.revisions}</p></div>}
+            {d.software && <div><p className="kicker mb-2">Software &amp; platforms</p><ul className="flex flex-col gap-2">{d.software.map((x, i) => <li key={i} className="text-[15px] prose-soft">{x}</li>)}</ul></div>}
+            {d.notIncluded && <div><p className="kicker mb-2">Not included</p><ul className="flex flex-col gap-2">{d.notIncluded.map((x, i) => <li key={i} className="text-[15px] prose-soft">{x}</li>)}</ul></div>}
+            {d.addOns && <div><p className="kicker mb-2">Upgrades &amp; add-ons</p><ul className="flex flex-col gap-2">{d.addOns.map((x, i) => <li key={i} className="text-[15px] prose-soft">{x}</li>)}</ul></div>}
+          </div>
+        </section>
+      )}
+
+      {d.afterPurchase && (
+        <section className="section-white">
+          <div className="shell py-14">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">After you purchase</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="max-w-[52em] text-[16px] prose-soft">{d.afterPurchase}</p>
+          </div>
+        </section>
+      )}
+
+      {d.faqs && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Questions</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <div className="flex max-w-[60em] flex-col gap-3">
+              {d.faqs.map((f, i) => (
+                <details key={i} className="border border-line-warm bg-white">
+                  <summary className="min-h-touch cursor-pointer px-4 py-3 text-[16px] font-medium text-charcoal">{f.q}</summary>
+                  <div className="border-t border-line-soft px-4 py-3 text-[15px] prose-soft">{f.a}</div>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      <section className="section-white">
+        <div className="shell flex flex-col items-start gap-4 py-14">
+          <h2 className="font-fraunces text-[26px] text-forest">Ready to hand this off?</h2>
+          <div className="flex flex-wrap gap-4">
+            <Link href="/get-started" className="btn-gold">Get started</Link>
+            <Link href="/book" className="btn-outline">Book &amp; pay</Link>
+            <Link href="/plans" className="btn-outline">See plans</Link>
           </div>
         </div>
       </section>
