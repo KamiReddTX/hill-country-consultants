@@ -150,6 +150,33 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </section>
       )}
 
+      {key === "systems" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Automations we build</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">Real, rule-based flows that run themselves. A few examples:</p>
+            <div className="grid gap-4 md:grid-cols-2">
+              {[
+                ["Lead form submitted", "CRM record created", "Follow-up task assigned", "Email drafted"],
+                ["Employee uploads paperwork", "Tracker updated", "Manager notified"],
+                ["Client completes onboarding", "Project folder created", "Tasks generated"],
+                ["Invoice paid", "Onboarding email sent", "Client portal created"],
+              ].map((flow, i) => (
+                <div key={i} className="flex flex-wrap items-center gap-x-2 gap-y-1 border border-line-warm bg-white p-4">
+                  {flow.map((step, j) => (
+                    <span key={j} className="flex items-center gap-2">
+                      <span className="text-[14px] text-charcoal">{step}</span>
+                      {j < flow.length - 1 && <span className="text-gold" aria-hidden="true">→</span>}
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {key === "digital" && (
         <section className="section-cream">
           <div className="shell py-16">
