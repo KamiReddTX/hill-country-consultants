@@ -71,7 +71,7 @@ export const INDUSTRIES: Industry[] = [
     img: "Stacked books and page proofs",
     headline: "Get the book finished, published, and selling.",
     problem:
-      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing imprint.",
+      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing imprint and a registered publisher in the Library of Congress Preassigned Control Number (PCN) Program.",
     handles: [
       "Editorial at the stage you are at",
       "Interior and eBook formatting",
