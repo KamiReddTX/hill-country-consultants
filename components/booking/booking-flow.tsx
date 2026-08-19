@@ -64,6 +64,7 @@ export function BookingFlow({
   const [catFilter, setCatFilter] = useState<string | null>(null);
   const [industryFilter, setIndustryFilter] = useState<{ cart: string[]; quotes: string[]; name: string } | null>(null);
   const [quoteConsent, setQuoteConsent] = useState(false);
+  const [attendees, setAttendees] = useState(20);
   const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "", repCode: "" });
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +86,10 @@ export function BookingFlow({
   );
   const chosenQuotes = useMemo(() => QUOTE_ITEMS.filter((q) => quotes[q.id]), [quotes]);
   const fixedTotal = useMemo(() => chosen.reduce((s, it) => s + it.qty * it.price, 0), [chosen]);
-  const dueNowCents = fixedTotal * 100;
+  // Classes cover up to 20 attendees; each additional attendee is $250.
+  const extraAttendees = selectedClass ? Math.max(0, attendees - 20) : 0;
+  const extraCents = extraAttendees * 25000;
+  const dueNowCents = fixedTotal * 100 + extraCents;
   const canPay = fixedTotal > 0;
   const hasSelection = chosen.length > 0 || chosenQuotes.length > 0;
   const needsDate = !!selectedClass;
@@ -170,6 +174,7 @@ export function BookingFlow({
     }
     if (!needsDate && !form.startDate) { setError("Please choose a requested start date."); return; }
     if (needsDate && (!pickedDate || !slot)) { setError("Please choose a class date and time."); return; }
+    if (needsDate && attendees < 20) { setError("Classes are for a minimum of 20 attendees."); return; }
     // The all-sales-are-final consent applies only to a paid booking; a free quote
     // request carries no obligation, so it isn't gated on it.
     if (canPay && !consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }
@@ -181,7 +186,7 @@ export function BookingFlow({
       payMode: "full", dueNowCents,
       contact: form, startDate,
       className: selectedClass ? `${selectedClass.no} — ${selectedClass.name}` : "",
-      classDate: pickedDate, classSlot: slot,
+      classDate: pickedDate, classSlot: slot, attendees,
       consentAt: new Date().toISOString(),
       repCode: form.repCode,
     };
@@ -307,6 +312,12 @@ export function BookingFlow({
                   <p className="kicker mb-2">Class selected</p>
                   <p className="text-[17px] font-medium text-charcoal">{selectedClass.no} — {selectedClass.name}</p>
                   <p className="mt-1 text-[13px] prose-muted">Minimum 20 attendees · additional attendees $250 each · booked 30–90 days out.</p>
+                  <label className="mt-3 flex flex-col gap-1 text-[13px] font-medium text-ink-faint">Number of attendees (minimum 20)
+                    <input type="number" min={20} value={attendees}
+                      onChange={(e) => setAttendees(Math.max(1, Math.floor(Number(e.target.value) || 0)))}
+                      className="min-h-touch w-32 border border-line-warm bg-white px-3 text-[16px] outline-none focus:border-forest" />
+                  </label>
+                  {extraAttendees > 0 && <p className="mt-1 text-[13px] text-forest">+{extraAttendees} over 20 × $250 = {usd(extraAttendees * 250)}</p>}
                   <p className="mt-3 text-[14px] prose-muted">{slotNoteForDow(pickedDow ?? 1)}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <button className="btn-outline px-3 text-[13px]" onClick={() => setCalOffset((o) => Math.max(0, o - 1))}>← Prev</button>
@@ -506,6 +517,12 @@ export function BookingFlow({
                     </li>
                   ))}
                 </ul>
+              </div>
+            )}
+            {extraCents > 0 && (
+              <div className="mb-2 flex justify-between gap-3 text-[14.5px]">
+                <span className="min-w-0 text-charcoal">Additional attendees × {extraAttendees}</span>
+                <span className="tabular-nums prose-muted">{usd(extraAttendees * 250)}</span>
               </div>
             )}
             {canPay && (

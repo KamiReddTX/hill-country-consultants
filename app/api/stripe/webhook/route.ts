@@ -77,6 +77,22 @@ export async function POST(req: NextRequest) {
       scope_snapshot: { items, quotes, payMode: m.payMode, amount_total: s.amount_total } as any,
     }).eq("ref", ref);
 
+    // Classes drop onto every admin & business-manager staff calendar (their
+    // calendar of events + prep task) on the class date.
+    if (m.className && m.startDate) {
+      try {
+        const { data: allStaff } = await db.from("staff").select("id,roles,role").eq("active", true);
+        const mgrs = (allStaff || []).filter((st: any) => {
+          const roles = Array.isArray(st.roles) ? st.roles : [];
+          return roles.includes("Administrator") || roles.includes("Business Manager") || st.role === "Administrator" || st.role === "Business Manager";
+        });
+        const title = `Class: ${m.className}${m.attendees ? ` — ${m.attendees} attendees` : ""}`;
+        const note = `Booked class (${ref}). Contact ${m.contact || ""} · ${m.phone || ""} · ${m.email || ""}.`.trim();
+        const rows = mgrs.map((st: any) => ({ staff_id: st.id, created_by: null, title, event_date: m.startDate, event_time: m.classSlot || null, note }));
+        if (rows.length) await db.from("staff_events").insert(rows);
+      } catch (e) { console.warn("[webhook] class staff events", e); }
+    }
+
     // Invite the client to set a password and sign in; /auth/callback binds their
     // user_id to their client row on first login.
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
