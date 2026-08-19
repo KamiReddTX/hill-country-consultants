@@ -1368,6 +1368,6 @@ export async function updateInvoice(id: string, patch: { status?: string; payUrl
   }
   const { error } = await createServiceClient().from("invoices").update(upd).eq("id", id);
   if (error) return { error: error.message };
-  revalidatePath("/staff/billing");
+  revalidatePath("/staff/billing"); revalidatePath("/staff");
   return { ok: true };
 }

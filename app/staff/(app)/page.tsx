@@ -29,12 +29,19 @@ export default async function Dashboard() {
 
   // Manager-only firm-wide queues.
   const bookings = priv ? await getBookings() : [];
-  const revenueCents = bookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0);
+  // Revenue collected = one-time booking payments (Stripe at checkout) + every
+  // invoice marked paid in Billing & AR. Both are real money in; summing them
+  // keeps the dashboard in step with the invoicing system.
+  let revenueCents = bookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0);
   let pendingLog: any[] = [];
   if (priv) {
     const db = createClient();
-    const { data } = await db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(50);
-    pendingLog = data ?? [];
+    const [{ data: pl }, { data: paidInv }] = await Promise.all([
+      db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(50),
+      db.from("invoices").select("amount_cents").eq("status", "paid"),
+    ]);
+    pendingLog = pl ?? [];
+    revenueCents += (paidInv ?? []).reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
   }
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
 
