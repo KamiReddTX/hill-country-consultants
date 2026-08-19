@@ -89,7 +89,7 @@ export const INDUSTRIES: Industry[] = [
     ],
     samples: ["Book cover concept", "Interior spread", "Launch graphic set", "Media one-sheet"],
     faqs: [
-      { q: "Do I keep my rights and royalties?", a: "Yes. You own your work. Redd Ladys Chronicles is a publishing vendor that helps you produce and distribute — rights and contract terms are yours, and we flag any legal language to your attorney." },
+      { q: "Do I keep my rights and royalties?", a: "Yes. You own your work. Redd Ladys Chronicles is our publishing imprint that helps you produce and distribute — rights and contract terms are yours, and we flag any legal language to your attorney. You can publish on your own accounts (you own the ISBN and are publisher of record), or through the imprint — we'll explain both paths before you decide." },
       { q: "Can you help if my manuscript isn't finished?", a: "Yes — we meet you at your stage, whether that's developmental editing, line editing, or final formatting." },
       { q: "Do you guarantee sales?", a: "No one honestly can. We produce professional assets and coordinate distribution and launch; the results depend on many factors beyond production." },
     ],

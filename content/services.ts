@@ -386,7 +386,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "Three versions of the logo are in circulation and nobody knows which is current. We define and maintain a consistent visual brand your team can apply correctly.",
     included: ["Brand starter kit — palette, fonts, logo-usage basics", "Full brand system — guidelines plus reusable templates", "Ongoing brand governance at higher tiers"],
     expect: ["Cohesive, documented brand assets", "Editable templates delivered in usable formats", "Usage rules written down, not assumed", "Assets organized and handed off"],
-    scope: "Starter kit once per term. A full logo design from scratch may be scoped separately.",
+    scope: "As a standalone purchase, the Brand Starter Kit is a one-time project. For plan clients, a Starter Kit is included once per contract term. A full original logo design from scratch is included in the Full Brand System or scoped separately as an add-on to the Starter Kit.",
     how: HOW,
     forWho: [
       "Businesses with an inconsistent look — multiple logo versions, no rules, off-brand posts.",
@@ -444,7 +444,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
       { q: "What files do I receive?", a: "It depends on your package. Higher tiers include editable templates (e.g., Canva) alongside exports (PNG, JPG, PDF, and SVG where relevant) and the brand guide; the base level delivers exports and the guide." },
       { q: "Do you handle trademarks?", a: "No. We build the brand identity and guide; trademark searches, registration, and legal review of names or marks are outside our scope and are your attorney's role." },
       { q: "How is this different from Marketing?", a: "Brand Systems builds the identity — the palette, type, logo rules, templates, and guide. Marketing then uses that identity to create and post content and run campaigns." },
-      { q: "How often can I get a starter kit?", a: "The starter kit is delivered once per term; ongoing brand governance is available at higher tiers to keep everything consistent as you grow." },
+      { q: "How often can I get a starter kit?", a: "As a standalone purchase, the Brand Starter Kit is a one-time project. For plan clients, a Starter Kit is included once per contract term. Ongoing brand governance is available at higher tiers to keep everything consistent as you grow." },
     ],
   },
   publishing: {
@@ -510,6 +510,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     faqs: [
       { q: "Who owns the copyright?", a: "You do, on standard projects — the author retains full copyright to their work. Ghostwritten projects can differ and are handled by contract; either way, rights language is flagged to your attorney and never altered by us." },
       { q: "Whose ISBN is used?", a: "Your own. We help you obtain an ISBN you own, so you're the publisher of record. ISBNs are billed at cost." },
+      { q: "Can I publish on my own accounts, or through your imprint?", a: "Both paths are available, and we explain them before you decide. On the client-owned path, you own the ISBN, we set up distribution on your own Amazon KDP and IngramSpark accounts, you're the publisher of record, and retailers pay royalties directly to you. On the Redd Ladys Chronicles imprint path, your book is published under our imprint's accounts, royalties come through the imprint and are passed to you per your written agreement, and you keep your author rights. Either way, rights and contract terms are yours and any legal language is flagged to your attorney." },
       { q: "Who receives the royalties?", a: "It depends on how the book is published. On your own KDP/IngramSpark accounts, retailers pay royalties directly to you. If you choose to publish through our imprint's accounts, royalties come through the imprint and are passed to you per your agreement." },
       { q: "What is Redd Ladys Chronicles, and how does the Library of Congress relate to my book?", a: "Redd Ladys Chronicles is our publishing imprint, and it is a registered publisher in the Library of Congress Preassigned Control Number (PCN) Program — the program through which a publisher can request a Library of Congress Control Number (LCCN) for a forthcoming title so it can be cataloged by the Library of Congress. An ISBN, which identifies your book for sale and distribution, is issued separately by the ISBN agency (not the Library of Congress), and we help you obtain one you own. If you'd like an LCCN assigned to your title, we can request a Preassigned Control Number through our publisher account as part of your project." },
       { q: "What platforms do you distribute on?", a: "Primarily Amazon KDP and IngramSpark, set up on your accounts. We prepare your publishing metadata and help you obtain and assign an ISBN before release, and can order proof and author copies." },
@@ -1030,33 +1031,25 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
 /** /services listing, grouped, with the image drop-zone label per line. */
 export interface ServiceGroup { group: string; items: { key: ServiceKey; img: string; src: string }[] }
 export const SERVICE_GROUPS: ServiceGroup[] = [
-  { group: "Admin & Coordination", items: [
+  { group: "Business Operations", items: [
     { key: "va", img: "A virtual assistant's organized admin workspace", src: "/images/services/va.jpg" },
     { key: "pm", img: "Project planning and coordination", src: "/images/services/pm.jpg" },
-  ]},
-  { group: "Construction", items: [
-    { key: "submittals", img: "Construction worker carrying steel on a job site", src: "/images/services/submittals.jpg" },
     { key: "compliance", img: "Compliance and documentation records", src: "/images/services/compliance.jpg" },
+    { key: "systems", img: "Systems and automation workflow planning", src: "/images/services/systems.jpg" },
   ]},
-  { group: "Brand & Market", items: [
+  { group: "Brand & Growth", items: [
     { key: "marketing", img: "Marketing strategy documents laid out on a table", src: "/images/services/marketing.jpg" },
     { key: "brand", img: "Brand guidance on a phone beside eyeglasses", src: "/images/services/brand.jpg" },
   ]},
-  { group: "Publishing & Media", items: [
+  { group: "Production & Development", items: [
     { key: "publishing", img: "Shelves filled with books", src: "/images/services/publishing.jpg" },
     { key: "media", img: "Recording at a podcast microphone", src: "/images/services/media.jpg" },
-  ]},
-  { group: "Digital", items: [
     { key: "digital", img: "Smartphone home screen with app icons", src: "/images/services/digital.jpg" },
   ]},
-  { group: "People & Process", items: [
+  { group: "Specialty Services", items: [
+    { key: "submittals", img: "Construction worker carrying steel on a job site", src: "/images/services/submittals.jpg" },
     { key: "trainingSvc", img: "A corporate training session", src: "/images/services/trainingSvc.jpg" },
-    { key: "systems", img: "Systems and automation workflow planning", src: "/images/services/systems.jpg" },
-  ]},
-  { group: "Events", items: [
     { key: "events", img: "A seminar room arranged with rows of chairs", src: "/images/services/events.jpg" },
-  ]},
-  { group: "Specialty", items: [
     { key: "ag", img: "Aerial view of a tractor working a field", src: "/images/services/ag.jpg" },
     { key: "grants", img: "Volunteers loading boxes of aid supplies", src: "/images/services/grants.jpg" },
     { key: "notary", img: "Notary seal and stamped documents on a desk", src: "" },
@@ -1066,3 +1059,9 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
 export const SERVICE_SLUGS = Object.keys(SERVICE_DETAILS) as ServiceKey[];
 export const isServiceKey = (s: string): s is ServiceKey => s in SERVICE_DETAILS;
 export const serviceRateLines = (key: ServiceKey): RateLine[] => rateLinesFor(key);
+
+/** Public URL slug for a service. The training key is exposed as the friendlier "corporate-training". */
+export const publicServiceSlug = (key: string): string => (key === "trainingSvc" ? "corporate-training" : key);
+/** Resolve a public slug back to its ServiceKey (accepts "corporate-training" or a raw key). */
+export const serviceKeyFromSlug = (slug: string): ServiceKey | undefined =>
+  slug === "corporate-training" ? "trainingSvc" : isServiceKey(slug) ? slug : undefined;

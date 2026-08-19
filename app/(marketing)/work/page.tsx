@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ImageSlot } from "@/components/image-slot";
 
 export const metadata: Metadata = {
-  title: "Our Work · Hill Country Consultants",
+  title: "Our Work",
   description: "A look at the work Hill Country Consultants produces — construction submittals, documents & compliance, brand & marketing, publishing, websites & digital, podcast & media, events, training, agriculture, and nonprofits.",
   alternates: { canonical: "/work" },
 };

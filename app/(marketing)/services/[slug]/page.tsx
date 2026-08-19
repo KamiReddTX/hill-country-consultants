@@ -6,16 +6,17 @@ import { RateLines } from "@/components/rate-lines";
 import { ProjectSampleBoard } from "@/components/services/project-sample-board";
 import { CLASSES } from "@/content/classes";
 import {
-  SERVICE_DETAILS, SERVICE_META, SERVICE_SLUGS, SERVICE_GROUPS, isServiceKey,
+  SERVICE_DETAILS, SERVICE_META, SERVICE_SLUGS, SERVICE_GROUPS, publicServiceSlug, serviceKeyFromSlug,
 } from "@/content/services";
 
 export function generateStaticParams() {
-  return SERVICE_SLUGS.map((slug) => ({ slug }));
+  return SERVICE_SLUGS.map((key) => ({ slug: publicServiceSlug(key) }));
 }
 
 export function generateMetadata({ params }: { params: { slug: string } }): Metadata {
-  if (!isServiceKey(params.slug)) return { title: "Service" };
-  const meta = SERVICE_META[params.slug];
+  const key = serviceKeyFromSlug(params.slug);
+  if (!key) return { title: "Service" };
+  const meta = SERVICE_META[key];
   return {
     title: meta.name,
     description: meta.desc,
@@ -37,8 +38,8 @@ function imgFor(slug: string) {
 }
 
 export default function ServiceDetailPage({ params }: { params: { slug: string } }) {
-  if (!isServiceKey(params.slug)) notFound();
-  const key = params.slug;
+  const key = serviceKeyFromSlug(params.slug);
+  if (!key) notFound();
   const d = SERVICE_DETAILS[key];
 
   return (

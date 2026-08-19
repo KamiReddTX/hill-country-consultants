@@ -6,6 +6,7 @@ import Link from "next/link";
 import {
   BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd,
 } from "@/content/pricing";
+import { publicServiceSlug } from "@/content/services";
 import { classBySlug } from "@/content/classes";
 import { INDUSTRIES } from "@/content/industries";
 import { InquiryForm } from "@/components/inquiry-form";
@@ -144,7 +145,7 @@ export function BookingFlow({
       <div className="min-w-0">
         <p className="text-[15.5px] text-charcoal">{it.name}</p>
         <p className="text-[13px] prose-muted">{usd(it.price)} · {it.unit}</p>
-        <Link href={`/services/${it.svc}`} className="text-[12px] link-underline" target="_blank">See service details →</Link>
+        <Link href={`/services/${publicServiceSlug(it.svc)}`} className="text-[12px] link-underline" target="_blank">See service details →</Link>
       </div>
       <div className="flex items-center gap-2">
         <button aria-label="Remove one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, -1)}>−</button>
@@ -196,6 +197,8 @@ export function BookingFlow({
     if (needsDate && attendees < 20) { setError("Classes are for a minimum of 20 attendees."); return; }
     if (needsDate && !trainingFormat) { setError("Please choose a training format — virtual or on-site."); return; }
     if (needsDate && trainingFormat === "onsite" && (!onsite.city || !onsite.state || !onsite.venue)) { setError("Please add the city, state, and venue for on-site training."); return; }
+    // Rush is a surcharge added on top of a submittal package — it can't be bought on its own.
+    if (cart["rush"] && !cart["sub-pkg"] && !cart["sub-week"]) { setError("Rush is a surcharge added on top of a submittal package. Add a submittal package or weekly service to apply rush."); return; }
     // The all-sales-are-final consent applies only to a paid booking; a free quote
     // request carries no obligation, so it isn't gated on it.
     if (canPay && !consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }

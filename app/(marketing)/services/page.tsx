@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ImageSlot } from "@/components/image-slot";
 import { SectionHeading } from "@/components/section-heading";
 import { RateLines } from "@/components/rate-lines";
-import { SERVICE_GROUPS, SERVICE_META } from "@/content/services";
+import { SERVICE_GROUPS, SERVICE_META, publicServiceSlug } from "@/content/services";
 import { INDUSTRIES } from "@/content/industries";
 
 export const metadata: Metadata = {
@@ -61,7 +61,7 @@ export default function ServicesPage() {
                     <ImageSlot label={item.img} src={item.src} ratio="16 / 9" />
                     <h3 className="font-fraunces text-[21px] font-medium text-forest">{meta.name}</h3>
                     <p className="text-[16px] prose-soft">{meta.desc}</p>
-                    <Link href={`/services/${item.key}`} className="link-underline self-start text-[14.5px]">
+                    <Link href={`/services/${publicServiceSlug(item.key)}`} className="link-underline self-start text-[14.5px]">
                       What you receive
                     </Link>
                     <div className="mt-1 border-t border-line-soft pt-5">

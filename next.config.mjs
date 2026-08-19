@@ -11,6 +11,12 @@ const nextConfig = {
   eslint: { ignoreDuringBuilds: true },
   // Task-document uploads ride in the server action body.
   experimental: { serverActions: { bodySizeLimit: "15mb" } },
+  // Corporate Training moved from the internal key slug to a friendly URL.
+  async redirects() {
+    return [
+      { source: "/services/trainingSvc", destination: "/services/corporate-training", permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

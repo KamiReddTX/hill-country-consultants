@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Client Portal Preview · Hill Country Consultants",
+  title: "Client Portal Preview",
   description: "See inside the Hill Country Consultants client portal — dashboard, onboarding tracker, 30-day roadmap, task board, project status, weekly reports, work log, document vault, and messaging. Every client gets one.",
   alternates: { canonical: "/portal-preview" },
 };
