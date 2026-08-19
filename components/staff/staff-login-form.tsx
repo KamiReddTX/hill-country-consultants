@@ -21,7 +21,7 @@ export function StaffLoginForm() {
     const { error } = await db.auth.signInWithPassword({ email: email.trim().toLowerCase(), password });
     setBusy(false);
     if (error) { setError("That didn't match. Check with your administrator if you can't sign in."); return; }
-    router.push("/staff/profile"); router.refresh();
+    router.push("/staff"); router.refresh();
   }
 
   async function requestReset() {
