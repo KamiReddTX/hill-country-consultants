@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ImageSlot } from "@/components/image-slot";
 import { RateLines } from "@/components/rate-lines";
 import { ProjectSampleBoard } from "@/components/services/project-sample-board";
+import { CLASSES } from "@/content/classes";
 import {
   SERVICE_DETAILS, SERVICE_META, SERVICE_SLUGS, SERVICE_GROUPS, isServiceKey,
 } from "@/content/services";
@@ -136,6 +137,25 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
                 </li>
               ))}
             </ol>
+          </div>
+        </section>
+      )}
+
+      {key === "trainingSvc" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">The eight classes</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <div className="grid gap-4 md:grid-cols-2">
+              {CLASSES.map((c) => (
+                <Link key={c.slug} href={`/training/${c.slug}`} className="block border border-line-warm bg-white p-5 transition-colors hover:border-gold">
+                  <p className="kicker">{c.no}</p>
+                  <p className="mt-1 font-fraunces text-[18px] text-forest">{c.name}</p>
+                  <p className="mt-1 text-[13px] prose-muted">For {c.who} · {c.format}</p>
+                </Link>
+              ))}
+            </div>
+            <p className="mt-6 text-[13px] prose-muted">Minimum 20 participants · additional attendees $250 each · booked 30–90 days out.</p>
           </div>
         </section>
       )}

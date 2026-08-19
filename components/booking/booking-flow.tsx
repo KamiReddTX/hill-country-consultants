@@ -128,6 +128,7 @@ export function BookingFlow({
       <div className="min-w-0">
         <p className="text-[15.5px] text-charcoal">{it.name}</p>
         <p className="text-[13px] prose-muted">{usd(it.price)} · {it.unit}</p>
+        <Link href={`/services/${it.svc}`} className="text-[12px] link-underline" target="_blank">See service details →</Link>
       </div>
       <div className="flex items-center gap-2">
         <button aria-label="Remove one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, -1)}>−</button>
@@ -539,6 +540,7 @@ export function BookingFlow({
               <button onClick={clearAll} className="mt-3 w-full text-[13px] link-underline">Clear selections</button>
             )}
             <p className="mt-4 text-[12.5px] prose-muted">All sales are final. Scoped work is quoted in writing before it begins.</p>
+            <p className="mt-2 text-[12.5px] prose-muted">After you book, a receipt and secure client-portal access arrive by email, and your account goes into review — we confirm scope and next steps within 48 hours.</p>
           </div>
         </aside>
         </div>

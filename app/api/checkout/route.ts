@@ -14,7 +14,7 @@ function slotToMin(s: string): number | null {
 
 /**
  * Creates a Stripe Checkout Session from the cart.
- * Only fixed-rate items are charged. Full vs 50% deposit is honored.
+ * Only fixed-rate items are charged, in full (deposits removed).
  * Consent (timestamp + payer IP) and a compact scope snapshot ride in metadata
  * so the webhook can persist the dispute evidence with the booking.
  */

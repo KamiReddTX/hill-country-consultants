@@ -22,7 +22,7 @@ export const FAQS: { q: string; a: string }[] = [
   { q: "How do I book — do I have to talk to someone first?", a: "No. If you know what you need, book it and pay on the Book & Pay page at the published rate. If you are not sure, take the free 30-minute session first. Scoped work is always quoted in writing before it begins." },
   { q: "How much does it cost?", a: "Foundation $1,500/mo, Momentum $4,250/mo, Enterprise $7,000/mo. Every plan includes the full menu; your tier sets the volume. Individual services are also available à la carte." },
   { q: "Do I have to sign a long contract?", a: "Plans run a standard 12-month term. A quarterly option is available." },
-  { q: "Can I buy just one thing?", a: "Yes. À-la-carte rates are published. Standalone projects require a 50% deposit, balance due on delivery." },
+  { q: "Can I buy just one thing?", a: "Yes. À-la-carte rates are published and paid in full at booking. Larger custom projects are scoped and quoted in writing before any payment." },
   { q: "How do I pay?", a: "Credit card, Zelle, or Cash App. No checks or money orders. Monthly fees split — first half on the 1st, second half by the 15th — or paid in full. Five business-day grace period." },
   { q: "What if I need more than my plan includes?", a: "Anything beyond your allotment is quoted in writing first. Extra submittals are $450/week at any volume. Rush is $550/job and is never included in any plan." },
   { q: "How fast is turnaround?", a: "Standard at Foundation, priority in queue at Momentum, priority on everything at Enterprise." },
