@@ -46,7 +46,7 @@ export const PLAN_INCLUDED: string[] = [
 ];
 
 export const PLAN_BILLED: string[] = [
-  "Submittals beyond allotment $450/week at any volume — the standalone weekly rate for non-plan clients is $750/week",
+  "Submittal packages beyond your allotment — a flat $450/week covering any number of additional packages that week (the standalone weekly rate for non-plan clients is $750/week)",
   "Rush $550 surcharge added on top of a package, never included in any plan",
   "Additional VA hours $55 Foundation / $50 Momentum / $40 Enterprise",
   "Anything beyond allotment quoted in writing first",
