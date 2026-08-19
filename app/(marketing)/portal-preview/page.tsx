@@ -67,7 +67,7 @@ export default function PortalPreviewPage() {
               </ul>
             </FeatureCard>
 
-            <FeatureCard title="Task board" desc="Requested, in progress, in review, delivered — add a request yourself, we confirm same day.">
+            <FeatureCard title="Task board" desc="Requested, in progress, in review, delivered — add a request yourself, we confirm the same business day.">
               <div className="grid grid-cols-3 gap-1.5">
                 {[["Requested", ["New flyer"]], ["In progress", ["Submittal 2"]], ["Delivered", ["Kickoff"]]].map(([c, items], i) => (
                   <div key={i} className="border border-line-soft bg-white p-1.5">
