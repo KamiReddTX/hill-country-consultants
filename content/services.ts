@@ -853,11 +853,65 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
   },
   grants: {
     headline: "Grants & Nonprofit Administration",
-    pain: "We take nonprofits from grant research through submission and reporting, on the funder’s deadlines.",
-    included: ["Grant research reports and prospect lists", "Application preparation and submission", "Compliance checklists", "Reporting to funders"],
-    expect: ["A set number of applications and reports per quarter by tier", "Eligibility confirmed before work begins", "Narrative, budget and attachments complete against the guidelines", "Submission confirmed and reporting scheduled"],
+    pain: "We take nonprofits from grant research through application and submission, on the funder’s deadlines.",
+    included: ["Grant research reports and prospect lists", "Application preparation and submission", "Budget and narrative development", "Compliance checklists"],
+    expect: ["A set number of applications per quarter by tier", "Eligibility confirmed before work begins", "Narrative, budget and attachments complete against the guidelines", "Submission confirmed when you authorize it"],
     scope: "No guarantee of award — we research, prepare, and submit. Volumes are set by tier.",
     how: HOW,
+    forWho: [
+      "Nonprofits and mission-driven organizations chasing funding without a grants team.",
+      "Small teams that need grants researched, matched, and written on deadline.",
+      "Anyone who needs a strong application prepared and submitted the right way.",
+    ],
+    examples: [
+      "Grant research", "Prospect lists", "Eligibility checks", "Fit ranking", "Budget development",
+      "Narrative development", "Attachment preparation", "Application submission", "Compliance checklists",
+    ],
+    deliverables: [
+      "A ranked shortlist of matched opportunities — each with eligibility, funding amount, deadline, application link, a fit ranking, and a recommendation.",
+      "A complete application: narrative, budget, and attachments built against the guidelines.",
+      "A compliance checklist for each application.",
+      "Submission on your behalf when you authorize it, with confirmation.",
+    ],
+    provide: [
+      "Your organization's details, mission, and financials.",
+      "Program information and any letters or attachments the funder requires.",
+      "Portal access where we submit on your behalf — through the vault.",
+      "Approvals before anything is submitted.",
+    ],
+    process: [
+      { t: "Strategy session", d: "A free 30-minute call to understand your mission, programs, and funding goals." },
+      { t: "Research & match", d: "We research and rank a shortlist of fitting opportunities with eligibility, amounts, deadlines, links, and recommendations." },
+      { t: "Confirm eligibility", d: "We confirm you're eligible before any application work begins." },
+      { t: "Prepare the application", d: "We develop the narrative and budget and assemble attachments against the funder's guidelines, with your approval." },
+      { t: "Submit", d: "We submit on your behalf when you authorize it and confirm receipt." },
+    ],
+    timeline: "Everything runs on the funder's deadlines. Your tier sets how many applications per quarter are included; we scope research and preparation around each deadline.",
+    revisions: "Applications are reviewed and refined with you against the funder's guidelines before submission.",
+    software: [
+      "Grant databases and research tools.",
+      "Budget and narrative templates.",
+      "Funder portals for submission, when you authorize it.",
+    ],
+    notIncluded: [
+      "Any guarantee of an award — we research, prepare, and submit; the funder decides.",
+      "Post-award grant management and ongoing funder reporting.",
+      "Audited financials or legal/accounting services — those are your professionals' role.",
+    ],
+    addOns: [
+      "Additional applications beyond your tier.",
+      "Deeper research or larger prospect lists.",
+      "Program or capability documentation to strengthen applications.",
+    ],
+    afterPurchase: "We research and rank matched opportunities, confirm your eligibility, develop the narrative, budget, and attachments against the guidelines, and submit on your behalf when you authorize it — all on the funder's deadlines.",
+    faqs: [
+      { q: "Can you guarantee we'll win funding?", a: "No. No one can honestly guarantee a grant award. We research the best-fit opportunities, confirm eligibility, and prepare and submit a strong, compliant application — but the funder makes the decision." },
+      { q: "What does the grant research include?", a: "A ranked shortlist of matched opportunities, each with eligibility requirements, funding amount, deadline, the application link, a fit ranking, and our recommendation — so you can decide where to focus." },
+      { q: "Do you write the application, or just find grants?", a: "Both. Beyond research, we develop the narrative and budget, assemble the attachments against the funder's guidelines, and — when you authorize it — submit on your behalf and confirm receipt." },
+      { q: "Do you submit the application for us?", a: "Yes, when you authorize it. We submit through the funder's portal using access you provide securely, and confirm submission. If you'd rather file it yourself, we hand you a complete, submission-ready package." },
+      { q: "Do you manage grants or handle reporting after we win?", a: "Post-award grant management and ongoing funder reporting aren't part of this service. We focus on research, preparation, and submission." },
+      { q: "What do we need to provide?", a: "Your organization's details, mission, and financials, program information, and any funder-required letters or attachments — plus approvals before we submit." },
+    ],
   },
 };
 
