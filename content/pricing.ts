@@ -110,8 +110,8 @@ export const QUOTE_ITEMS: QuoteItem[] = [
   { id: "q-systems", name: "Systems & automation buildout", from: "scoped to your process" },
   { id: "q-ag", name: "Agriculture & land planning", from: "from $500 per deliverable" },
   { id: "q-grant-app", name: "Grant application", from: "from $750" },
-  { id: "q-copy", name: "Copywriting", from: "scoped to your project" },
-  { id: "q-notary", name: "Notary service — online or in person (Texas)", from: "fees per state schedule" },
+  { id: "q-copy", name: "Copywriting", from: "from $250 per project" },
+  { id: "q-notary", name: "Notary service — online or in person (Texas)", from: "$25 online · $10/act in person (TX) + travel" },
 ];
 
 export interface RateLine {
@@ -134,7 +134,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
   { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each", cart: "graphic" },
   { svc: "marketing", n: "Multi-asset campaign", p: "from $850", quote: "q-campaign" },
-  { svc: "marketing", n: "Copywriting", p: "scoped to your project", quote: "q-copy" },
+  { svc: "marketing", n: "Copywriting", p: "from $250 per project", quote: "q-copy" },
   { svc: "marketing", n: "Speaker / media one-sheet & kit", p: "from $350", quote: "q-kit" },
   { svc: "brand", n: "Brand starter kit", p: "$950", cart: "brand-starter" },
   { svc: "brand", n: "Full brand system", p: "from $3,500", quote: "q-brand" },
@@ -155,7 +155,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "ag", n: "Agriculture & land planning", p: "from $500 per deliverable", quote: "q-ag" },
   { svc: "grants", n: "Grant research report", p: "$350 each", cart: "grant-research" },
   { svc: "grants", n: "Grant application", p: "from $750 each", quote: "q-grant-app" },
-  { svc: "notary", n: "Notarization — online (RON) or in-person (Texas)", p: "fees per state schedule", quote: "q-notary" },
+  { svc: "notary", n: "Notarization — online (RON) or in-person (Texas)", p: "$25 online · $10/act in-person (TX) + travel from $35", quote: "q-notary" },
 ];
 
 export const bookItemById = (id: string) => BOOK_ITEMS.find((b) => b.id === id);

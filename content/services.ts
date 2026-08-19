@@ -980,7 +980,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     headline: "Notary Services",
     pain: "A document needs a notary and you need it done right — without hunting for an appointment or driving across town. We provide professional notarizations online, for signers wherever remote notarization is permitted, and in person across Texas.",
     included: ["Acknowledgments and jurats", "Oaths and affirmations", "Signature witnessing", "Online (remote) notarization by secure audio-video session", "In-person notarization across Texas"],
-    expect: ["A commissioned Texas notary (Texas notary commission #134384502)", "Online notarization by secure remote session, where the law permits", "In-person appointments across Texas", "Fees within the maximums set by state law", "Georgia commission in process — in-person Georgia service coming soon"],
+    expect: ["A commissioned Texas notary (Texas notary commission #134384502)", "Online notarization by secure remote session, where the law permits", "In-person appointments across Texas", "Online notarization $25 each; in-person $10 per notarial act (Texas's regulated maximums), plus a travel fee from $35 for mobile appointments", "Georgia commission in process — in-person Georgia service coming soon"],
     scope: "We notarize signatures and administer oaths and affirmations. We do not provide legal advice, draft or review legal documents, or notarize where a valid ID is missing or a conflict of interest exists. Notary fees follow the maximums set by state law.",
     how: HOW,
     forWho: [
@@ -1021,7 +1021,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
       { q: "Where can you notarize in person?", a: "In person across Texas, by appointment. A Georgia commission is in process, and we'll add in-person Georgia service once it's active." },
       { q: "What do I need to bring?", a: "The unsigned document (we witness the signing), a valid current government-issued photo ID for every signer, and every signer present — in person or live on the online session." },
       { q: "What can't a notary do?", a: "A notary verifies identity and witnesses signatures and oaths — we don't give legal advice or draft or review legal documents. If your document needs legal guidance, that's your attorney's role." },
-      { q: "How much does it cost?", a: "Notary fees follow the maximums set by state law, and online notarization has its own fee. We confirm the fee before your appointment so there are no surprises." },
+      { q: "How much does it cost?", a: "Online (remote) notarization is $25 per notarization, and in-person notarization is $10 per notarial act — both at Texas's regulated maximums. For mobile, in-person appointments a travel fee applies, starting at $35 and quoted by location. We confirm the total before your appointment so there are no surprises." },
     ],
   },
 };
