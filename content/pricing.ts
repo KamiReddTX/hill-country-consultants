@@ -59,7 +59,7 @@ export const PLAN_TERMS: string[] = [
   "Pay the year up front and save one month",
   "Standalone projects paid in full at booking",
   "5 business-day grace period",
-  "Payments by credit or debit card, processed securely through Stripe",
+  "We accept various forms of electronic payment through the Stripe secure payment system",
 ];
 
 export interface BookItem {
