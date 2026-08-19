@@ -49,7 +49,7 @@ export default function PortalPreviewPage() {
       <section className="section-cream">
         <div className="shell py-16">
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
-            <FeatureCard title="Dashboard & onboarding tracker" desc="Your week-one onboarding, step by step — each marks done as it actually happens.">
+            <FeatureCard title="Dashboard & onboarding tracker" desc="Your week-one onboarding, step by step — each step is marked complete as it happens.">
               <div className="flex justify-between text-[11px] prose-muted"><span>Onboarding</span><span>3 of 5</span></div>
               <div className="mt-1"><Bar pct={60} /></div>
               <ul className="mt-3 flex flex-col gap-1.5 text-[13px]">
@@ -102,7 +102,7 @@ export default function PortalPreviewPage() {
               </ul>
             </FeatureCard>
 
-            <FeatureCard title="Document vault" desc="The record of every login we hold — editable by you, so work never stops on a changed password.">
+            <FeatureCard title="Credential vault" desc="A secure record of every login we hold — usernames, passwords, and access — editable by you, so work never stops on a changed password. Documents and deliverables live separately under Calendar & files.">
               <ul className="flex flex-col gap-1.5 text-[13px]">
                 {[["Google Workspace", "In sync"], ["Website hosting", "In sync"], ["Ad manager", "Needs re-sync"]].map(([n, s], i) => (
                   <li key={i} className="flex items-center justify-between"><span className="text-charcoal">🔒 {n}</span><span className={`text-[11px] font-semibold ${s === "In sync" ? "text-forest" : "text-red-700"}`}>{s}</span></li>

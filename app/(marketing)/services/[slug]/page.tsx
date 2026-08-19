@@ -223,7 +223,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
           <div className="shell py-16">
             <h2 className="font-fraunces text-[24px] font-medium text-forest">Automations we build</h2>
             <span className="rule-gold mb-6 mt-3" />
-            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">Real, rule-based flows that run themselves. A few examples:</p>
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">Real, rule-based flows that automate repeatable steps and reduce repetitive work, while keeping the human review that matters. A few examples:</p>
             <div className="grid gap-4 md:grid-cols-2">
               {[
                 ["Lead form submitted", "CRM record created", "Follow-up task assigned", "Email drafted"],

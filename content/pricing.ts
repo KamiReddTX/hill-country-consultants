@@ -47,7 +47,7 @@ export const PLAN_INCLUDED: string[] = [
 
 export const PLAN_BILLED: string[] = [
   "Submittals beyond allotment $450/week at any volume — the standalone weekly rate for non-plan clients is $750/week",
-  "Rush $550/job, never included in any plan",
+  "Rush $550 surcharge added on top of a package, never included in any plan",
   "Additional VA hours $55 Foundation / $50 Momentum / $40 Enterprise",
   "Anything beyond allotment quoted in writing first",
   "Hard costs at cost",
@@ -74,11 +74,11 @@ export interface BookItem {
 export const BOOK_ITEMS: BookItem[] = [
   { id: "sub-pkg", svc: "submittals", group: "Construction", name: "Construction submittal package", unit: "per package", price: 350 },
   { id: "sub-week", svc: "submittals", group: "Construction", name: "Weekly submittal service", unit: "per week · any volume", price: 750 },
-  { id: "rush", svc: "submittals", group: "Construction", name: "Rush turnaround", unit: "per job · never included in a plan", price: 550 },
+  { id: "rush", svc: "submittals", group: "Construction", name: "Rush turnaround (surcharge)", unit: "surcharge added on top of a package · never included in a plan", price: 550 },
   { id: "va-block", svc: "va", group: "Admin", name: "Virtual assistant block", unit: "10 hours at $65/hr · minimum booking", price: 650 },
   { id: "graphic", svc: "marketing", group: "Marketing & brand", name: "Marketing graphic (flyer / social)", unit: "each", price: 125 },
   { id: "brand-starter", svc: "brand", group: "Marketing & brand", name: "Brand starter kit", unit: "one-time", price: 950 },
-  { id: "podcast", svc: "media", group: "Publishing & media", name: "Podcast episode (edit + cover art)", unit: "each", price: 350 },
+  { id: "podcast", svc: "media", group: "Publishing & media", name: "Podcast episode (edit + cover art)", unit: "each · up to 90 min · audio edit, cleanup, intro/outro, music, cover art · 1 revision", price: 350 },
   { id: "media-asset", svc: "media", group: "Publishing & media", name: "Media asset (audiogram / short)", unit: "each", price: 95 },
   { id: "grant-research", svc: "grants", group: "Specialty", name: "Grant research report", unit: "each", price: 350 },
   { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "up to 20 participants · +$250/person over 20", price: 3000 },
@@ -127,7 +127,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
   { svc: "submittals", n: "Submittal package", p: "$350 each", cart: "sub-pkg" },
   { svc: "submittals", n: "Weekly submittal service · any volume", p: "$750/wk", cart: "sub-week" },
-  { svc: "submittals", n: "Rush turnaround", p: "$550/job · never included in a plan", cart: "rush" },
+  { svc: "submittals", n: "Rush turnaround (surcharge on a package)", p: "$550 · added on top of a package · never in a plan", cart: "rush" },
   { svc: "compliance", n: "Single document — capabilities, cert, profile, one-sheet or SOP", p: "from $450", quote: "q-doc" },
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
   { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each", cart: "graphic" },

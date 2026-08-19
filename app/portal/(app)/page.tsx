@@ -33,7 +33,7 @@ export default async function OnboardingPage() {
         <h1 className="font-fraunces text-[32px] font-normal text-forest">Welcome{client.contact ? `, ${client.contact.split(" ")[0]}` : ""}.</h1>
         <span className="rule-gold mb-4 mt-2" />
         <p className="max-w-[48em] prose-soft">
-          Your week-one onboarding, step by step. Each one marks done as it actually happens — nothing here is
+          Your week-one onboarding, step by step. Each step is marked complete as it happens — nothing here is
           filled in ahead of the work.
         </p>
         <div className="mt-5 max-w-md">

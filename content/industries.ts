@@ -71,7 +71,7 @@ export const INDUSTRIES: Industry[] = [
     img: "Stacked books and page proofs",
     headline: "Get the book finished, published, and selling.",
     problem:
-      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing vendor registered with the Library of Congress.",
+      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing imprint.",
     handles: [
       "Editorial at the stage you are at",
       "Interior and eBook formatting",
@@ -186,7 +186,7 @@ export const INDUSTRIES: Industry[] = [
     samples: ["Grant prospect report", "Application narrative", "Program budget", "Board packet"],
     faqs: [
       { q: "Can you guarantee we'll win the grant?", a: "No. We research, prepare and submit strong, compliant applications; award decisions rest with the funder." },
-      { q: "Do you handle reporting after we win?", a: "Yes. Funder reporting and compliance files are in scope — often the piece that gets missed." },
+      { q: "Do you handle reporting after we win?", a: "Post-award funder reporting is available, but it isn't automatically part of a standalone grant application. It's a separate service, and it may be included when your plan or a custom scope specifically states it — so nothing gets missed, but you always know exactly what's covered." },
       { q: "Are you our auditor?", a: "No. We prepare and organize documentation; we are not a substitute for a licensed auditor." },
     ],
     related: ["smb", "authors"],

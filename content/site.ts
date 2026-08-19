@@ -78,7 +78,7 @@ export const HOME_STEPS: { n: string; d: string }[] = [
   { n: "01", d: "Free 30-minute strategy session." },
   { n: "02", d: "Proposal and contract in writing." },
   { n: "03", d: "Onboarding in week one — kickoff call, 30-day roadmap, secure credential handoff, shared task board." },
-  { n: "04", d: "Delivery against your allotments, every deliverable pre-ship reviewed." },
+  { n: "04", d: "Delivery against your allotments, every deliverable quality-reviewed before delivery." },
   { n: "05", d: "Scheduled reviews on your tier cadence." },
 ];
 
@@ -94,8 +94,8 @@ export const TRUST_POINTS: { t: string; d: string }[] = [
 /** Home — the four pillars behind every engagement (verbatim). */
 export const PILLARS: { t: string; d: string }[] = [
   { t: "Documentation", d: "Submittals, SOPs, manuals, proposals and capability statements, produced to a defined standard and delivered on your letterhead." },
-  { t: "Compliance", d: "Certifications, permits, insurance tracking and audit-ready files. The paperwork that keeps you eligible to work." },
-  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will do the follow through for you, in writing." },
+  { t: "Compliance", d: "Certification and permit application support, insurance tracking, compliance documentation and audit-ready files. The paperwork that keeps you eligible to work." },
+  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will handle the follow-through for you, in writing." },
   { t: "Systems", d: "File architecture, naming conventions, templates and intake forms. Structure that holds after we hand it back." },
 ];
 

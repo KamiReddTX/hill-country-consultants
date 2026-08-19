@@ -62,7 +62,7 @@ export default function HomePage() {
           </h2>
           <span className="rule-gold mb-5 mt-3" />
           <p className="mb-11 max-w-[52em] text-[18px] prose-soft">
-            Most businesses juggle a bookkeeper here, a marketer there, a web person, a compliance
+            Most businesses juggle an administrative assistant here, a marketer there, a web person, a compliance
             contractor — each hired, onboarded and managed separately. We bring those capabilities
             together under one roof and across four divisions, so you get a whole bench of specialists
             with one point of contact, one coordinated team, and one flat monthly fee.
@@ -159,12 +159,18 @@ export default function HomePage() {
             </h2>
             <span className="rule-gold mt-3" />
           </div>
-          <p className="text-[20px] prose-soft">
-            One hire gets you one skill set —{" "}
-            <span className="font-semibold text-charcoal">$5,500–$7,500/month</span> calculating
-            salary, benefits, PTO, equipment, software, and management. For the same money, often
-            less, you get the whole firm.
-          </p>
+          <div className="flex flex-col gap-4">
+            <p className="text-[20px] prose-soft">
+              One hire gets you one skill set —{" "}
+              <span className="font-semibold text-charcoal">$5,500–$7,500/month</span> calculating
+              salary, benefits, PTO, equipment, software, and management. For the same money, often
+              less, you get the whole firm.
+            </p>
+            <p className="text-[14px] prose-muted">
+              Illustrative estimate. Actual employee cost varies by role, compensation, benefits,
+              equipment, software, payroll taxes, and management overhead.
+            </p>
+          </div>
         </div>
       </section>
 

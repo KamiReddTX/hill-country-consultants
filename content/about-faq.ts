@@ -2,8 +2,8 @@
 
 export const PILLARS: { t: string; d: string }[] = [
   { t: "Documentation", d: "Submittals, SOPs, manuals, proposals and capability statements, produced to a defined standard and delivered on your letterhead." },
-  { t: "Compliance", d: "Certifications, permits, insurance tracking and audit-ready files. The paperwork that keeps you eligible to work." },
-  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will do the follow through for you, in writing." },
+  { t: "Compliance", d: "Certification and permit application support, insurance tracking, compliance documentation and audit-ready files. The paperwork that keeps you eligible to work." },
+  { t: "Coordination", d: "Logs, transmittals, ball-in-court tracking and deadlines. We will handle the follow-through for you, in writing." },
   { t: "Systems", d: "File architecture, naming conventions, templates and intake forms. Structure that holds after we hand it back." },
 ];
 
@@ -24,7 +24,7 @@ export const FAQS: { q: string; a: string }[] = [
   { q: "Do I have to sign a long contract?", a: "Plans run a standard 12-month term. A quarterly option is available." },
   { q: "Can I buy just one thing?", a: "Yes. À-la-carte rates are published and paid in full at booking. Larger custom projects are scoped and quoted in writing before any payment." },
   { q: "How do I pay?", a: "Credit card, Zelle, or Cash App. No checks or money orders. Monthly fees split — first half on the 1st, second half by the 15th — or paid in full. Five business-day grace period." },
-  { q: "What if I need more than my plan includes?", a: "Anything beyond your allotment is quoted in writing first. Extra submittals are $450/week at any volume. Rush is $550/job and is never included in any plan." },
+  { q: "What if I need more than my plan includes?", a: "Anything beyond your allotment is quoted in writing first. Extra submittal packages beyond your allotment are a flat $450/week covering any number of additional packages that week. Rush is a $550 surcharge added on top of a package price and is never included in any plan." },
   { q: "How fast is turnaround?", a: "Standard at Foundation, priority in queue at Momentum, priority on everything at Enterprise." },
   { q: "Do I get one person or a rotating team?", a: "A dedicated account lead on every plan. One point of contact." },
   { q: "What happens to my logins?", a: "Collected securely through a password manager during week-one onboarding, and returned with all assets if you offboard." },
