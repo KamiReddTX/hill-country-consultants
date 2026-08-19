@@ -155,7 +155,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
                 </Link>
               ))}
             </div>
-            <p className="mt-6 text-[13px] prose-muted">Minimum 20 participants · additional attendees $250 each · booked 30–90 days out.</p>
+            <p className="mt-6 text-[13px] prose-muted">Minimum enrollment 20 · base price covers up to 20 · additional attendees $250 each · booked 30–90 days out.</p>
           </div>
         </section>
       )}

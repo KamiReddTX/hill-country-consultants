@@ -29,10 +29,10 @@ export default function IndustryPage({ params }: { params: { slug: string } }) {
   const ind = industryBySlug(params.slug);
   if (!ind) notFound();
 
-  const bookParams = new URLSearchParams();
-  if (ind.cart.length) bookParams.set("add", ind.cart.join(","));
-  if (ind.quotes.length) bookParams.set("quote", ind.quotes.join(","));
-  const startHref = bookParams.toString() ? `/book?${bookParams.toString()}` : "/book";
+  // Start Here highlights the services most relevant to this industry on the
+  // booking page — it filters the list, it does not add anything to the cart.
+  // Nothing is added to a booking until the customer sets a quantity.
+  const startHref = `/book?industry=${ind.slug}`;
 
   return (
     <>
@@ -144,8 +144,12 @@ export default function IndustryPage({ params }: { params: { slug: string } }) {
         <div className="shell flex flex-col items-start gap-5 py-16">
           <h2 className="font-fraunces text-[clamp(24px,3.2vw,32px)] font-normal text-forest">Start here</h2>
           <span className="rule-gold" />
+          <p className="max-w-[46em] text-[15.5px] prose-soft">
+            We&apos;ll highlight the services most relevant to {ind.name.toLowerCase()} on the booking page. Nothing is
+            added to your booking until you set a quantity — so you choose exactly what you want.
+          </p>
           <div className="mt-1 flex flex-wrap items-center gap-4">
-            <Link href={startHref} className="btn-gold">Start here</Link>
+            <Link href={startHref} className="btn-gold">See recommended services</Link>
             <Link href="/get-started" className="link-underline text-[15px]">
               Or book a free 30-minute strategy session
             </Link>

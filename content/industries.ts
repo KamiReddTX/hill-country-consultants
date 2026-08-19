@@ -95,7 +95,7 @@ export const INDUSTRIES: Industry[] = [
     ],
     related: ["smb", "nonprofits"],
     cart: ["podcast", "media-asset", "graphic"],
-    quotes: [],
+    quotes: ["q-edit", "q-ebook", "q-book"],
   },
   {
     slug: "food",
@@ -126,8 +126,8 @@ export const INDUSTRIES: Industry[] = [
       { q: "We run events and catering — can you coordinate those?", a: "Yes. Event and catering coordination, run-of-show, and vendor docs are all in scope." },
     ],
     related: ["smb", "authors"],
-    cart: ["graphic", "brand-starter"],
-    quotes: [],
+    cart: ["graphic", "brand-starter", "va-block"],
+    quotes: ["q-doc", "q-event"],
   },
   {
     slug: "smb",

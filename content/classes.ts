@@ -82,17 +82,17 @@ export const CLASS_DETAIL: Record<string, ClassDetail> = {
 
 /** Shared facts that apply to every class. */
 export const TRAINING_INFO = {
-  delivery: "Every class is delivered on-site or live-virtual — you choose. The content is the same either way; on-site adds the hands-on build lab in the room.",
+  delivery: "Every class is delivered on-site or live-virtual — you choose. The content is the same either way, and both formats include the hands-on build lab: virtual participants complete it live online, and on-site participants complete it live in the room.",
   travel: "On-site travel and lodging are quoted per booking based on your location.",
   certificate: "Each participant receives a certificate of completion. (This is a certificate of completion, not a professional certification.)",
   materials: "Every attendee gets a workbook and a resource pack, and each class includes a hands-on build lab that produces real deliverables your team keeps.",
   customization: "Classes are tailored to your team, tools, and industry — we adjust the examples, exercises, and build lab to your real work before the session.",
   postSupport: "You leave with the deliverables built in the room, plus follow-up materials; ongoing implementation support is available through our service lines.",
-  instructor: "Taught by the HCC specialist who does this work day to day, so the examples and the build lab come from real engagements.",
+  instructor: "Taught by an experienced Hill Country Consultants specialist who does this work day to day, so the examples and the build lab come from real engagements. Full instructor details — name, title, background, and relevant credentials — are added for each class as they are confirmed.",
 };
 
 export const TRAINING_FAQS: { q: string; a: string }[] = [
-  { q: "Is the class on-site or virtual?", a: "Either — you choose. Every class runs on-site or live-virtual with the same content; on-site includes the hands-on build lab in the room." },
+  { q: "Is the class on-site or virtual?", a: "Either — you choose. Every class runs on-site or live-virtual with the same content, and both formats include the hands-on build lab: virtual participants complete it live online, and on-site participants complete it live in the room." },
   { q: "Can you tailor it to our team and industry?", a: "Yes. We adjust the examples, exercises, and build lab to your tools, industry, and real work before the session." },
   { q: "Do participants get a certificate?", a: "Yes — a certificate of completion for each participant. It's a certificate of completion, not a professional certification." },
   { q: "What do participants receive?", a: "A workbook, a resource pack, and the deliverables built during the hands-on lab, which your team keeps." },

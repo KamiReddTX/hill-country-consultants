@@ -23,7 +23,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function GetStartedPage() {
+export default function GetStartedPage({
+  searchParams,
+}: {
+  searchParams: { service?: string; class?: string };
+}) {
+  const presetService = searchParams.service ?? "";
+  const presetClass = searchParams.class ?? "";
   return (
     <>
       <section className="bg-white border-b border-line">
@@ -55,7 +61,7 @@ export default function GetStartedPage() {
 
       <section className="section-cream">
         <div className="shell grid gap-10 py-16 md:grid-cols-[1.4fr_1fr]">
-          <InquiryForm />
+          <InquiryForm presetService={presetService} presetClass={presetClass} />
           <aside className="flex flex-col gap-8">
             <div>
               <p className="kicker mb-2">Talk to us</p>

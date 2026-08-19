@@ -17,13 +17,14 @@ export const metadata: Metadata = {
 export default function BookPage({
   searchParams,
 }: {
-  searchParams: { add?: string; quote?: string; class?: string };
+  searchParams: { add?: string; quote?: string; class?: string; industry?: string };
 }) {
   return (
     <BookingFlow
       initialAdd={searchParams.add ?? ""}
       initialQuotes={searchParams.quote ?? ""}
       initialClass={searchParams.class ?? ""}
+      initialIndustry={searchParams.industry ?? ""}
     />
   );
 }

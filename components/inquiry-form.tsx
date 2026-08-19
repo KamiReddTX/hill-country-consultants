@@ -10,12 +10,17 @@ import { track } from "@vercel/analytics";
  * confirmation. A hidden honeypot field lets the server silently drop bots.
  * Email + phone are shown prominently so the page is useful immediately.
  */
-export function InquiryForm() {
+export function InquiryForm({ presetService = "", presetClass = "" }: { presetService?: string; presetClass?: string } = {}) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(false);
   const [form, setForm] = useState({
-    name: "", business: "", email: "", phone: "", industry: "", timeline: "", howHeard: "", referral: "", message: "",
+    name: "", business: "", email: "", phone: "",
+    // A training "Request a date" link passes the service and class through so
+    // the customer never has to re-type them — they ride to /api/inquiry.
+    industry: presetService || "",
+    timeline: "", howHeard: "", referral: "",
+    message: presetClass ? `Training request — Class: ${presetClass}. ` : "",
     hp_field_x: "", // honeypot — neutral name so browser autofill won't fill it; must stay empty
   });
   const set = (k: keyof typeof form) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -77,6 +82,14 @@ export function InquiryForm() {
           onChange={set("hp_field_x")}
         />
       </div>
+      {(presetService || presetClass) && (
+        <div className="border border-gold/60 bg-cream/60 px-4 py-3">
+          <p className="kicker mb-1">Your request</p>
+          {presetService && <p className="text-[15px] text-charcoal">Service requested: <strong>{presetService}</strong></p>}
+          {presetClass && <p className="text-[15px] text-charcoal">Class: <strong>{presetClass}</strong></p>}
+          <p className="mt-1 text-[12px] prose-muted">Included with your message — no need to re-type it.</p>
+        </div>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <label className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-ink-faint">Name</span>

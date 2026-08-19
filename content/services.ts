@@ -655,7 +655,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     headline: "Corporate Training",
     pain: "We teach team classes drawn from our own service lines — half or full day, on site or virtual, with a hands-on build lab where your team produces real deliverables in the room.",
     included: ["Half- or full-day workshop, on site or virtual", "Workbook and resource pack", "Hands-on build lab", "Working deliverables built during the session", "Post-class materials, feedback survey and certificates"],
-    expect: ["Content tailored to your industry before the session", "Minimum 20 participants; additional attendees $250 each", "Cadence set by your plan tier", "Eight classes to choose from"],
+    expect: ["Content tailored to your industry before the session", "Minimum enrollment 20 participants; base price covers up to 20, additional attendees $250 each", "Cadence set by your plan tier", "Eight classes to choose from"],
     scope: "Standalone rates are $3,000 for a half day and $4,500 for a full day. Classes are included in every plan at your tier’s cadence.",
     how: HOW,
     forWho: [
@@ -707,8 +707,8 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     ],
     afterPurchase: "We confirm the date (30–90 days out), tailor the class to your team, and deliver it on site or live-virtual — your team leaves with real deliverables, a workbook, and certificates of completion.",
     faqs: [
-      { q: "Is training on-site or virtual?", a: "Either — you choose. Every class runs on site or live-virtual with the same content; on-site adds the hands-on build lab in the room." },
-      { q: "How many people can attend?", a: "Classes are for a minimum of 20 participants. Additional attendees over 20 are $250 each." },
+      { q: "Is training on-site or virtual?", a: "Either — you choose. Every class runs on site or live-virtual with the same content, and both formats include the hands-on build lab: virtual participants complete it live online, and on-site participants complete it live in the room." },
+      { q: "How many people can attend?", a: "Classes require a minimum enrollment of 20 participants. The base price covers up to 20, and each additional attendee over 20 is $250." },
       { q: "How far ahead do we book?", a: "Classes book 30 to 90 days out, and we schedule at least a 4-hour buffer between classes." },
       { q: "Do participants get a certificate?", a: "Yes — a certificate of completion for each participant. It's a certificate of completion, not a professional certification." },
       { q: "What do we receive?", a: "A workbook, a resource pack, the deliverables built in the hands-on lab, and post-class materials." },

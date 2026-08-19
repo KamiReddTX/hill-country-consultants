@@ -54,18 +54,27 @@ const usdCents = (cents: number) =>
   });
 
 export function BookingFlow({
-  initialAdd, initialQuotes, initialClass,
+  initialAdd, initialQuotes, initialClass, initialIndustry,
 }: {
-  initialAdd: string; initialQuotes: string; initialClass: string;
+  initialAdd: string; initialQuotes: string; initialClass: string; initialIndustry?: string;
 }) {
   const [cart, setCart] = useState<Cart>(() => seedCart(initialAdd));
   const [quotes, setQuotes] = useState<Quotes>(() => seedQuotes(initialQuotes));
   const [mode, setMode] = useState<"pay" | "call">("pay");
   const [step, setStep] = useState<Step>("select");
   const [catFilter, setCatFilter] = useState<string | null>(null);
-  const [industryFilter, setIndustryFilter] = useState<{ cart: string[]; quotes: string[]; name: string } | null>(null);
+  // An `industry` param pre-selects the industry *filter* — it highlights the
+  // recommended services but never adds anything to the cart (nothing is added
+  // until the customer sets a quantity).
+  const [industryFilter, setIndustryFilter] = useState<{ cart: string[]; quotes: string[]; name: string } | null>(() => {
+    const ind = initialIndustry ? INDUSTRIES.find((i) => i.slug === initialIndustry) : undefined;
+    return ind ? { cart: ind.cart, quotes: ind.quotes, name: ind.name } : null;
+  });
   const [quoteConsent, setQuoteConsent] = useState(false);
   const [attendees, setAttendees] = useState(20);
+  // Training logistics captured before payment (class bookings only).
+  const [trainingFormat, setTrainingFormat] = useState<"" | "virtual" | "onsite">("");
+  const [onsite, setOnsite] = useState({ city: "", state: "", venue: "" });
   const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "", repCode: "" });
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -74,8 +83,14 @@ export function BookingFlow({
 
   const selectedClass = initialClass ? classBySlug(initialClass) : undefined;
 
-  // calendar state
-  const [calOffset, setCalOffset] = useState(0);
+  // calendar state — for a class, open on the month that contains the first
+  // eligible date (today + 30 days) rather than a month with no bookable dates.
+  const [calOffset, setCalOffset] = useState(() => {
+    if (!initialClass) return 0;
+    const t = new Date();
+    const min = new Date(t); min.setDate(t.getDate() + 30);
+    return (min.getFullYear() - t.getFullYear()) * 12 + (min.getMonth() - t.getMonth());
+  });
   const [pickedDate, setPickedDate] = useState("");
   const [pickedIso, setPickedIso] = useState(""); // machine YYYY-MM-DD for the same pick — bookings.start_date is a date column
   const [pickedDow, setPickedDow] = useState<number | null>(null);
@@ -158,7 +173,9 @@ export function BookingFlow({
         const inMonth = cur.getMonth() === first.getMonth();
         const iso = cur.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
         const date = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
-        const closed = dow === 3 || dow === 0;
+        // Training runs weekdays including Wednesday; only Sunday is closed, and
+        // Saturday is available by preapproved appointment (flagged, not blocked).
+        const closed = dow === 0;
         const disabled = !inMonth || cur < today || closed || (isClass && (cur < minD || cur > maxD));
         days.push({ key: `${w}-${d}`, label: inMonth ? String(cur.getDate()) : "", iso, date, open: !disabled, appt: dow === 6 && !disabled, picked: pickedDate === iso, dow });
       }
@@ -177,18 +194,29 @@ export function BookingFlow({
     if (!needsDate && !form.startDate) { setError("Please choose a requested start date."); return; }
     if (needsDate && (!pickedDate || !slot)) { setError("Please choose a class date and time."); return; }
     if (needsDate && attendees < 20) { setError("Classes are for a minimum of 20 attendees."); return; }
+    if (needsDate && !trainingFormat) { setError("Please choose a training format — virtual or on-site."); return; }
+    if (needsDate && trainingFormat === "onsite" && (!onsite.city || !onsite.state || !onsite.venue)) { setError("Please add the city, state, and venue for on-site training."); return; }
     // The all-sales-are-final consent applies only to a paid booking; a free quote
     // request carries no obligation, so it isn't gated on it.
     if (canPay && !consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }
     if (chosenQuotes.length > 0 && !quoteConsent) { setError("Please acknowledge that quoted items are an estimate, not a final cost."); return; }
 
+    // For a class, capture the format + on-site location alongside the notes so it
+    // rides through to the booking record and the confirmation.
+    const logistics = needsDate
+      ? `Format: ${trainingFormat === "onsite" ? `On-site — ${onsite.venue}, ${onsite.city}, ${onsite.state}` : "Virtual (live online)"}`
+      : "";
+    const contact = logistics
+      ? { ...form, notes: [form.notes, logistics].filter(Boolean).join(" | ") }
+      : form;
     const payload = {
       items: chosen.map((c) => ({ id: c.id, name: c.name, qty: c.qty, svc: c.svc, price: c.price })),
       quotes: chosenQuotes.map((q) => ({ id: q.id, name: q.name, from: q.from })),
       payMode: "full", dueNowCents,
-      contact: form, startDate,
+      contact, startDate,
       className: selectedClass ? `${selectedClass.no} — ${selectedClass.name}` : "",
       classDate: pickedDate, classSlot: slot, attendees,
+      trainingFormat, onsite,
       consentAt: new Date().toISOString(),
       repCode: form.repCode,
     };
@@ -314,13 +342,39 @@ export function BookingFlow({
                 <div className="mb-8 border border-line-warm bg-white p-6">
                   <p className="kicker mb-2">Class selected</p>
                   <p className="text-[17px] font-medium text-charcoal">{selectedClass.no} — {selectedClass.name}</p>
-                  <p className="mt-1 text-[13px] prose-muted">Minimum 20 attendees · additional attendees $250 each · booked 30–90 days out.</p>
-                  <label className="mt-3 flex flex-col gap-1 text-[13px] font-medium text-ink-faint">Number of attendees (minimum 20)
+                  <p className="mt-1 text-[13px] prose-muted">Minimum enrollment 20 · base price covers up to 20 · additional attendees $250 each · booked 30–90 days out.</p>
+                  <label className="mt-3 flex flex-col gap-1 text-[13px] font-medium text-ink-faint">Expected number of participants (minimum 20)
                     <input type="number" min={20} value={attendees}
                       onChange={(e) => setAttendees(Math.max(1, Math.floor(Number(e.target.value) || 0)))}
                       className="min-h-touch w-32 border border-line-warm bg-white px-3 text-[16px] outline-none focus:border-forest" />
                   </label>
                   {extraAttendees > 0 && <p className="mt-1 text-[13px] text-forest">+{extraAttendees} over 20 × $250 = {usd(extraAttendees * 250)}</p>}
+
+                  {/* Training format — required before checkout */}
+                  <div className="mt-5">
+                    <p className="text-[13px] font-medium text-ink-faint">Training format</p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {([["virtual", "Virtual (live online)"], ["onsite", "On-site (in person)"]] as const).map(([val, label]) => (
+                        <button key={val} type="button" onClick={() => setTrainingFormat(val)}
+                          className={`min-h-touch border px-4 text-[14px] ${trainingFormat === val ? "border-forest bg-forest text-white" : "border-line-warm bg-white text-charcoal hover:border-gold"}`}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {trainingFormat === "onsite" && (
+                    <div className="mt-4 flex flex-col gap-3 border border-line-warm bg-cream/50 p-4">
+                      <div className="grid gap-3 sm:grid-cols-3">
+                        <label className="flex flex-col gap-1 text-[12px] font-medium text-ink-faint">City
+                          <input value={onsite.city} onChange={(e) => setOnsite((o) => ({ ...o, city: e.target.value }))} className="min-h-touch border border-line-warm bg-white px-3 text-[15px] outline-none focus:border-forest" /></label>
+                        <label className="flex flex-col gap-1 text-[12px] font-medium text-ink-faint">State
+                          <input value={onsite.state} onChange={(e) => setOnsite((o) => ({ ...o, state: e.target.value }))} className="min-h-touch border border-line-warm bg-white px-3 text-[15px] outline-none focus:border-forest" /></label>
+                        <label className="flex flex-col gap-1 text-[12px] font-medium text-ink-faint">Venue / location
+                          <input value={onsite.venue} onChange={(e) => setOnsite((o) => ({ ...o, venue: e.target.value }))} className="min-h-touch border border-line-warm bg-white px-3 text-[15px] outline-none focus:border-forest" /></label>
+                      </div>
+                      <p className="text-[13px] prose-muted">The base training price does not include travel. Travel, lodging, transportation, and other applicable on-site expenses are quoted separately after we confirm the location.</p>
+                    </div>
+                  )}
                   <p className="mt-3 text-[14px] prose-muted">{slotNoteForDow(pickedDow ?? 1)}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <button className="btn-outline px-3 text-[13px]" onClick={() => setCalOffset((o) => Math.max(0, o - 1))}>← Prev</button>
@@ -346,6 +400,9 @@ export function BookingFlow({
                       </button>
                     ))}
                   </div>
+                  <p className="mt-2 text-[12px] prose-muted">
+                    Available dates are selectable; faded dates are unavailable (outside the 30–90 day window, or Sunday). A “·” marks Saturday — available by preapproved appointment, which we confirm before it&apos;s booked.
+                  </p>
                   {pickedDate && pickedDow !== null && (
                     <div className="mt-4">
                       <p className="text-[13px] text-ink-faint">{slotNoteForDow(pickedDow)}</p>
@@ -362,6 +419,8 @@ export function BookingFlow({
                 </div>
               )}
 
+              {/* During a class booking, hide the general marketplace so the class stays the focus. */}
+              {!selectedClass && (<>
               <div id="service-list" className="mb-6">
                 <p className="kicker mb-3">Filter by industry</p>
                 <div className="flex flex-wrap gap-2">
@@ -418,6 +477,7 @@ export function BookingFlow({
                   </button>
                 ))}
               </div>
+              </>)}
             </>
           )}
 
