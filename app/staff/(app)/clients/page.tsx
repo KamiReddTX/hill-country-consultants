@@ -14,6 +14,7 @@ import { ClientContactsManager } from "@/components/staff/client-contacts-manage
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { LocalTime } from "@/components/local-time";
 import { PlanSelect } from "@/components/staff/plan-select";
+import { AutoOpenDetails } from "@/components/staff/auto-open-details";
 import { AllotmentAdjustForm } from "@/components/staff/allotment-adjust-form";
 import { DeleteAdjustmentButton } from "@/components/staff/delete-adjustment-button";
 import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
@@ -101,6 +102,7 @@ export default async function ClientsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      <AutoOpenDetails />
       <div>
         <h1 className="font-fraunces text-[32px] font-normal text-forest">Clients</h1>
         <span className="rule-gold mb-2 mt-2" />
@@ -124,7 +126,7 @@ export default async function ClientsPage() {
           const adjList = adjByClient.get(c.id) || [];
           const usage = computeAllotmentUsage(plan, vaHoursByClient.get(c.id) || 0, adjList.map((a: any) => ({ service_key: a.service_key, delta: Number(a.delta) })));
           return (
-            <details key={c.id} className="border border-line-warm bg-white">
+            <details key={c.id} id={`c-${c.id}`} className="border border-line-warm bg-white">
               <summary className="min-h-touch cursor-pointer list-none px-4 py-3">
                 <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="text-[15px] font-medium text-charcoal">{label}</span>

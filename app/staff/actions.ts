@@ -140,14 +140,22 @@ export async function updateLeadStage(leadId: string, stage: string): Promise<Ac
 }
 
 /** Mark a lead won → create the client, attributed to the rep's code. */
-export async function markLeadWon(leadId: string): Promise<ActionResult> {
+export async function markLeadWon(leadId: string): Promise<ActionResult & { clientId?: string; clientLabel?: string }> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   const db = createClient();
-  const { error } = await db.rpc("create_client_from_lead", { p_lead: leadId });
+  // The RPC creates (or updates, on a matching email) the client row and returns
+  // its id, so we can point the rep straight at the new file.
+  const { data: clientId, error } = await db.rpc("create_client_from_lead", { p_lead: leadId });
   if (error) return { error: error.message };
-  revalidatePath("/staff/pipeline"); revalidatePath("/staff/follow-ups"); revalidatePath("/staff");
-  return { ok: true };
+  // Best-effort label for the confirmation — never blocks the win.
+  let clientLabel: string | undefined;
+  if (clientId) {
+    const { data: c } = await db.from("clients").select("business, contact, email").eq("id", clientId as string).maybeSingle();
+    if (c) clientLabel = (c as any).business || (c as any).contact || (c as any).email || undefined;
+  }
+  revalidatePath("/staff/pipeline"); revalidatePath("/staff/follow-ups"); revalidatePath("/staff"); revalidatePath("/staff/clients");
+  return { ok: true, clientId: (clientId as string) || undefined, clientLabel };
 }
 
 /** Admin only: add a staff row. The person is then invited via Supabase Auth and
