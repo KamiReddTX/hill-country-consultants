@@ -150,6 +150,22 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </section>
       )}
 
+      {key === "events" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Event samples</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">Planned, coordinated, and run to a timeline. A sampling:</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {["Event setup", "Registration table", "Run-of-show", "Stage / speaker", "Decor detail", "Guest experience"].map((lbl) => (
+                <ImageSlot key={lbl} label={lbl} src="" />
+              ))}
+            </div>
+            <p className="mt-4 text-[12px] prose-muted">Portfolio samples — add your real event photos here.</p>
+          </div>
+        </section>
+      )}
+
       {key === "systems" && (
         <section className="section-cream">
           <div className="shell py-16">
