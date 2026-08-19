@@ -3,6 +3,13 @@ import { SectionHeading } from "@/components/section-heading";
 import { InquiryForm } from "@/components/inquiry-form";
 import { HOURS, SITE } from "@/content/site";
 
+const NEXT_STEPS: { t: string; d: string }[] = [
+  { t: "We reply the same business day", d: "Send the form and we acknowledge it the same business day — usually within a few hours during business hours." },
+  { t: "A quick call or email first", d: "We'll reach out to confirm what you need and set a time for your free 30-minute strategy session. No pressure, no obligation." },
+  { t: "The session is free and virtual", d: "Thirty minutes by video or phone. We map the work, name what hurts most today, and recommend a plan tier or a standalone scope." },
+  { t: "Everything in writing before anything begins", d: "You get scope and pricing in writing. Nothing starts — and you pay nothing — until you approve it." },
+];
+
 export const metadata: Metadata = {
   title: "Get Started",
   description:
@@ -27,6 +34,22 @@ export default function GetStartedPage() {
             title="Start with a free 30-minute strategy session."
             intro="We map the work, recommend a plan tier or a standalone scope, and put it in writing before anything begins. No obligation."
           />
+        </div>
+      </section>
+
+      <section className="section-white">
+        <div className="shell py-14">
+          <h2 className="font-fraunces text-[24px] font-medium text-forest">What happens next</h2>
+          <span className="rule-gold mb-8 mt-3" />
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {NEXT_STEPS.map((s, i) => (
+              <div key={i} className="flex flex-col gap-2.5 border border-line-warm bg-cream/50 p-6">
+                <p className="font-inter text-[13px] tracking-[0.14em] text-ink-faint">{String(i + 1).padStart(2, "0")}</p>
+                <h3 className="font-fraunces text-[18px] font-medium text-forest">{s.t}</h3>
+                <p className="text-[15px] prose-soft">{s.d}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

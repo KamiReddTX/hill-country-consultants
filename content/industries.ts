@@ -1,6 +1,6 @@
 /**
- * Six industries — verbatim from the approved build. Each preloads a set of
- * services on /book (fixed BOOK_ITEMS + scoped QUOTE_ITEMS). No photos of people.
+ * Six industries — full landing pages. Each preloads a set of services on /book
+ * (fixed BOOK_ITEMS + scoped QUOTE_ITEMS). No photos of people.
  */
 
 export interface Industry {
@@ -10,6 +10,10 @@ export interface Industry {
   headline: string;   // the outcome for that trade
   problem: string;    // one paragraph naming what actually goes wrong
   handles: string[];  // what we handle
+  deliverables: string[]; // concrete things a client walks away with
+  samples: string[];  // portfolio placeholder labels (redacted work shown as ImageSlots)
+  faqs: { q: string; a: string }[];
+  related: string[];  // other industry slugs to cross-link
   cart: string[];     // BOOK_ITEMS ids to preload on /book
   quotes: string[];   // QUOTE_ITEMS ids to preload on /book
 }
@@ -44,6 +48,20 @@ export const INDUSTRIES: Industry[] = [
       "Transmittals, logs and ball-in-court",
       "Resubmittal turnaround",
     ],
+    deliverables: [
+      "A spec-matched submittal package, indexed and ready to transmit",
+      "Marked OEM cut sheets with selections and options called out",
+      "A prequalification package assembled to the GC's checklist",
+      "A live certification & insurance tracker with renewal dates",
+      "A submittal log with ball-in-court and status per item",
+    ],
+    samples: ["Submittal cover sheet", "Marked cut sheet", "Compliance checklist", "Transmittal & log"],
+    faqs: [
+      { q: "How fast can you turn a submittal around?", a: "Standard packages run on the timeline set in your written scope; when you need it sooner, our rush option compresses that — priced before we start." },
+      { q: "Do you stamp or certify engineering?", a: "No. We prepare and organize the package to spec; your contractor of record or engineer reviews and signs. We never alter engineered or legal content." },
+      { q: "Can you match our GC's specific submittal format?", a: "Yes. We build to the spec section and the GC's checklist, using your letterhead and naming conventions." },
+    ],
+    related: ["smb", "agriculture"],
     cart: ["sub-pkg", "sub-week", "rush"],
     quotes: [],
   },
@@ -62,6 +80,20 @@ export const INDUSTRIES: Industry[] = [
       "Podcast and media production",
       "The posting calendar around release",
     ],
+    deliverables: [
+      "A print-ready interior and a reflowable eBook file",
+      "A cover concept coordinated through to distribution",
+      "A launch kit: graphics, media one-sheet, and posting calendar",
+      "Podcast or audiogram assets to promote the release",
+      "An ISBN/registration path coordinated under Redd Ladys Chronicles",
+    ],
+    samples: ["Book cover concept", "Interior spread", "Launch graphic set", "Media one-sheet"],
+    faqs: [
+      { q: "Do I keep my rights and royalties?", a: "Yes. You own your work. Redd Ladys Chronicles is a publishing vendor that helps you produce and distribute — rights and contract terms are yours, and we flag any legal language to your attorney." },
+      { q: "Can you help if my manuscript isn't finished?", a: "Yes — we meet you at your stage, whether that's developmental editing, line editing, or final formatting." },
+      { q: "Do you guarantee sales?", a: "No one honestly can. We produce professional assets and coordinate distribution and launch; the results depend on many factors beyond production." },
+    ],
+    related: ["smb", "nonprofits"],
     cart: ["podcast", "media-asset", "graphic"],
     quotes: [],
   },
@@ -80,6 +112,20 @@ export const INDUSTRIES: Industry[] = [
       "Event and catering coordination",
       "The posting calendar",
     ],
+    deliverables: [
+      "A permit & certification tracker with renewal reminders",
+      "Organized vendor and supplier documentation",
+      "SOPs and staff training documents on your letterhead",
+      "Menu and promotional graphics in your brand",
+      "A posting calendar you can hand to any staff member",
+    ],
+    samples: ["Menu design", "Promo graphic", "SOP document", "Event run-of-show"],
+    faqs: [
+      { q: "Do you issue food permits or certifications?", a: "No. We prepare and track the paperwork and deadlines; the issuing authority certifies. We keep you ahead of renewals so nothing lapses." },
+      { q: "Can you handle our social media too?", a: "We build the posting calendar and the graphics; ongoing posting can be part of a plan or a standalone scope." },
+      { q: "We run events and catering — can you coordinate those?", a: "Yes. Event and catering coordination, run-of-show, and vendor docs are all in scope." },
+    ],
+    related: ["smb", "authors"],
     cart: ["graphic", "brand-starter"],
     quotes: [],
   },
@@ -98,6 +144,20 @@ export const INDUSTRIES: Industry[] = [
       "Project coordination",
       "File architecture that survives turnover",
     ],
+    deliverables: [
+      "Daily admin and inbox coverage against your allotment",
+      "A template library for the documents you send most",
+      "Process documentation so the work survives turnover",
+      "Marketing and brand assets in one consistent look",
+      "A file architecture with naming conventions that hold",
+    ],
+    samples: ["Capability statement", "Template set", "Process SOP", "Brand asset sheet"],
+    faqs: [
+      { q: "Can I start with just one thing?", a: "Yes. You can book a standalone project paid in full at booking, or start a monthly plan for ongoing coverage. Larger custom work is scoped and quoted in writing first." },
+      { q: "How do you handle our logins securely?", a: "Credentials are collected through a password manager, never kept in plain text, and returned at offboarding." },
+      { q: "What if I need more than my plan allotment?", a: "Anything beyond your allotment is quoted in writing before it's done — no surprise invoices." },
+    ],
+    related: ["construction", "food"],
     cart: ["va-block"],
     quotes: ["q-doc"],
   },
@@ -116,6 +176,20 @@ export const INDUSTRIES: Industry[] = [
       "Program documentation",
       "Event coordination",
     ],
+    deliverables: [
+      "A researched grant prospect list matched to your mission",
+      "Prepared applications assembled to each funder's checklist",
+      "A funder reporting & compliance file, audit-ready",
+      "Board and donor documents on your letterhead",
+      "Program documentation that outlives staff turnover",
+    ],
+    samples: ["Grant prospect report", "Application narrative", "Program budget", "Board packet"],
+    faqs: [
+      { q: "Can you guarantee we'll win the grant?", a: "No. We research, prepare and submit strong, compliant applications; award decisions rest with the funder." },
+      { q: "Do you handle reporting after we win?", a: "Yes. Funder reporting and compliance files are in scope — often the piece that gets missed." },
+      { q: "Are you our auditor?", a: "No. We prepare and organize documentation; we are not a substitute for a licensed auditor." },
+    ],
+    related: ["smb", "authors"],
     cart: ["grant-research"],
     quotes: ["q-grant-app"],
   },
@@ -134,6 +208,20 @@ export const INDUSTRIES: Industry[] = [
       "Lease and vendor documentation",
       "Operations coordination",
     ],
+    deliverables: [
+      "A regenerative plan framework tailored to your land",
+      "A seasonal stewardship calendar you can work from",
+      "Record-keeping templates for the program you're enrolled in",
+      "Assembled program and cost-share paperwork",
+      "Organized lease and vendor documentation",
+    ],
+    samples: ["Stewardship calendar", "Land records template", "Regenerative plan", "Cost-share packet"],
+    faqs: [
+      { q: "Do you do surveying or agronomy?", a: "No — those are licensed specialties. We prepare records and frameworks and refer specialized work out to the right professionals." },
+      { q: "Can you help with cost-share and program paperwork?", a: "Yes. We assemble and track program and cost-share documentation so deadlines don't slip." },
+      { q: "I have records everywhere — where do we start?", a: "We build the file architecture and templates first, then bring your existing records into one organized place." },
+    ],
+    related: ["construction", "smb"],
     cart: [],
     quotes: ["q-ag"],
   },

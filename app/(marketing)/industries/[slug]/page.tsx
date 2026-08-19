@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { ImageSlot } from "@/components/image-slot";
 import { INDUSTRIES, industryBySlug, INDUSTRY_SCOPE_ENDS, INDUSTRY_SCOPE_BY_SLUG } from "@/content/industries";
 
+const nameBySlug = (slug: string) => INDUSTRIES.find((i) => i.slug === slug)?.name ?? slug;
+
 export function generateStaticParams() {
   return INDUSTRIES.map((i) => ({ slug: i.slug }));
 }
@@ -72,6 +74,70 @@ export default function IndustryPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </section>
+
+      {/* ── What you walk away with ── */}
+      <section className="section-cream">
+        <div className="shell py-16">
+          <h2 className="font-fraunces text-[24px] font-medium text-forest">What you walk away with</h2>
+          <span className="rule-gold mb-7 mt-3" />
+          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+            {ind.deliverables.map((d, i) => (
+              <div key={i} className="flex gap-3 border border-line-warm bg-white p-5">
+                <span className="mt-1 h-2.5 w-2.5 shrink-0 bg-gold" aria-hidden="true" />
+                <p className="text-[15.5px] prose-soft">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Sample work (redacted placeholders) ── */}
+      <section className="section-white">
+        <div className="shell py-16">
+          <h2 className="font-fraunces text-[24px] font-medium text-forest">Sample work</h2>
+          <span className="rule-gold mb-2 mt-3" />
+          <p className="mb-7 max-w-[46em] text-[15px] prose-muted">
+            Representative examples for this industry. Client work is shown redacted — no confidential information is ever displayed.
+          </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {ind.samples.map((s) => <ImageSlot key={s} label={s} src="" />)}
+          </div>
+        </div>
+      </section>
+
+      {/* ── FAQ ── */}
+      <section className="section-cream">
+        <div className="shell max-w-[56em] py-16">
+          <h2 className="font-fraunces text-[24px] font-medium text-forest">Common questions</h2>
+          <span className="rule-gold mb-7 mt-3" />
+          <div className="flex flex-col gap-6">
+            {ind.faqs.map((f, i) => (
+              <div key={i} className="border-t border-line-soft pt-4">
+                <h3 className="font-fraunces text-[18px] font-medium text-forest">{f.q}</h3>
+                <p className="mt-2 text-[16px] prose-soft">{f.a}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-8 text-[15px] prose-muted">
+            More in our <Link href="/faq" className="link-underline">full FAQ</Link>.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Related industries ── */}
+      {ind.related.length > 0 && (
+        <section className="section-white">
+          <div className="shell py-14">
+            <h2 className="font-fraunces text-[20px] font-medium text-forest">Related industries</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <div className="flex flex-wrap gap-4">
+              {ind.related.map((r) => (
+                <Link key={r} href={`/industries/${r}`} className="btn-outline text-[15px]">{nameBySlug(r)}</Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── Start here ── */}
       <section className="section-cream">

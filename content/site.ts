@@ -27,6 +27,7 @@ export const SITE = {
 export const NAV: { href: string; label: string }[] = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/work", label: "Our Work" },
   { href: "/industries", label: "Industries" },
   { href: "/training", label: "Training" },
   { href: "/about", label: "About" },
@@ -36,6 +37,7 @@ export const NAV: { href: string; label: string }[] = [
 /** Footer link columns. */
 export const FOOTER_NAV: { href: string; label: string }[] = [
   { href: "/services", label: "Services" },
+  { href: "/work", label: "Our Work" },
   { href: "/industries", label: "Industries" },
   { href: "/plans", label: "Plans & Pricing" },
   { href: "/book", label: "Book & Pay" },

@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   },
 };
 
+const DIVISIONS: { t: string; items: string[] }[] = [
+  { t: "Business Operations", items: ["Virtual Assistance", "Administrative Support", "Documentation", "Compliance", "Project Management", "Systems", "Automation"] },
+  { t: "Brand & Growth", items: ["Marketing", "Graphic Design", "Branding", "Content", "Campaign Support"] },
+  { t: "Production & Development", items: ["Publishing", "Podcast Production", "Media Production", "Websites", "Apps", "PWAs"] },
+  { t: "Specialty Services", items: ["Construction Submittals", "Corporate Training", "Event Planning", "Agriculture & Land Services", "Grant & Nonprofit Administration"] },
+];
+
 export default function HomePage() {
   return (
     <>
@@ -44,6 +51,39 @@ export default function HomePage() {
             </div>
           </div>
           <ImageSlot label="Modern glass-and-concrete building exterior with reflected greenery" src="/images/hero.jpg" />
+        </div>
+      </section>
+
+      {/* ── Four divisions (all capabilities under one firm) ── */}
+      <section className="section-white">
+        <div className="shell py-20">
+          <h2 className="font-fraunces text-[clamp(28px,3.6vw,38px)] font-normal leading-tight text-forest">
+            One coordinated firm. Four divisions.
+          </h2>
+          <span className="rule-gold mb-5 mt-3" />
+          <p className="mb-11 max-w-[52em] text-[18px] prose-soft">
+            Most businesses juggle a bookkeeper here, a marketer there, a web person, a compliance
+            contractor — each hired, onboarded and managed separately. We bring those capabilities
+            together under one roof and across four divisions, so you get a whole bench of specialists
+            with one point of contact, one coordinated team, and one flat monthly fee.
+          </p>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {DIVISIONS.map((d) => (
+              <div key={d.t} className="flex flex-col gap-3 border border-line-warm bg-cream/50 p-6">
+                <h3 className="font-fraunces text-[20px] font-medium text-forest">{d.t}</h3>
+                <span className="rule-gold" />
+                <ul className="flex flex-col gap-1.5 text-[15px] prose-soft">
+                  {d.items.map((it) => <li key={it}>{it}</li>)}
+                </ul>
+              </div>
+            ))}
+          </div>
+          <div className="mt-10 flex flex-wrap gap-4">
+            <Link href="/services" className="btn-gold text-[15px]">View Services</Link>
+            <Link href="/get-started" className="btn-outline text-[15px]">Get Started</Link>
+            <Link href="/work" className="btn-outline text-[15px]">View Our Work</Link>
+            <Link href="/portal-preview" className="btn-outline text-[15px]">See Client Portal Preview</Link>
+          </div>
         </div>
       </section>
 
@@ -148,7 +188,7 @@ export default function HomePage() {
             ))}
           </div>
           <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3">
-            <Link href="/portal/login" className="btn-outline text-[15px]">See the client portal</Link>
+            <Link href="/portal-preview" className="btn-outline text-[15px]">See the client portal</Link>
             <p className="text-[15px] prose-muted">Included in every plan and every standalone booking.</p>
           </div>
         </div>
