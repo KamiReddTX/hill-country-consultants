@@ -4,7 +4,7 @@ import { InquiryForm } from "@/components/inquiry-form";
 import { HOURS, SITE } from "@/content/site";
 
 const NEXT_STEPS: { t: string; d: string }[] = [
-  { t: "We reply the same business day", d: "Send the form and we acknowledge it the same business day — usually within a few hours during business hours." },
+  { t: "We reply the same business day", d: "Send the form and we acknowledge it the same business day. Requests received outside business hours or on a closed day (Wednesday and Sunday) are reviewed the next business day." },
   { t: "A quick call or email first", d: "We'll reach out to confirm what you need and set a time for your free 30-minute strategy session. No pressure, no obligation." },
   { t: "The session is free and virtual", d: "Thirty minutes by video or phone. We map the work, name what hurts most today, and recommend a plan tier or a standalone scope." },
   { t: "Everything in writing before anything begins", d: "You get scope and pricing in writing. Nothing starts — and you pay nothing — until you approve it." },

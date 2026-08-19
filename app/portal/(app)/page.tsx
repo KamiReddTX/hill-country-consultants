@@ -21,7 +21,7 @@ export default async function OnboardingPage() {
   { const idx = new Map<string, number>(); for (const it of cl) { const k = it.section || ""; if (!idx.has(k)) { idx.set(k, clGroups.length); clGroups.push({ section: it.section, items: [] }); } clGroups[idx.get(k)!].items.push(it); } }
   const clPct = cl.length ? Math.round((clDone / cl.length) * 100) : 0;
   // assigned_to holds the owning employee's staff id — resolve it to a name.
-  let lead = "Assigned within 48 hours";
+  let lead = "Assigned within one business day";
   if (client.assigned_to && /^[0-9a-f-]{36}$/i.test(client.assigned_to)) {
     const { data: s } = await createServiceClient().from("staff").select("name,email").eq("id", client.assigned_to).maybeSingle();
     lead = (s as any)?.name || (s as any)?.email || lead;

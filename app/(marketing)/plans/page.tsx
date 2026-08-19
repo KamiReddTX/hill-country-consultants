@@ -77,7 +77,32 @@ export default function PlansPage() {
           <p className="mt-4 text-[13.5px] prose-muted">
             Allotments reset monthly unless a cell notes otherwise — <span className="font-medium text-charcoal">/qtr</span> = per quarter, <span className="font-medium text-charcoal">per term</span> = once per contract term. Unused allotment does not roll over.
           </p>
-          <div className="mt-10 max-w-[42em]">
+
+          <div className="mt-12 grid gap-10 md:grid-cols-2">
+            <div>
+              <h3 className="font-fraunces text-[20px] font-medium text-forest">How allotments work</h3>
+              <span className="rule-gold mb-4 mt-2" />
+              <ul className="flex flex-col gap-2.5 text-[15px] prose-soft">
+                <li>Your tier sets the volume for each service line. The figures in the table are per-service maximums — not a promise that every maximum is used in the same month.</li>
+                <li>Some work is project-based and scheduled by capacity (websites, publishing, events, training, larger builds), so it&apos;s planned into your month rather than delivered on demand.</li>
+                <li>A large production project can span more than one period and may draw on more than one month&apos;s allotment; we scope that with you up front.</li>
+                <li>Concurrency has limits — Foundation runs one active project, Momentum up to three, Enterprise at program level.</li>
+                <li>Unused allotment doesn&apos;t roll over, and anything beyond your allotment is quoted in writing first.</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-fraunces text-[20px] font-medium text-forest">What the turnaround levels mean</h3>
+              <span className="rule-gold mb-4 mt-2" />
+              <ul className="flex flex-col gap-2.5 text-[15px] prose-soft">
+                <li><span className="font-medium text-charcoal">Standard</span> — your work enters the normal production queue.</li>
+                <li><span className="font-medium text-charcoal">Priority in queue</span> — scheduled ahead of standard requests where capacity permits.</li>
+                <li><span className="font-medium text-charcoal">Priority on everything</span> — first scheduling priority among active clients.</li>
+              </ul>
+              <p className="mt-3 text-[14px] prose-muted">Turnaround still varies by service — each service page gives the detail, and deadline work can be flagged as rush.</p>
+            </div>
+          </div>
+
+          <div className="mt-12 max-w-[42em]">
             <PlanChooser />
           </div>
         </div>
