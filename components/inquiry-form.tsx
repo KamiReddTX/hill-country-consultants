@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ChangeEvent } from "react";
+import { track } from "@vercel/analytics";
 
 /**
  * Strategy-session / contact form. Posts to /api/inquiry and only confirms once
@@ -49,6 +50,7 @@ export function InquiryForm() {
           });
           const data = await res.json().catch(() => ({}));
           if (res.ok && data.persisted === true) {
+            track("get_started_submitted");
             setSubmitted(true);
             return;
           }

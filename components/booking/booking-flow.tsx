@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, type ChangeEvent } from "react";
+import { track } from "@vercel/analytics";
 import Link from "next/link";
 import {
   BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd,
@@ -203,6 +204,7 @@ export function BookingFlow({
         });
         const data = await res.json();
         if (res.ok && data.persisted) {
+          track("quote_requested");
           setDoneRef("HCC-" + Math.floor(100000 + Math.random() * 899999));
           setStep("done");
           return;
@@ -222,7 +224,7 @@ export function BookingFlow({
         method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload),
       });
       const data = await res.json();
-      if (res.ok && data.url) { window.location.href = data.url; return; }
+      if (res.ok && data.url) { track("checkout_started"); window.location.href = data.url; return; }
       setError(data.error || "Payment isn't configured yet. Add your Stripe keys to enable checkout.");
     } catch {
       setError("Something went wrong reaching the payment service. Please try again.");

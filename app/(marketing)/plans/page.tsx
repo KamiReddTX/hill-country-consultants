@@ -3,6 +3,7 @@ import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
 import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS } from "@/content/pricing";
 import { PlanInterest } from "@/components/plan-interest";
+import { PlanChooser } from "@/components/plan-chooser";
 
 export const metadata: Metadata = {
   title: "Plans & Pricing",
@@ -39,6 +40,9 @@ export default function PlansPage() {
               </div>
             ))}
           </div>
+          <p className="mt-6 max-w-[52em] text-[15.5px] prose-muted">
+            Between tiers? We can set a custom allotment — just ask in your free strategy session.
+          </p>
         </div>
       </section>
 
@@ -69,6 +73,12 @@ export default function PlansPage() {
                 ))}
               </tbody>
             </table>
+          </div>
+          <p className="mt-4 text-[13.5px] prose-muted">
+            Allotments reset monthly unless a cell notes otherwise — <span className="font-medium text-charcoal">/qtr</span> = per quarter, <span className="font-medium text-charcoal">per term</span> = once per contract term. Unused allotment does not roll over.
+          </p>
+          <div className="mt-10 max-w-[42em]">
+            <PlanChooser />
           </div>
         </div>
       </section>
