@@ -110,7 +110,7 @@ export const QUOTE_ITEMS: QuoteItem[] = [
   { id: "q-systems", name: "Systems & automation buildout", from: "scoped to your process" },
   { id: "q-ag", name: "Agriculture & land planning", from: "from $500 per deliverable" },
   { id: "q-grant-app", name: "Grant application", from: "from $750" },
-  { id: "q-copy", name: "Copywriting", from: "from $250 per project" },
+  { id: "q-copy", name: "Copywriting", from: "from $0.25/word or $250 per project" },
   { id: "q-notary", name: "Notary service — online or in person (Texas)", from: "$25 online · $10/act in person (TX) + travel" },
 ];
 
@@ -134,7 +134,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
   { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each", cart: "graphic" },
   { svc: "marketing", n: "Multi-asset campaign", p: "from $850", quote: "q-campaign" },
-  { svc: "marketing", n: "Copywriting", p: "from $250 per project", quote: "q-copy" },
+  { svc: "marketing", n: "Copywriting", p: "from $0.25/word or $250 per project", quote: "q-copy" },
   { svc: "marketing", n: "Speaker / media one-sheet & kit", p: "from $350", quote: "q-kit" },
   { svc: "brand", n: "Brand starter kit", p: "$950", cart: "brand-starter" },
   { svc: "brand", n: "Full brand system", p: "from $3,500", quote: "q-brand" },
