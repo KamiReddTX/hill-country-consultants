@@ -13,10 +13,12 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   const priv = isPrivileged(me), admin = isAdmin(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
   const unread = await getMessageUnreads(me.id).catch(() => ({ total: 0 } as any));
-  const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff/profile", label: "My profile" }];
-  // Manager overview + tools
-  if (priv || sales) tabs.push({ href: "/staff", label: "Dashboard" });
-  if (priv) tabs.push({ href: "/staff/admin", label: "Admin" }, { href: "/staff/directory", label: "Directory" });
+  // Dashboard first for every employee (content differs by role — a manager sees
+  // a firm-wide roll-up, an individual sees their own clients and hours).
+  const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff", label: "Dashboard" }];
+  // Manager overview + tools (the Admin tab is retired — its queues now live on
+  // the Dashboard, and per-client work lives on the Clients tab).
+  if (priv) tabs.push({ href: "/staff/directory", label: "Directory" });
   if (admin) tabs.push({ href: "/staff/payroll", label: "Payroll" });
   if (salesLead) tabs.push({ href: "/staff/sales", label: "Sales" });
   // Everyday work tabs — every employee's job surface (scoped to their clients)
@@ -39,6 +41,8 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
   // Manager operations
   if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "Clients" }, { href: "/staff/reports", label: "Reports" });
+  // My profile is always last.
+  tabs.push({ href: "/staff/profile", label: "My profile" });
 
   return (
     <div className="min-h-screen bg-cream">
