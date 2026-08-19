@@ -150,6 +150,22 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </section>
       )}
 
+      {key === "brand" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Brand-kit samples</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">A coherent system your whole team can apply correctly. A sampling:</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {["Brand guide cover", "Color palette", "Typography", "Logo variations", "Business card", "Social template"].map((lbl) => (
+                <ImageSlot key={lbl} label={lbl} src="" />
+              ))}
+            </div>
+            <p className="mt-4 text-[12px] prose-muted">Portfolio samples — add your real brand work here.</p>
+          </div>
+        </section>
+      )}
+
       {key === "marketing" && (
         <section className="section-cream">
           <div className="shell py-16">
