@@ -150,6 +150,22 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         </section>
       )}
 
+      {key === "publishing" && (
+        <section className="section-cream">
+          <div className="shell py-16">
+            <h2 className="font-fraunces text-[24px] font-medium text-forest">Published work</h2>
+            <span className="rule-gold mb-6 mt-3" />
+            <p className="mb-6 max-w-[52em] text-[16px] prose-soft">From manuscript to finished book — yours to own. A sampling:</p>
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {["Book cover", "Interior spread", "eBook on device", "Back cover & blurb", "Launch graphic", "Proof copy"].map((lbl) => (
+                <ImageSlot key={lbl} label={lbl} src="" />
+              ))}
+            </div>
+            <p className="mt-4 text-[12px] prose-muted">Portfolio samples — add your published titles here.</p>
+          </div>
+        </section>
+      )}
+
       {key === "brand" && (
         <section className="section-cream">
           <div className="shell py-16">
