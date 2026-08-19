@@ -20,9 +20,9 @@ export const metadata: Metadata = {
 
 const DIVISIONS: { t: string; items: string[] }[] = [
   { t: "Business Operations", items: ["Virtual Assistance", "Administrative Support", "Documentation", "Compliance", "Project Management", "Systems", "Automation"] },
-  { t: "Brand & Growth", items: ["Marketing", "Graphic Design", "Branding", "Content", "Campaign Support"] },
+  { t: "Brand & Growth", items: ["Marketing", "Graphic Design", "Branding", "Copywriting", "Content", "Campaign Support"] },
   { t: "Production & Development", items: ["Publishing", "Podcast Production", "Media Production", "Websites", "Apps", "PWAs"] },
-  { t: "Specialty Services", items: ["Construction Submittals", "Corporate Training", "Event Planning", "Agriculture & Land Services", "Grant & Nonprofit Administration"] },
+  { t: "Specialty Services", items: ["Construction Submittals", "Corporate Training", "Event Planning", "Agriculture & Land Services", "Grant & Nonprofit Administration", "Notary Services"] },
 ];
 
 export default function HomePage() {

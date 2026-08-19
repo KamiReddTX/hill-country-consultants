@@ -9,7 +9,7 @@ import { rateLinesFor, type RateLine } from "@/content/pricing";
 export type ServiceKey =
   | "va" | "pm" | "submittals" | "compliance" | "marketing" | "brand"
   | "publishing" | "media" | "digital" | "trainingSvc" | "systems"
-  | "events" | "ag" | "grants";
+  | "events" | "ag" | "grants" | "notary";
 
 const HOW =
   "Start with the free 30-minute strategy session. We map the work, recommend a plan tier or a standalone scope, and put it in writing before anything begins.";
@@ -30,6 +30,7 @@ export const SERVICE_META: Record<ServiceKey, ServiceMeta> = {
   events: { name: "Event Planning, in person", desc: "Event plan and budget outline, run-of-show, vendor coordination and on-site coordination at higher tiers." },
   ag: { name: "Agriculture & Land", desc: "Regenerative plan framework, stewardship calendar, record-keeping templates and operations coordination." },
   grants: { name: "Grants & Nonprofit Administration", desc: "Grant research and prospect lists, application preparation and submission, and compliance checklists — with post-award funder reporting available as a separate service or where your plan or scope includes it." },
+  notary: { name: "Notary Services", desc: "Professional notarizations — online (remote) and in person in Texas. Acknowledgments, jurats, oaths and signature witnessing, handled correctly and on schedule." },
 };
 
 export interface ServiceDetail {
@@ -328,6 +329,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     deliverables: [
       "On-brand social graphics, flyers, and ad creative.",
       "Email and promotional graphics and copy.",
+      "Copywriting for web pages, emails, ads, social, and marketing materials, in your brand voice.",
       "A content calendar, planned and scheduled.",
       "Scheduling and posting to your accounts when you grant access — or a clean handoff for you to post.",
       "Campaign concepts and multi-asset rollouts.",
@@ -974,6 +976,54 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
       { q: "What do we need to provide?", a: "Your organization's details, mission, and financials, program information, and any funder-required letters or attachments — plus approvals before we submit." },
     ],
   },
+  notary: {
+    headline: "Notary Services",
+    pain: "A document needs a notary and you need it done right — without hunting for an appointment or driving across town. We provide professional notarizations online, for signers wherever remote notarization is permitted, and in person across Texas.",
+    included: ["Acknowledgments and jurats", "Oaths and affirmations", "Signature witnessing", "Online (remote) notarization by secure audio-video session", "In-person notarization across Texas"],
+    expect: ["A commissioned Texas notary (Texas notary commission #134384502)", "Online notarization by secure remote session, where the law permits", "In-person appointments across Texas", "Fees within the maximums set by state law", "Georgia commission in process — in-person Georgia service coming soon"],
+    scope: "We notarize signatures and administer oaths and affirmations. We do not provide legal advice, draft or review legal documents, or notarize where a valid ID is missing or a conflict of interest exists. Notary fees follow the maximums set by state law.",
+    how: HOW,
+    forWho: [
+      "Anyone who needs a document notarized quickly, without tracking down an appointment.",
+      "Remote signers who need an online (remote) notarization from anywhere it's permitted.",
+      "Texas businesses and individuals who want reliable in-person notarization.",
+    ],
+    examples: [
+      "Acknowledgments", "Jurats", "Affidavits", "Sworn statements", "Powers of attorney (signature)",
+      "Consent and authorization forms", "Copy certifications (where allowed)", "Remote online notarization (RON)",
+    ],
+    deliverables: [
+      "A properly executed notarization — acknowledgment, jurat, or oath — on your document.",
+      "Online (remote) notarization by secure, recorded audio-video session where permitted.",
+      "In-person notarization at an agreed Texas location or by appointment.",
+      "A complete notarial certificate and seal on the document.",
+    ],
+    provide: [
+      "The unsigned document (we witness the signing).",
+      "A valid, current government-issued photo ID for each signer.",
+      "All signers present — in person, or live on the online session.",
+      "For online sessions, a device with a camera and a stable connection.",
+    ],
+    process: [
+      { t: "Tell us what you need", d: "Send the document type and whether you want online or in-person (Texas), and we confirm we can notarize it." },
+      { t: "Verify identity", d: "Each signer presents a valid government photo ID; online sessions use secure identity verification." },
+      { t: "Notarize", d: "We witness the signing and complete the notarial certificate — live online or in person." },
+      { t: "Deliver", d: "You receive the notarized document; online notarizations are completed and returned electronically." },
+    ],
+    notIncluded: [
+      "Legal advice, or drafting or reviewing legal documents — that's your attorney's role.",
+      "Notarizing without a valid, current government-issued ID, or where a conflict of interest exists.",
+      "Acts outside a notary's authority or outside the states where we're commissioned.",
+      "In-person notarization outside Texas (Georgia is in process).",
+    ],
+    faqs: [
+      { q: "Do you notarize online?", a: "Yes. We offer remote online notarization (RON) by a secure, recorded audio-video session, for signers wherever online notarization is legally permitted. You'll need a valid photo ID and a device with a camera." },
+      { q: "Where can you notarize in person?", a: "In person across Texas, by appointment. A Georgia commission is in process, and we'll add in-person Georgia service once it's active." },
+      { q: "What do I need to bring?", a: "The unsigned document (we witness the signing), a valid current government-issued photo ID for every signer, and every signer present — in person or live on the online session." },
+      { q: "What can't a notary do?", a: "A notary verifies identity and witnesses signatures and oaths — we don't give legal advice or draft or review legal documents. If your document needs legal guidance, that's your attorney's role." },
+      { q: "How much does it cost?", a: "Notary fees follow the maximums set by state law, and online notarization has its own fee. We confirm the fee before your appointment so there are no surprises." },
+    ],
+  },
 };
 
 /** /services listing, grouped, with the image drop-zone label per line. */
@@ -1008,6 +1058,7 @@ export const SERVICE_GROUPS: ServiceGroup[] = [
   { group: "Specialty", items: [
     { key: "ag", img: "Aerial view of a tractor working a field", src: "/images/services/ag.jpg" },
     { key: "grants", img: "Volunteers loading boxes of aid supplies", src: "/images/services/grants.jpg" },
+    { key: "notary", img: "Notary seal and stamped documents on a desk", src: "" },
   ]},
 ];
 
