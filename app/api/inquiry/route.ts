@@ -1,6 +1,17 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
+import { sendLeadAlert } from "@/lib/email";
+
+const NOTIFY_ROLES = ["Administrator", "Business Manager", "Sales Manager"];
+/** Emails of active Admin / Business Manager / Sales Manager staff (roles[]-aware). */
+async function notifyRecipients(admin: ReturnType<typeof createClient<Database>>): Promise<string[]> {
+  const { data } = await admin.from("staff").select("email, role, roles").eq("active", true);
+  const list = (data ?? [])
+    .filter((s: any) => NOTIFY_ROLES.includes(s.role) || (Array.isArray(s.roles) && s.roles.some((r: string) => NOTIFY_ROLES.includes(r))))
+    .map((s: any) => s.email).filter(Boolean) as string[];
+  return list.length ? Array.from(new Set(list)) : [process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com"];
+}
 
 export const runtime = "nodejs";
 
@@ -66,6 +77,14 @@ export async function POST(req: Request) {
       rep_code: referral || null,
       stage: "New lead",
     });
+    if (!error) {
+      // Best-effort alert to Admin / BM / Sales Manager — the lead is already saved.
+      try {
+        const to = await notifyRecipients(admin);
+        const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+        await sendLeadAlert({ to, kind: "Get Started request", business, contact: name, email, phone, industry, timeline, message: pain, portalUrl: site ? `${site}/staff` : undefined });
+      } catch { /* email failure never blocks the lead */ }
+    }
     return NextResponse.json({ ok: true, persisted: !error });
   } catch {
     return NextResponse.json({ ok: true, persisted: false });

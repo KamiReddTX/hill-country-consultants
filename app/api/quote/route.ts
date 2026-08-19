@@ -1,8 +1,18 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
+import { sendLeadAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
+
+const NOTIFY_ROLES = ["Administrator", "Business Manager", "Sales Manager"];
+async function notifyRecipients(admin: ReturnType<typeof createClient<Database>>): Promise<string[]> {
+  const { data } = await admin.from("staff").select("email, role, roles").eq("active", true);
+  const list = (data ?? [])
+    .filter((s: any) => NOTIFY_ROLES.includes(s.role) || (Array.isArray(s.roles) && s.roles.some((r: string) => NOTIFY_ROLES.includes(r))))
+    .map((s: any) => s.email).filter(Boolean) as string[];
+  return list.length ? Array.from(new Set(list)) : [process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com"];
+}
 
 /**
  * Quote-only booking → a lead row.
@@ -63,6 +73,13 @@ export async function POST(req: Request) {
       rep_code: clean(body.repCode) || null,
       stage: "New lead",
     });
+    if (!error) {
+      try {
+        const to = await notifyRecipients(admin);
+        const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+        await sendLeadAlert({ to, kind: "Quote request", business: clean(contact.business), contact: clean(contact.name), email: clean(contact.email), phone: clean(contact.phone), timeline: clean(body.startDate), message: pain, portalUrl: site ? `${site}/staff` : undefined });
+      } catch { /* email failure never blocks the lead */ }
+    }
     return NextResponse.json({ ok: true, persisted: !error });
   } catch {
     return NextResponse.json({ ok: true, persisted: false });

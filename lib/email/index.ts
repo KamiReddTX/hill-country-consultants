@@ -203,6 +203,28 @@ export async function sendPlanInterestAlert(opts: { plan: string; email: string;
   await send(to, `New ${opts.plan} plan interest · ${opts.name || opts.email}`, shell("New plan interest", body), opts.email || undefined);
 }
 
+/** Internal alert to Admin/BM/Sales Manager when a new customer request comes in
+ *  from the website (Get Started inquiry or a quote request). Reply-To is the
+ *  prospect so a reply reaches them directly. */
+export async function sendLeadAlert(opts: {
+  to: string | string[]; kind: "Get Started request" | "Quote request";
+  business: string; contact: string; email: string; phone: string;
+  industry?: string; timeline?: string; message?: string; portalUrl?: string;
+}) {
+  const row = (k: string, v: string) =>
+    v ? `<tr><td style="padding:2px 16px 2px 0;color:#6b6552;white-space:nowrap">${k}</td><td style="padding:2px 0"><strong>${esc(v)}</strong></td></tr>` : "";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">New <strong>${esc(opts.kind)}</strong> from the website.</p>
+    <table style="font-size:14px;line-height:1.6;color:#3a3f38;border-collapse:collapse;margin:8px 0 16px">
+      ${row("Business", opts.business)}${row("Contact", opts.contact)}${row("Email", opts.email)}${row("Phone", opts.phone)}${row("Industry", opts.industry || "")}${row("Timeline", opts.timeline || "")}
+    </table>
+    ${opts.message ? `<div style="font-size:14px;line-height:1.6;color:#3a3f38;border-left:3px solid #c2a24a;padding:2px 0 2px 14px;margin:12px 0;white-space:pre-wrap">${esc(opts.message)}</div>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">It&apos;s on the staff <strong>Dashboard → Customer requests</strong> and in <strong>Pipeline → New lead</strong>.</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open the staff portal</a></p>` : ""}
+    <p style="font-size:13px;color:#6b6552">Reply to this email to reach the prospect directly.</p>`;
+  await send(opts.to, `New ${opts.kind.toLowerCase()} · ${opts.business || opts.contact || opts.email}`, shell("New customer request", body), opts.email || undefined);
+}
+
 /** 4-hour shift alert to the employee and admins. */
 export async function sendShiftAlert(opts: { to: string; name: string; hours: number }) {
   const body = `<p style="font-size:16px;line-height:1.6">${opts.name} has been clocked in for <strong>${opts.hours.toFixed(1)} hours</strong>. Shifts over 4 hours are flagged for review.</p>`;
