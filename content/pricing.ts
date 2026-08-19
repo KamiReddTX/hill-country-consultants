@@ -56,7 +56,7 @@ export const PLAN_BILLED: string[] = [
 export const PLAN_TERMS: string[] = [
   "12-month standard, quarterly option available",
   "First half due on the 1st, second half by the 15th, or paid in full",
-  "50% deposit on standalone projects",
+  "Standalone projects paid in full at booking",
   "5 business-day grace period",
   "Credit card, Zelle, or Cash App — no checks or money orders",
 ];

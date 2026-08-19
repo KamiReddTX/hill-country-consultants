@@ -44,7 +44,7 @@ const GROUPS = Array.from(new Set(BOOK_ITEMS.map((b) => b.group)));
 
 // Format integer cents as USD. Cents are shown only when the amount isn't a whole
 // dollar, so whole-dollar totals read exactly as before ($650, not $650.00) while a
-// 50% deposit on an odd total reads correctly ($62.50 — matching the Stripe charge).
+// an odd-cent total (e.g. attendee math) reads correctly ($62.50 — matching the Stripe charge).
 const usdCents = (cents: number) =>
   "$" +
   (cents / 100).toLocaleString("en-US", {
