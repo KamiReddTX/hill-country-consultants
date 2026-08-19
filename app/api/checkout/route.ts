@@ -20,38 +20,24 @@ export async function POST(req: NextRequest) {
   let body: any;
   try { body = await req.json(); } catch { return NextResponse.json({ error: "Invalid request." }, { status: 400 }); }
   const items: { id: string; qty: number }[] = (body.items || []).filter((i: any) => bookItemById(i.id));
-  const payMode: "full" | "deposit" = body.payMode === "deposit" ? "deposit" : "full";
+  const payMode = "full"; // deposits removed — full payment only
   if (!items.length) return NextResponse.json({ error: "No payable items in the cart." }, { status: 400 });
   if (!body.contact?.email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
 
-  const fixedTotal = items.reduce((s, i) => s + (bookItemById(i.id)!.price * (i.qty || 1)), 0);
-  // Deposit in cents — the single amount both charged here and shown in the
-  // booking UI (components/booking/booking-flow.tsx), so they never disagree.
-  const depositCents = Math.round((fixedTotal / 2) * 100);
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const site = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;
 
-  const line_items =
-    payMode === "deposit"
-      ? [{
-          quantity: 1,
-          price_data: {
-            currency: "usd",
-            unit_amount: depositCents,
-            product_data: { name: "50% deposit — Hill Country Consultants", description: "Balance due on delivery." },
-          },
-        }]
-      : items.map((i) => {
-          const it = bookItemById(i.id)!;
-          return {
-            quantity: i.qty || 1,
-            price_data: {
-              currency: "usd",
-              unit_amount: it.price * 100,
-              product_data: { name: it.name, description: it.unit },
-            },
-          };
-        });
+  const line_items = items.map((i) => {
+    const it = bookItemById(i.id)!;
+    return {
+      quantity: i.qty || 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: it.price * 100,
+        product_data: { name: it.name, description: it.unit },
+      },
+    };
+  });
 
   const session = await stripe.checkout.sessions.create({
     mode: "payment",

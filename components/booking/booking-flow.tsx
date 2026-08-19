@@ -60,8 +60,10 @@ export function BookingFlow({
   const [cart, setCart] = useState<Cart>(() => seedCart(initialAdd));
   const [quotes, setQuotes] = useState<Quotes>(() => seedQuotes(initialQuotes));
   const [mode, setMode] = useState<"pay" | "call">("pay");
-  const [payMode, setPayMode] = useState<"full" | "deposit">("full");
   const [step, setStep] = useState<Step>("select");
+  const [catFilter, setCatFilter] = useState<string | null>(null);
+  const [industryFilter, setIndustryFilter] = useState<{ cart: string[]; quotes: string[]; name: string } | null>(null);
+  const [quoteConsent, setQuoteConsent] = useState(false);
   const [form, setForm] = useState({ name: "", business: "", email: "", phone: "", startDate: "", notes: "", repCode: "" });
   const [consent, setConsent] = useState(false);
   const [error, setError] = useState("");
@@ -83,10 +85,7 @@ export function BookingFlow({
   );
   const chosenQuotes = useMemo(() => QUOTE_ITEMS.filter((q) => quotes[q.id]), [quotes]);
   const fixedTotal = useMemo(() => chosen.reduce((s, it) => s + it.qty * it.price, 0), [chosen]);
-  // Deposit computed once in cents so the amount shown here and the amount charged
-  // by app/api/checkout are always identical, including odd-dollar totals.
-  const depositCents = Math.round((fixedTotal / 2) * 100);
-  const dueNowCents = payMode === "deposit" ? depositCents : fixedTotal * 100;
+  const dueNowCents = fixedTotal * 100;
   const canPay = fixedTotal > 0;
   const hasSelection = chosen.length > 0 || chosenQuotes.length > 0;
   const needsDate = !!selectedClass;
@@ -103,25 +102,44 @@ export function BookingFlow({
   const toggleQuote = (id: string) =>
     setQuotes((q) => { const n = { ...q }; if (n[id]) delete n[id]; else n[id] = true; return n; });
 
-  // Industry starting point: preload that industry's services and jump to the summary.
-  const applyIndustry = (cartIds: string[], quoteIds: string[]) => {
-    setCart((c) => {
-      const nc = { ...c };
-      cartIds.forEach((id) => { if (bookItemById(id)) nc[id] = (nc[id] || 0) + 1; });
-      return nc;
-    });
-    setQuotes((q) => {
-      const nq = { ...q };
-      quoteIds.forEach((id) => { if (quoteItemById(id)) nq[id] = true; });
-      return nq;
-    });
-    if (typeof document !== "undefined") {
-      document.getElementById("selection-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+  // Set the exact quantity from the editable number field.
+  const setQty = (id: string, val: number) =>
+    setCart((c) => { const nc = { ...c }; const n = Math.max(0, Math.floor(val || 0)); if (n <= 0) delete nc[id]; else nc[id] = n; return nc; });
+  const clearAll = () => { setCart({}); setQuotes({}); };
+
+  // Industry / category shortcuts FILTER the visible services — they never add to the cart.
+  const showIndustry = (ind: { cart: string[]; quotes: string[]; name: string }) => {
+    setIndustryFilter({ cart: ind.cart, quotes: ind.quotes, name: ind.name });
+    setCatFilter(null);
+    if (typeof document !== "undefined") document.getElementById("service-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
+
+  // Which fixed-rate + quote items to show, given the active filter.
+  const visibleGroups = industryFilter ? [] : (catFilter ? [catFilter] : GROUPS);
+  const industryFixed = industryFilter ? BOOK_ITEMS.filter((b) => industryFilter.cart.includes(b.id)) : [];
+  const visibleQuotes = industryFilter ? QUOTE_ITEMS.filter((q) => industryFilter.quotes.includes(q.id)) : QUOTE_ITEMS;
+
+  const row = (it: (typeof BOOK_ITEMS)[number]) => (
+    <li key={it.id} className="flex items-center justify-between gap-3 py-3">
+      <div className="min-w-0">
+        <p className="text-[15.5px] text-charcoal">{it.name}</p>
+        <p className="text-[13px] prose-muted">{usd(it.price)} · {it.unit}</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <button aria-label="Remove one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, -1)}>−</button>
+        <input aria-label="Quantity" type="number" min={0} value={cart[it.id] || 0} onChange={(e) => setQty(it.id, Number(e.target.value))}
+          className="h-9 w-14 border border-line-warm bg-white text-center text-[15px] tabular-nums outline-none focus:border-forest" />
+        <button aria-label="Add one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, 1)}>+</button>
+      </div>
+    </li>
+  );
 
   const calendar = useMemo(() => {
     const today = new Date(); today.setHours(0, 0, 0, 0);
+    // Classes book no sooner than 30 days out and no later than 90 days out.
+    const isClass = !!selectedClass;
+    const minD = new Date(today); minD.setDate(today.getDate() + 30);
+    const maxD = new Date(today); maxD.setDate(today.getDate() + 90);
     const first = new Date(today.getFullYear(), today.getMonth() + calOffset, 1);
     const start = new Date(first);
     start.setDate(first.getDate() - ((first.getDay() + 6) % 7));
@@ -135,12 +153,12 @@ export function BookingFlow({
         const iso = cur.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
         const date = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, "0")}-${String(cur.getDate()).padStart(2, "0")}`;
         const closed = dow === 3 || dow === 0;
-        const disabled = !inMonth || cur < today || closed;
+        const disabled = !inMonth || cur < today || closed || (isClass && (cur < minD || cur > maxD));
         days.push({ key: `${w}-${d}`, label: inMonth ? String(cur.getDate()) : "", iso, date, open: !disabled, appt: dow === 6 && !disabled, picked: pickedDate === iso, dow });
       }
     }
     return { label: first.toLocaleDateString("en-US", { month: "long", year: "numeric" }), days };
-  }, [calOffset, pickedDate]);
+  }, [calOffset, pickedDate, selectedClass]);
 
   async function submit() {
     setError("");
@@ -155,11 +173,12 @@ export function BookingFlow({
     // The all-sales-are-final consent applies only to a paid booking; a free quote
     // request carries no obligation, so it isn't gated on it.
     if (canPay && !consent) { setError("Please accept the Terms of Service and Refund & Cancellation Policy to continue."); return; }
+    if (chosenQuotes.length > 0 && !quoteConsent) { setError("Please acknowledge that quoted items are an estimate, not a final cost."); return; }
 
     const payload = {
       items: chosen.map((c) => ({ id: c.id, name: c.name, qty: c.qty, svc: c.svc, price: c.price })),
       quotes: chosenQuotes.map((q) => ({ id: q.id, name: q.name, from: q.from })),
-      payMode, dueNowCents,
+      payMode: "full", dueNowCents,
       contact: form, startDate,
       className: selectedClass ? `${selectedClass.no} — ${selectedClass.name}` : "",
       classDate: pickedDate, classSlot: slot,
@@ -287,6 +306,7 @@ export function BookingFlow({
                 <div className="mb-8 border border-line-warm bg-white p-6">
                   <p className="kicker mb-2">Class selected</p>
                   <p className="text-[17px] font-medium text-charcoal">{selectedClass.no} — {selectedClass.name}</p>
+                  <p className="mt-1 text-[13px] prose-muted">Minimum 20 attendees · additional attendees $250 each · booked 30–90 days out.</p>
                   <p className="mt-3 text-[14px] prose-muted">{slotNoteForDow(pickedDow ?? 1)}</p>
                   <div className="mt-4 flex items-center justify-between">
                     <button className="btn-outline px-3 text-[13px]" onClick={() => setCalOffset((o) => Math.max(0, o - 1))}>← Prev</button>
@@ -328,40 +348,48 @@ export function BookingFlow({
                 </div>
               )}
 
-              <div className="mb-8">
-                <p className="kicker mb-3">Start from your industry</p>
+              <div id="service-list" className="mb-6">
+                <p className="kicker mb-3">Filter by industry</p>
                 <div className="flex flex-wrap gap-2">
                   {INDUSTRIES.map((ind) => (
-                    <button
-                      key={ind.slug}
-                      type="button"
-                      onClick={() => applyIndustry(ind.cart, ind.quotes)}
-                      className="min-h-touch border border-line-warm bg-white px-4 text-[13.5px] text-charcoal hover:border-gold"
-                    >
+                    <button key={ind.slug} type="button" onClick={() => showIndustry(ind)}
+                      className={`min-h-touch border px-4 text-[13.5px] ${industryFilter?.name === ind.name ? "border-forest bg-forest text-white" : "border-line-warm bg-white text-charcoal hover:border-gold"}`}>
                       {ind.name}
                     </button>
                   ))}
                 </div>
+                <p className="mt-2 text-[12px] prose-muted">Filtering only narrows the list — nothing is added to your booking until you set a quantity.</p>
+              </div>
+
+              <div className="mb-6">
+                <p className="kicker mb-2">Filter by category</p>
+                <div className="flex flex-wrap gap-2">
+                  <button type="button" onClick={() => { setCatFilter(null); setIndustryFilter(null); }}
+                    className={`min-h-touch border px-3 text-[13px] ${!catFilter && !industryFilter ? "border-forest bg-forest text-white" : "border-line-warm bg-white text-charcoal hover:border-gold"}`}>All</button>
+                  {GROUPS.map((g) => (
+                    <button key={g} type="button" onClick={() => { setCatFilter(g); setIndustryFilter(null); }}
+                      className={`min-h-touch border px-3 text-[13px] ${catFilter === g ? "border-forest bg-forest text-white" : "border-line-warm bg-white text-charcoal hover:border-gold"}`}>{g}</button>
+                  ))}
+                </div>
+                {(catFilter || industryFilter) && (
+                  <button type="button" onClick={() => { setCatFilter(null); setIndustryFilter(null); }} className="mt-3 text-[13px] link-underline">Show all services</button>
+                )}
               </div>
 
               <h2 className="mb-4 font-fraunces text-[20px] font-medium text-forest">Fixed-rate services</h2>
-              {GROUPS.map((group) => (
+              {industryFilter && (
+                <div className="mb-6">
+                  <p className="kicker mb-2">Suggested for {industryFilter.name}</p>
+                  {industryFixed.length === 0
+                    ? <p className="text-[14px] prose-muted">No fixed-rate services for this industry — see the quote requests below.</p>
+                    : <ul className="divide-y divide-line-soft border-y border-line-soft">{industryFixed.map(row)}</ul>}
+                </div>
+              )}
+              {visibleGroups.map((group) => (
                 <div key={group} className="mb-6">
                   <p className="kicker mb-2">{group}</p>
                   <ul className="divide-y divide-line-soft border-y border-line-soft">
-                    {BOOK_ITEMS.filter((b) => b.group === group).map((it) => (
-                      <li key={it.id} className="flex items-center justify-between gap-3 py-3">
-                        <div className="min-w-0">
-                          <p className="text-[15.5px] text-charcoal">{it.name}</p>
-                          <p className="text-[13px] prose-muted">{usd(it.price)} · {it.unit}</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <button aria-label="Remove one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, -1)}>−</button>
-                          <span className="w-6 text-center tabular-nums">{cart[it.id] || 0}</span>
-                          <button aria-label="Add one" className="h-9 w-9 border border-line-warm bg-white text-[18px] leading-none" onClick={() => step2(it.id, 1)}>+</button>
-                        </div>
-                      </li>
-                    ))}
+                    {BOOK_ITEMS.filter((b) => b.group === group).map(row)}
                   </ul>
                 </div>
               ))}
@@ -369,7 +397,7 @@ export function BookingFlow({
               <h2 className="mb-2 mt-8 font-fraunces text-[20px] font-medium text-forest">Scoped work — request a written quote</h2>
               <p className="mb-4 text-[14px] prose-muted">Quote requests are free and create no obligation. We price them in writing before anything begins.</p>
               <div className="flex flex-wrap gap-2">
-                {QUOTE_ITEMS.map((q) => (
+                {visibleQuotes.map((q) => (
                   <button key={q.id} onClick={() => toggleQuote(q.id)}
                     className={`min-h-touch border px-3 py-2 text-left text-[13.5px] ${quotes[q.id] ? "border-forest bg-forest text-white" : "border-line-warm bg-white hover:border-gold"}`}>
                     {q.name} <span className={quotes[q.id] ? "text-gold-onForest" : "text-ink-faint"}>· {q.from}</span>
@@ -382,12 +410,8 @@ export function BookingFlow({
           {step === "pay" && (
             <div className="flex flex-col gap-5">
               {canPay && (
-                <div>
-                  <p className="kicker mb-2">How would you like to pay?</p>
-                  <div className="flex gap-3">
-                    <button onClick={() => setPayMode("full")} className={`min-h-touch flex-1 border px-4 ${payMode === "full" ? "border-forest bg-forest text-white" : "border-line-warm bg-white"}`}>Pay in full · {usd(fixedTotal)}</button>
-                    <button onClick={() => setPayMode("deposit")} className={`min-h-touch flex-1 border px-4 ${payMode === "deposit" ? "border-forest bg-forest text-white" : "border-line-warm bg-white"}`}>50% deposit · {usdCents(depositCents)}</button>
-                  </div>
+                <div className="border border-line-warm bg-white p-4">
+                  <div className="flex justify-between text-[15px]"><span className="prose-muted">Total due today</span><span className="font-fraunces text-[20px] text-charcoal tabular-nums">{usd(fixedTotal)}</span></div>
                 </div>
               )}
               <div className="grid gap-4 sm:grid-cols-2">
@@ -438,6 +462,12 @@ export function BookingFlow({
                   Quote requests are free and create no obligation. We price scoped work in writing before anything begins — no payment is taken now.
                 </p>
               )}
+              {chosenQuotes.length > 0 && (
+                <label className="flex items-start gap-3 border border-line-warm bg-white p-4">
+                  <input type="checkbox" className="mt-1 h-5 w-5 shrink-0" checked={quoteConsent} onChange={(e) => setQuoteConsent(e.target.checked)} />
+                  <span className="text-[14.5px] prose-soft">I understand this is <strong>not my final cost</strong>. My cost may increase after my 30-minute consultation regarding the items I requested a quote for.</span>
+                </label>
+              )}
               {error && <p className="text-[14px] text-red-700">{error}</p>}
               <div className="flex flex-wrap gap-3">
                 <button disabled={busy} onClick={submit} className="btn-gold">
@@ -481,13 +511,15 @@ export function BookingFlow({
             {canPay && (
               <div className="border-t border-line-soft pt-3">
                 <div className="flex justify-between text-[15px]"><span className="prose-muted">Payable today</span><span className="font-fraunces text-[22px] text-charcoal tabular-nums">{usdCents(dueNowCents)}</span></div>
-                {payMode === "deposit" && <p className="mt-1 text-[13px] prose-muted">50% deposit — balance due on delivery.</p>}
               </div>
             )}
             {step === "select" && hasSelection && (
               <button onClick={() => { setStep("pay"); setError(""); }} className="btn-gold mt-5 w-full">
                 {canPay ? "Continue to payment" : "Continue to quote request"}
               </button>
+            )}
+            {hasSelection && (
+              <button onClick={clearAll} className="mt-3 w-full text-[13px] link-underline">Clear selections</button>
             )}
             <p className="mt-4 text-[12.5px] prose-muted">All sales are final. Scoped work is quoted in writing before it begins.</p>
           </div>

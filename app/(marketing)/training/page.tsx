@@ -25,7 +25,7 @@ export default function TrainingPage() {
             as="h1"
             kicker="Training"
             title="Eight corporate classes"
-            intro="Half or full day, on site or virtual, with a hands-on build lab where your team produces real deliverables. Content is tailored to your industry before the session; up to 20 participants, add $75 per person beyond 20."
+            intro="Half or full day, on site or virtual, with a hands-on build lab where your team produces real deliverables. Content is tailored to your industry before the session. Each class is for a minimum of 20 participants; additional attendees are $250 each, and classes book 30–90 days out."
           />
         </div>
       </section>

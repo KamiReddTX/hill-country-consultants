@@ -38,7 +38,8 @@ export default function ClassPage({ params }: { params: { class: string } }) {
           <p className="kicker mt-6">{c.no}</p>
           <h1 className="mt-2 max-w-[22em] font-fraunces text-[clamp(30px,4.4vw,48px)] font-normal text-forest">{c.name}</h1>
           <span className="rule-gold mt-3" />
-          <p className="mt-4 text-[15px] prose-muted">For {c.who} · {c.format} · on-site or live-virtual</p>
+          <p className="mt-4 text-[15px] prose-muted">For {c.who} · {c.format} · on-site or live-virtual · minimum 20 attendees</p>
+          <p className="mt-1 text-[14px] prose-muted">Priced for up to 20 participants; additional attendees are $250 each. Classes book 30–90 days out.</p>
           <p className="mt-6 max-w-[46em] text-[19px] prose-soft">{c.why}</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <Link href="/get-started" className="btn-gold">Request a training date</Link>

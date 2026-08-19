@@ -80,8 +80,8 @@ export const BOOK_ITEMS: BookItem[] = [
   { id: "podcast", svc: "media", group: "Publishing & media", name: "Podcast episode (edit + cover art)", unit: "each", price: 350 },
   { id: "media-asset", svc: "media", group: "Publishing & media", name: "Media asset (audiogram / short)", unit: "each", price: 95 },
   { id: "grant-research", svc: "grants", group: "Specialty", name: "Grant research report", unit: "each", price: 350 },
-  { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "up to 20 participants · +$75/person over 20", price: 3000 },
-  { id: "class-full", svc: "trainingSvc", group: "Training", name: "Corporate class — full day, 6h", unit: "up to 20 participants · +$75/person over 20", price: 4500 },
+  { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "up to 20 participants · +$250/person over 20", price: 3000 },
+  { id: "class-full", svc: "trainingSvc", group: "Training", name: "Corporate class — full day, 6h", unit: "up to 20 participants · +$250/person over 20", price: 4500 },
 ];
 
 export interface QuoteItem {
