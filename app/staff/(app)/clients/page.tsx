@@ -13,6 +13,11 @@ import { DeleteClientButton } from "@/components/staff/delete-client-button";
 import { ClientContactsManager } from "@/components/staff/client-contacts-manager";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { LocalTime } from "@/components/local-time";
+import { PlanSelect } from "@/components/staff/plan-select";
+import { AllotmentAdjustForm } from "@/components/staff/allotment-adjust-form";
+import { DeleteAdjustmentButton } from "@/components/staff/delete-adjustment-button";
+import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
+import { ALLOTMENT_LINES } from "@/content/pricing";
 
 /** Clients hub — one expandable row per client with everything about them:
  *  account setup, contacts & suspension, bookings, weekly reports, recent work
@@ -56,11 +61,13 @@ export default async function ClientsPage() {
   const teamOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
 
   const db = createClient();
-  const [{ data: assignments }, { data: allContacts }, { data: workLog }, { data: reports }] = await Promise.all([
+  const ym = monthKey();
+  const [{ data: assignments }, { data: allContacts }, { data: workLog }, { data: reports }, { data: adjustments }] = await Promise.all([
     db.from("client_assignments").select("*"),
     db.from("client_contacts").select("*").order("created_at", { ascending: true }),
     db.from("client_work_log").select("*").order("worked_on", { ascending: false }).limit(400),
     db.from("client_reports").select("id,client_id,name,created_at").order("created_at", { ascending: false }),
+    db.from("client_allotment_adjustments").select("*").eq("period_month", `${ym}-01`).order("created_at", { ascending: false }),
   ]);
 
   const teamByClient = new Map<string, { id: string; staffId: string; label: string }[]>();
@@ -77,6 +84,18 @@ export default async function ClientsPage() {
   (workLog ?? []).forEach((w: any) => { const a = logByClient.get(w.client_id) || []; a.push(w); logByClient.set(w.client_id, a); });
   const reportsByClient = new Map<string, any[]>();
   (reports ?? []).forEach((r: any) => { const a = reportsByClient.get(r.client_id) || []; a.push(r); reportsByClient.set(r.client_id, a); });
+
+  // This month's allotment inputs: approved VA-ish hours from the work log (auto)
+  // and manual adjustments per client.
+  const vaHoursByClient = new Map<string, number>();
+  (workLog ?? []).forEach((w: any) => {
+    if (String(w.worked_on || "").slice(0, 7) !== ym) return;
+    if (w.approved === false) return;
+    vaHoursByClient.set(w.client_id, (vaHoursByClient.get(w.client_id) || 0) + Number(w.hours || 0));
+  });
+  const adjByClient = new Map<string, any[]>();
+  (adjustments ?? []).forEach((a: any) => { const arr = adjByClient.get(a.client_id) || []; arr.push(a); adjByClient.set(a.client_id, arr); });
+  const adjLabel = new Map(ALLOTMENT_LINES.map((l) => [l.key, l.label]));
 
   const H = ({ children }: { children: React.ReactNode }) => <p className="mb-1 text-[12px] font-semibold uppercase tracking-wide text-forest">{children}</p>;
 
@@ -101,6 +120,9 @@ export default async function ClientsPage() {
           const lg = (logByClient.get(c.id) || []).slice(0, 6);
           const rp = (reportsByClient.get(c.id) || []).slice(0, 5);
           const suspended = !!(c as any).suspended;
+          const plan = (c as any).plan || null;
+          const adjList = adjByClient.get(c.id) || [];
+          const usage = computeAllotmentUsage(plan, vaHoursByClient.get(c.id) || 0, adjList.map((a: any) => ({ service_key: a.service_key, delta: Number(a.delta) })));
           return (
             <details key={c.id} className="border border-line-warm bg-white">
               <summary className="min-h-touch cursor-pointer list-none px-4 py-3">
@@ -128,6 +150,46 @@ export default async function ClientsPage() {
                     {c.rep_code && <span className="text-[12px] prose-muted">Rep: {c.rep_code}</span>}
                     {admin && <DeleteClientButton clientId={c.id} label={label} />}
                   </div>
+                </div>
+
+                {/* Plan & allotments */}
+                <div>
+                  <H>Plan &amp; allotments · {ym}</H>
+                  <div className="grid gap-3 md:max-w-[420px]">
+                    <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Retainer tier<PlanSelect clientId={c.id} current={plan} /></label>
+                  </div>
+                  {plan ? (
+                    <div className="mt-3 flex flex-col gap-3">
+                      <div className="overflow-x-auto border border-line-soft">
+                        <table className="w-full min-w-[520px] border-collapse bg-white text-left text-[13px]">
+                          <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-2 font-medium">Service</th><th className="p-2 font-medium">Allotment</th><th className="p-2 font-medium">Used</th><th className="p-2 font-medium">Remaining</th></tr></thead>
+                          <tbody>
+                            {usage.map((u) => (
+                              <tr key={u.key} className="border-b border-line-soft/60">
+                                <td className="p-2 text-charcoal">{u.label} <span className="text-[11px] text-ink-faint">({u.unit})</span></td>
+                                <td className="p-2 prose-muted">{u.allot ?? "—"}</td>
+                                <td className="p-2 prose-soft">{u.used}{u.key === "va_hours" && u.auto ? <span className="text-[11px] text-ink-faint"> ({u.auto} logged)</span> : null}</td>
+                                <td className={`p-2 font-medium ${u.over ? "text-red-700" : "text-forest"}`}>{u.remaining ?? "—"}{u.over ? " · over" : ""}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <p className="text-[11px] prose-muted">VA hours count approved work-log hours this month automatically. Record other deliverables (a submittal, a compliance build, a graphic) as they&rsquo;re completed — a positive number uses allotment, a negative number credits it back. Anything over allotment should be invoiced from Billing &amp; AR.</p>
+                      <AllotmentAdjustForm clientId={c.id} month={ym} />
+                      {adjList.length > 0 && (
+                        <ul className="flex flex-col gap-0.5">
+                          {adjList.map((a: any) => (
+                            <li key={a.id} className="text-[12px] prose-muted">
+                              {Number(a.delta) > 0 ? "+" : ""}{Number(a.delta)} {adjLabel.get(a.service_key) || a.service_key}{a.note ? ` · ${a.note}` : ""} <DeleteAdjustmentButton id={a.id} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-2 text-[13px] prose-muted">Off-plan (à-la-carte). Set a retainer tier to track monthly allotments.</p>
+                  )}
                 </div>
 
                 {/* Contacts & suspension */}
@@ -181,6 +243,7 @@ export default async function ClientsPage() {
                     <Link href="/staff/vault" className="link-underline">Vault</Link>
                     <Link href="/staff/tasks" className="link-underline">Task board</Link>
                     <Link href="/staff/weekly" className="link-underline">Weekly reports</Link>
+                    <Link href="/staff/billing" className="link-underline">Billing &amp; AR</Link>
                   </div>
                 </div>
               </div>

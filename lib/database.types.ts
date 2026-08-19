@@ -88,6 +88,7 @@ export interface Database {
           kickoff_at: string | null;
           roadmap_at: string | null;
           billing_type: string;
+          plan: string | null;
           suspended: boolean | null;
           suspended_reason: string | null;
           suspended_at: string | null;
@@ -107,12 +108,69 @@ export interface Database {
           kickoff_at?: string | null;
           roadmap_at?: string | null;
           billing_type?: string;
+          plan?: string | null;
           suspended?: boolean | null;
           suspended_reason?: string | null;
           suspended_at?: string | null;
           reply_token?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["clients"]["Insert"]>;
+      };
+      invoices: {
+        Row: {
+          id: string;
+          client_id: string;
+          number: string;
+          kind: string;
+          period_month: string | null;
+          description: string | null;
+          amount_cents: number;
+          status: string;
+          due_date: string | null;
+          pay_url: string | null;
+          paid_at: string | null;
+          paid_method: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          number: string;
+          kind?: string;
+          period_month?: string | null;
+          description?: string | null;
+          amount_cents?: number;
+          status?: string;
+          due_date?: string | null;
+          pay_url?: string | null;
+          paid_at?: string | null;
+          paid_method?: string | null;
+          created_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["invoices"]["Insert"]>;
+      };
+      client_allotment_adjustments: {
+        Row: {
+          id: string;
+          client_id: string;
+          period_month: string;
+          service_key: string;
+          delta: number;
+          note: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          period_month: string;
+          service_key: string;
+          delta?: number;
+          note?: string | null;
+          created_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["client_allotment_adjustments"]["Insert"]>;
       };
       client_checklist_items: {
         Row: { id: string; client_id: string; section: string | null; label: string; done: boolean; done_at: string | null; position: number; created_by: string | null; created_at: string };

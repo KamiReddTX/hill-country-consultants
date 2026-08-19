@@ -41,6 +41,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
   // Manager operations
   if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "Clients" }, { href: "/staff/reports", label: "Reports" });
+  if (priv) tabs.push({ href: "/staff/billing", label: "Billing & AR" });
   // My profile is always last.
   tabs.push({ href: "/staff/profile", label: "My profile" });
 

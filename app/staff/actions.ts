@@ -1233,3 +1233,133 @@ export async function deleteChecklistSection(clientId: string, section: string):
   revalidatePath("/staff/checklists"); revalidatePath("/portal");
   return { ok: true };
 }
+
+// ── Tier 1 back-office: client plan, allotments, billing/AR ──────────────────
+// Guarded by isPrivileged (Administrator / Business Manager) to mirror the
+// SQL is_biller() policy on invoices. Allotment adjustments also allow sales
+// (is_sales() in SQL) so account owners can record usage.
+import { isSalesOrAdmin } from "@/lib/staff";
+import { PLAN_FEE_CENTS, type PlanTier } from "@/content/pricing";
+
+/** Set (or clear) a client's retainer tier. Admin / Business Manager only. */
+export async function setClientPlan(clientId: string, plan: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const value = plan === "Foundation" || plan === "Momentum" || plan === "Enterprise" ? plan : null;
+  const { error } = await createServiceClient().from("clients").update({ plan: value }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/clients"); revalidatePath("/staff/billing"); revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Record a manual usage adjustment against a client's monthly allotment.
+ *  delta > 0 consumes allotment, delta < 0 credits it back. */
+export async function addAllotmentAdjustment(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesOrAdmin(me) && !isPrivileged(me)) return { error: "Sales, admins and business managers only." };
+  const clientId = String(formData.get("clientId") || "");
+  const serviceKey = String(formData.get("serviceKey") || "");
+  const month = String(formData.get("month") || ""); // 'YYYY-MM'
+  const delta = Number(formData.get("delta") || 0);
+  const note = String(formData.get("note") || "").slice(0, 300) || null;
+  if (!clientId || !serviceKey || !/^\d{4}-\d{2}$/.test(month)) return { error: "Missing client, service, or month." };
+  if (!Number.isFinite(delta) || delta === 0) return { error: "Enter a non-zero amount." };
+  const period_month = `${month}-01`;
+  const { error } = await createServiceClient().from("client_allotment_adjustments").insert({
+    client_id: clientId, period_month, service_key: serviceKey, delta, note, created_by: me!.email,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/clients"); revalidatePath("/staff/billing");
+  return { ok: true };
+}
+
+/** Remove a usage adjustment (undo a mistaken entry). */
+export async function deleteAllotmentAdjustment(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesOrAdmin(me) && !isPrivileged(me)) return { error: "Sales, admins and business managers only." };
+  const { error } = await createServiceClient().from("client_allotment_adjustments").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/clients"); revalidatePath("/staff/billing");
+  return { ok: true };
+}
+
+/** Sequential invoice number, e.g. HCC-2026-0007. Best-effort under low volume. */
+async function nextInvoiceNumber(admin: ReturnType<typeof createServiceClient>): Promise<string> {
+  const year = new Date().getFullYear();
+  const { data } = await admin.from("invoices").select("number").ilike("number", `HCC-${year}-%`).order("number", { ascending: false }).limit(1);
+  const last = data?.[0]?.number as string | undefined;
+  const seq = last ? Number(last.split("-").pop()) + 1 : 1;
+  return `HCC-${year}-${String(seq).padStart(4, "0")}`;
+}
+
+/** Draft this month's plan invoice for every plan client that doesn't have one
+ *  yet. One invoice per client per month (DB unique index enforces it); the
+ *  client can split or pay it in full. Returns how many were created. */
+export async function generatePlanInvoices(month: string): Promise<ActionResult & { created?: number }> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!/^\d{4}-\d{2}$/.test(month)) return { error: "Pick a month." };
+  const admin = createServiceClient();
+  const period_month = `${month}-01`;
+  const { data: planClients } = await admin.from("clients").select("id, business, plan, billing_type").not("plan", "is", null);
+  const { data: existing } = await admin.from("invoices").select("client_id").eq("kind", "plan").eq("period_month", period_month);
+  const have = new Set((existing ?? []).map((r: any) => r.client_id));
+  let created = 0;
+  for (const c of planClients ?? []) {
+    if (have.has(c.id)) continue;
+    if ((c as any).billing_type === "comp" || (c as any).billing_type === "barter") continue; // not billed
+    const fee = PLAN_FEE_CENTS[(c as any).plan as PlanTier] ?? 0;
+    if (!fee) continue;
+    const number = await nextInvoiceNumber(admin);
+    const due = new Date(`${period_month}T00:00:00`); due.setDate(due.getDate() + 5); // 5-business-day grace, approx
+    const { error } = await admin.from("invoices").insert({
+      client_id: c.id, number, kind: "plan", period_month,
+      description: `${(c as any).plan} plan — ${month}`,
+      amount_cents: fee, status: "draft", due_date: due.toISOString().slice(0, 10), created_by: me!.email,
+    });
+    if (!error) created++;
+  }
+  revalidatePath("/staff/billing");
+  return { ok: true, created };
+}
+
+/** Create a one-off invoice (overage or project) for a client. */
+export async function createInvoice(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const clientId = String(formData.get("clientId") || "");
+  const kind = String(formData.get("kind") || "project");
+  const description = String(formData.get("description") || "").slice(0, 400) || null;
+  const dollars = Number(formData.get("amount") || 0);
+  const payUrl = String(formData.get("payUrl") || "").trim() || null;
+  if (!clientId) return { error: "Pick a client." };
+  if (!Number.isFinite(dollars) || dollars <= 0) return { error: "Enter an amount." };
+  const admin = createServiceClient();
+  const number = await nextInvoiceNumber(admin);
+  const { error } = await admin.from("invoices").insert({
+    client_id: clientId, number, kind: kind === "overage" ? "overage" : "project",
+    description, amount_cents: Math.round(dollars * 100), status: "draft", pay_url: payUrl, created_by: me!.email,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/billing");
+  return { ok: true };
+}
+
+/** Move an invoice through draft → sent, attach/replace a Stripe pay link,
+ *  mark it paid (manual or stripe), or void it. */
+export async function updateInvoice(id: string, patch: { status?: string; payUrl?: string; paidMethod?: string }): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const upd: any = {};
+  if (patch.payUrl !== undefined) upd.pay_url = patch.payUrl.trim() || null;
+  if (patch.status) {
+    if (!["draft", "sent", "paid", "void"].includes(patch.status)) return { error: "Bad status." };
+    upd.status = patch.status;
+    if (patch.status === "paid") { upd.paid_at = new Date().toISOString(); upd.paid_method = patch.paidMethod === "stripe" ? "stripe" : "manual"; }
+    else { upd.paid_at = null; upd.paid_method = null; }
+  }
+  const { error } = await createServiceClient().from("invoices").update(upd).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/billing");
+  return { ok: true };
+}

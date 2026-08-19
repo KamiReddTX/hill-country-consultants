@@ -17,6 +17,39 @@ export const PLANS: { name: PlanTier; price: string; best: string }[] = [
   { name: "Enterprise", price: "$7,000/mo", best: "Program-level coverage" },
 ];
 
+/** Monthly plan fee in cents, keyed by tier — used to draft plan invoices. */
+export const PLAN_FEE_CENTS: Record<PlanTier, number> = {
+  Foundation: 150000,
+  Momentum: 425000,
+  Enterprise: 700000,
+};
+
+/**
+ * Per-month allotment each plan tier includes on the service lines we track
+ * against real usage. `auto` lines are computed from data the portal already
+ * has (VA hours from the approved work log); the rest are tracked by staff
+ * recording usage as adjustments. Quantities mirror the plan-comparison table.
+ */
+export type AllotKey = "va_hours" | "submittals" | "compliance" | "marketing";
+export const ALLOTMENT_LINES: {
+  key: AllotKey; label: string; unit: string; auto: boolean; f: number; m: number; e: number;
+}[] = [
+  { key: "va_hours",   label: "Virtual assistant", unit: "hours",    auto: true,  f: 40, m: 100, e: 160 },
+  { key: "submittals", label: "Submittals",        unit: "packages", auto: false, f: 4,  m: 12,  e: 24 },
+  { key: "compliance", label: "Compliance docs",   unit: "builds",   auto: false, f: 1,  m: 3,   e: 6 },
+  { key: "marketing",  label: "Marketing graphics", unit: "graphics", auto: false, f: 4,  m: 12,  e: 24 },
+];
+
+/** The monthly allotment for one service line on a given plan, or null off-plan. */
+export function allotmentFor(plan: string | null | undefined, key: AllotKey): number | null {
+  const row = ALLOTMENT_LINES.find((l) => l.key === key);
+  if (!row) return null;
+  if (plan === "Foundation") return row.f;
+  if (plan === "Momentum") return row.m;
+  if (plan === "Enterprise") return row.e;
+  return null;
+}
+
 export const PLAN_ROWS: { label: string; f: string; m: string; e: string }[] = [
   { label: "Best for", f: "Smaller businesses & brands", m: "Mid-size, multiple fronts", e: "Program-level coverage" },
   { label: "Virtual assistant", f: "2 hrs/day (~40/mo)", m: "5 hrs/day (~100/mo)", e: "8 hrs/day (~160/mo)" },
