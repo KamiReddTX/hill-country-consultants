@@ -39,15 +39,27 @@ create or replace function my_role() returns text
   select role from staff where user_id = auth.uid() limit 1;
 $$;
 
--- ── MA4: leads are sales/admin only (mirrors isSalesOrAdmin in the app) ──────
--- Drop the old permissive policy (leads_staff) and, for safe re-runs, the new
--- one, then recreate the tightened policy. client_vault is intentionally left as
--- is_staff() elsewhere so virtual assistants can still deliver work.
+-- ── MA4: leads visible to sales + admin, roles[]-aware (mirrors isSalesOrAdmin) ──
+-- The app authorizes off the staff.roles[] array (a staffer can hold several
+-- roles) with a scalar staff.role fallback, so the leads policy must do the same.
+-- Visible to Administrator, Business Manager, Sales Manager, Account manager, and
+-- Sales staff — matching isSalesOrAdmin() in the UI, so the pipeline never renders
+-- empty for someone the app let onto the page. (An earlier scalar my_role() version
+-- of this policy hid leads from anyone whose access came from the roles[] array.)
+create or replace function is_sales() returns boolean
+  language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from staff s
+    where s.user_id = auth.uid() and s.active
+      and (
+        s.roles && array['Administrator','Business Manager','Sales Manager','Account manager','Sales staff']::text[]
+        or s.role in ('Administrator','Business Manager','Sales Manager','Account manager','Sales staff')
+      )
+  );
+$$;
 drop policy if exists leads_staff on leads;
 drop policy if exists leads_sales on leads;
-create policy leads_sales on leads for all
-  using (my_role() in ('Sales / account manager', 'Administrator'))
-  with check (my_role() in ('Sales / account manager', 'Administrator'));
+create policy leads_sales on leads for all using (is_sales()) with check (is_sales());
 
 -- ── C1 + created_by fix: replace the RPC body, then lock down EXECUTE ────────
 -- CREATE OR REPLACE keeps the existing privileges; the REVOKE below then removes

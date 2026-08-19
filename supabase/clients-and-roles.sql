@@ -23,10 +23,10 @@ create or replace function is_sales() returns boolean
   language sql stable security definer set search_path = public, pg_temp as $$
   select exists (
     select 1 from staff s where s.user_id = auth.uid() and s.active
-      and ('Account manager' = any(s.roles) or 'Sales staff' = any(s.roles)
-           or s.role in ('Account manager', 'Sales staff')
-           or 'Administrator' = any(s.roles) or 'Business Manager' = any(s.roles)
-           or s.role in ('Administrator', 'Business Manager'))
+      and (
+        s.roles && array['Administrator','Business Manager','Sales Manager','Account manager','Sales staff']::text[]
+        or s.role in ('Administrator','Business Manager','Sales Manager','Account manager','Sales staff')
+      )
   );
 $$;
 
