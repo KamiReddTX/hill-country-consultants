@@ -6,9 +6,11 @@ import { redirect } from "next/navigation";
 export const dynamic = "force-dynamic";
 
 import { getStaffMember, getClients, getDirectory, getLeads, getBookings, isPrivileged, isSalesOrAdmin, splitClients, getOpenPunch, getMyPunches, periodOf, usd } from "@/lib/staff";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button";
 import { money } from "@/lib/portal";
+import { computeRepEarnings } from "@/lib/commission";
+import { COMMISSION } from "@/content/commission";
 
 const STAGES = ["New lead", "Contacted", "Qualified", "Proposal", "Closed won", "Closed lost"];
 
@@ -27,8 +29,12 @@ export default async function Dashboard() {
   const newRequests = leads.filter((l) => (l.stage || "New lead") === "New lead");
   const stageCounts = STAGES.map((st) => ({ st, n: leads.filter((l) => (l.stage || "New lead") === st).length }));
 
-  // Manager-only firm-wide queues.
-  const bookings = priv ? await getBookings() : [];
+  // A rep earns commission on the clients attributed to their employee code, so
+  // anyone in sales (with a code) gets a personal running tally.
+  const salesCredit = isSalesOrAdmin(me) && !!me.employee_code;
+
+  // Manager-only firm-wide queues (bookings are also needed to tally a rep's own).
+  const bookings = priv || salesCredit ? await getBookings() : [];
   // Revenue collected = one-time booking payments (Stripe at checkout) + every
   // invoice marked paid in Billing & AR. Both are real money in; summing them
   // keeps the dashboard in step with the invoicing system.
@@ -44,6 +50,16 @@ export default async function Dashboard() {
     revenueCents += (paidInv ?? []).reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
   }
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
+
+  // A rep's own running income + estimated commission. Invoices are biller-only
+  // under RLS, so we read them with the service client and surface only this
+  // rep's aggregated totals — never raw rows.
+  let repEarnings: ReturnType<typeof computeRepEarnings> | null = null;
+  if (salesCredit) {
+    const { data: inv } = await createServiceClient()
+      .from("invoices").select("client_id, kind, status, amount_cents, period_month");
+    repEarnings = computeRepEarnings({ employeeCode: me.employee_code, clients, bookings, invoices: (inv ?? []) as any });
+  }
 
   const period = periodOf(0);
   const punches = me.hourly ? await getMyPunches(me, period.startISO, period.endISO) : [];
@@ -78,9 +94,20 @@ export default async function Dashboard() {
           {stat("Unassigned", unassigned.length)}
           {priv && stat("Total clients", clients.length)}
           {priv && stat("Revenue collected", money(revenueCents))}
+          {salesCredit && repEarnings && stat("Income collected", money(repEarnings.incomeCents))}
+          {salesCredit && repEarnings && stat("Commission (est.)", money(repEarnings.commissionCents))}
           {me.hourly && stat("Hours this period", hours.toFixed(1))}
           {me.hourly && stat("Gross this period", usd(hours * Number(me.rate || 0)))}
         </div>
+        {salesCredit && repEarnings && (
+          <p className="mt-3 max-w-[60em] border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">
+            Your running tally on the {repEarnings.clientCount} account{repEarnings.clientCount === 1 ? "" : "s"} credited to <span className="font-semibold">{me.employee_code}</span>:
+            income collected <span className="font-semibold tabular-nums">{money(repEarnings.incomeCents)}</span>, estimated commission
+            {" "}<span className="font-semibold tabular-nums text-forest">{money(repEarnings.commissionCents)}</span> at {COMMISSION.initialPct}% initial · {COMMISSION.recurringPct}% recurring · {COMMISSION.aLaCartePct}% à-la-carte.{" "}
+            <Link href="/staff/commissions" className="link-underline">See your statement →</Link>
+            <span className="block text-[12px] prose-muted">Estimate on money collected to date. Commission is released by an admin after a client is retained three months.</span>
+          </p>
+        )}
         {me.hourly && open && <p className="mt-3 border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">You&apos;re on the clock since {new Date(open.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.</p>}
       </div>
 

@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { getStaffMember, isSalesOrAdmin, getClients, getBookings } from "@/lib/staff";
+import { createServiceClient } from "@/lib/supabase/server";
 import { COMMISSION, COMMISSION_LINES } from "@/content/commission";
+import { computeRepEarnings } from "@/lib/commission";
 import { money } from "@/lib/portal";
 
 export const dynamic = "force-dynamic";
@@ -27,6 +29,13 @@ export default async function CommissionsPage() {
   const aLaCarteCents = myBookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0);
   const aLaCarteCommission = Math.round(aLaCarteCents * (COMMISSION.aLaCartePct / 100));
 
+  // Full running tally (bookings + paid plan/overage/project invoices). Invoices
+  // are biller-only under RLS, so read them with the service client and surface
+  // only this rep's aggregated totals.
+  const { data: inv } = await createServiceClient()
+    .from("invoices").select("client_id, kind, status, amount_cents, period_month");
+  const earnings = computeRepEarnings({ employeeCode: me.employee_code, clients, bookings, invoices: (inv ?? []) as any });
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -37,6 +46,18 @@ export default async function CommissionsPage() {
           This statement is read-only — an administrator releases commission after a client has been retained three months.
         </p>
       </div>
+
+      {/* Running tally */}
+      <section>
+        <h2 className="mb-3 font-fraunces text-[20px] font-medium text-forest">Your running tally</h2>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="border border-line-warm bg-white p-5"><p className="kicker">Income collected</p><p className="mt-1 font-fraunces text-[28px] text-charcoal tabular-nums">{money(earnings.incomeCents)}</p><p className="mt-1 text-[12px] prose-muted">Across {earnings.clientCount} attributed account{earnings.clientCount === 1 ? "" : "s"}</p></div>
+          <div className="border border-line-warm bg-white p-5"><p className="kicker">Commission (est.)</p><p className="mt-1 font-fraunces text-[28px] text-forest tabular-nums">{money(earnings.commissionCents)}</p><p className="mt-1 text-[12px] prose-muted">Blended {COMMISSION.initialPct}/{COMMISSION.recurringPct}/{COMMISSION.aLaCartePct}%</p></div>
+          <div className="border border-line-warm bg-white p-5"><p className="kicker">Initial &amp; recurring</p><p className="mt-1 font-fraunces text-[22px] text-charcoal tabular-nums">{money(earnings.initialCents + earnings.recurringCents)}</p><p className="mt-1 text-[12px] prose-muted">{money(earnings.initialCents)} initial · {money(earnings.recurringCents)} recurring</p></div>
+          <div className="border border-line-warm bg-white p-5"><p className="kicker">À-la-carte</p><p className="mt-1 font-fraunces text-[22px] text-charcoal tabular-nums">{money(earnings.aLaCarteCents)}</p><p className="mt-1 text-[12px] prose-muted">Bookings + one-off invoices</p></div>
+        </div>
+        <p className="mt-3 text-[12px] prose-muted">A running estimate on money actually collected to date. Commission is released by an administrator after a client has been retained three months.</p>
+      </section>
 
       {/* The structure */}
       <section>
