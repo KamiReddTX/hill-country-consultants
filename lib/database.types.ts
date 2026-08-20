@@ -315,8 +315,8 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["client_checklist_items"]["Insert"]>;
       };
       job_applications: {
-        Row: { id: string; name: string; email: string; phone: string | null; location: string | null; position: string | null; employment_type: string | null; availability: string | null; desired_pay: string | null; experience: string | null; skills: string | null; portfolio_url: string | null; resume_path: string | null; why: string | null; referral: string | null; status: string; created_at: string };
-        Insert: { id?: string; name: string; email: string; phone?: string | null; location?: string | null; position?: string | null; employment_type?: string | null; availability?: string | null; desired_pay?: string | null; experience?: string | null; skills?: string | null; portfolio_url?: string | null; resume_path?: string | null; why?: string | null; referral?: string | null; status?: string };
+        Row: { id: string; name: string; email: string; phone: string | null; location: string | null; position: string | null; employment_type: string | null; availability: string | null; desired_pay: string | null; experience: string | null; skills: string | null; portfolio_url: string | null; resume_path: string | null; credentials_path: string | null; why: string | null; referral: string | null; status: string; created_at: string };
+        Insert: { id?: string; name: string; email: string; phone?: string | null; location?: string | null; position?: string | null; employment_type?: string | null; availability?: string | null; desired_pay?: string | null; experience?: string | null; skills?: string | null; portfolio_url?: string | null; resume_path?: string | null; credentials_path?: string | null; why?: string | null; referral?: string | null; status?: string };
         Update: Partial<Database["public"]["Tables"]["job_applications"]["Insert"]>;
       };
       client_roadmap: {

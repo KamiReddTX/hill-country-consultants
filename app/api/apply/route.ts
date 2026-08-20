@@ -44,24 +44,28 @@ export async function POST(req: Request) {
   if (!url || !key) return NextResponse.json({ ok: true, persisted: false });
   const admin = createClient<Database>(url, key, { auth: { persistSession: false } });
 
-  // Résumé upload — optional, up to ~8MB.
-  let resume_path: string | null = null;
-  const file = form.get("resume");
-  if (file instanceof File && file.size > 0 && file.size <= 8 * 1024 * 1024) {
-    try {
-      const buf = Buffer.from(await file.arrayBuffer());
-      const path = `${Date.now()}-${safeName(file.name)}`;
-      const up = await admin.storage.from("applications").upload(path, buf, { contentType: file.type || "application/octet-stream" });
-      if (!up.error) resume_path = path;
-    } catch (e) { console.warn("[apply] resume", e); }
-  }
+  // File uploads — résumé and credentials, optional, up to ~8MB each.
+  const uploadOne = async (fieldKey: string, prefix: string): Promise<string | null> => {
+    const f = form.get(fieldKey);
+    if (f instanceof File && f.size > 0 && f.size <= 8 * 1024 * 1024) {
+      try {
+        const buf = Buffer.from(await f.arrayBuffer());
+        const path = `${prefix}/${Date.now()}-${safeName(f.name)}`;
+        const up = await admin.storage.from("applications").upload(path, buf, { contentType: f.type || "application/octet-stream" });
+        if (!up.error) return path;
+      } catch (e) { console.warn(`[apply] ${fieldKey}`, e); }
+    }
+    return null;
+  };
+  const resume_path = await uploadOne("resume", "resumes");
+  const credentials_path = await uploadOne("credentials", "credentials");
 
   try {
     const { error } = await admin.from("job_applications").insert({
       name, email, phone: phone || null, location: location || null, position: position || null,
       employment_type: employment_type || null, availability: availability || null, desired_pay: desired_pay || null,
       experience: experience || null, skills: skills || null, portfolio_url: portfolio_url || null,
-      resume_path, why: why || null, referral: referral || null,
+      resume_path, credentials_path, why: why || null, referral: referral || null,
     });
     if (error) return NextResponse.json({ ok: false, persisted: false, error: error.message }, { status: 200 });
   } catch {

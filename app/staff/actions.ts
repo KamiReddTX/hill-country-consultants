@@ -1675,3 +1675,53 @@ export async function deleteKbArticle(id: string): Promise<ActionResult> {
   revalidatePath("/staff/kb");
   return { ok: true };
 }
+
+// ── Careers: hire an applicant → create their employee profile ────────────────
+/** Convert a job application into a staff/employee profile, pre-filled with the
+ *  applicant's name/email/phone and the chosen role, then invite them. The
+ *  application is marked 'hired'. Admin / Business Manager. */
+export async function hireFromApplication(applicationId: string, role: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: app } = await admin.from("job_applications").select("*").eq("id", applicationId).maybeSingle();
+  if (!app) return { error: "Application not found." };
+  const a = app as any;
+  const email = String(a.email || "").trim().toLowerCase();
+  if (!email) return { error: "Application has no email." };
+
+  // Don't duplicate an existing employee on the same email.
+  const { data: existing } = await admin.from("staff").select("id").eq("email", email).maybeSingle();
+  if (existing) return { error: "An employee already exists with that email." };
+
+  const { error } = await admin.from("staff").insert({
+    email,
+    name: a.name || null,
+    phone: a.phone || null,
+    role: role as any,
+    roles: [role],
+    active: true,
+  });
+  if (error) return { error: error.message };
+
+  await admin.from("job_applications").update({ status: "hired" }).eq("id", applicationId);
+
+  // Best-effort invite so they can set a password and reach the portal.
+  try {
+    const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+    const { data: link } = await admin.auth.admin.generateLink({
+      type: "invite", email,
+      options: site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined,
+    } as any);
+    const hashed = (link as any)?.properties?.hashed_token;
+    if (site && hashed) {
+      await sendEmployeeWelcome({ to: email, name: a.name || null, actionUrl: `${site}/auth/callback?token_hash=${hashed}&type=invite&next=/staff` });
+    } else {
+      await admin.auth.admin.inviteUserByEmail(email, site ? { redirectTo: `${site}/auth/callback?next=/staff` } : undefined);
+    }
+  } catch (e) { console.warn("[hireFromApplication] invite", e); }
+
+  await logAudit({ actorEmail: me!.email, action: "create", entity: "staff", summary: `hired ${a.name || email} as ${role} (from application)` });
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}

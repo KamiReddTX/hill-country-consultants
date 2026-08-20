@@ -13,6 +13,7 @@ const FOOTER_LINKS: { href: string; label: string }[] = [
   { href: "/about", label: "About" },
   { href: "/faq", label: "FAQ" },
   { href: "/get-started", label: "Get Started" },
+  { href: "/careers", label: "Careers" },
   { href: "/policies", label: "Policies & Procedures" },
 ];
 

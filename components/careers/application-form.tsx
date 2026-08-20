@@ -12,9 +12,10 @@ const TYPES = ["Full-time", "Part-time", "Contract / 1099", "Flexible"];
 const field = "min-h-touch w-full border border-line-warm bg-white px-3 text-[15px] outline-none focus:border-forest";
 const labelCls = "flex flex-col gap-1 text-[13px] text-ink-faint";
 
-/** Public employment application. Posts multipart form data (incl. an optional
- *  résumé) to /api/apply. Shows an email fallback if the save doesn't confirm. */
-export function ApplicationForm() {
+/** Public employment application. Posts multipart form data (résumé + optional
+ *  credentials) to /api/apply. Shows an email fallback if the save doesn't
+ *  confirm. Pass `role` from a job posting to pre-fill and lock the position. */
+export function ApplicationForm({ role }: { role?: string } = {}) {
   const [pending, start] = useTransition();
   const [done, setDone] = useState(false);
   const [err, setErr] = useState("");
@@ -51,12 +52,19 @@ export function ApplicationForm() {
         <label className={labelCls}>Email *<input name="email" type="email" required className={field} /></label>
         <label className={labelCls}>Phone<input name="phone" className={field} /></label>
         <label className={labelCls}>Location (city, state)<input name="location" className={field} /></label>
-        <label className={labelCls}>Position you&apos;re applying for
-          <select name="position" defaultValue="" className={field}>
-            <option value="" disabled>Select a role…</option>
-            {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </label>
+        {role ? (
+          <label className={labelCls}>Position you&apos;re applying for
+            <input value={role} readOnly className={`${field} bg-cream/50`} />
+            <input type="hidden" name="position" value={role} />
+          </label>
+        ) : (
+          <label className={labelCls}>Position you&apos;re applying for
+            <select name="position" defaultValue="" className={field}>
+              <option value="" disabled>Select a role…</option>
+              {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+            </select>
+          </label>
+        )}
         <label className={labelCls}>Employment type
           <select name="employment_type" defaultValue="" className={field}>
             <option value="" disabled>Select…</option>
@@ -74,7 +82,10 @@ export function ApplicationForm() {
         <label className={labelCls}>How did you hear about us?<input name="referral" className={field} /></label>
       </div>
       <label className={labelCls}>Why Hill Country Consultants?<textarea name="why" rows={3} className={`${field} py-2`} /></label>
-      <label className={labelCls}>Résumé (PDF or Word, optional — max 8MB)<input name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="text-[14px]" /></label>
+      <div className="grid gap-4 md:grid-cols-2">
+        <label className={labelCls}>Résumé (PDF or Word, optional — max 8MB)<input name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="text-[14px]" /></label>
+        <label className={labelCls}>Credentials / certifications (optional — PDF or image, max 8MB)<input name="credentials" type="file" accept=".pdf,.doc,.docx,image/*,application/pdf" className="text-[14px]" /></label>
+      </div>
 
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" disabled={pending} className="btn-gold text-[15px] disabled:opacity-50">{pending ? "Submitting…" : "Submit application"}</button>

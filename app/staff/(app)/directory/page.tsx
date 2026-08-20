@@ -10,6 +10,7 @@ import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
 import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
 import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
 import { DocumentLibrary } from "@/components/staff/document-library";
+import { HireApplicant } from "@/components/staff/hire-applicant";
 import { LocalTime } from "@/components/local-time";
 
 export default async function DirectoryPage() {
@@ -94,7 +95,15 @@ export default async function DirectoryPage() {
                   {a.skills && <p className="md:col-span-2"><span className="text-ink-faint">Skills:</span> {a.skills}</p>}
                   {a.experience && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Experience:</span> {a.experience}</p>}
                   {a.why && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Why HCC:</span> {a.why}</p>}
-                  <p className="pt-1 md:col-span-2">{a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[13px]">Download résumé</a> : <span className="text-[12px] prose-muted">No résumé attached.</span>}</p>
+                  <div className="flex flex-wrap items-center gap-3 pt-1 md:col-span-2">
+                    {a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[13px]">Download résumé</a> : <span className="text-[12px] prose-muted">No résumé attached.</span>}
+                    {a.credentials_path && <a href={`/api/application-file/${a.id}?kind=credentials`} className="border border-line-warm px-3 py-1 text-[13px] text-forest">Download credentials</a>}
+                  </div>
+                  <div className="border-t border-line-soft pt-3 md:col-span-2">
+                    {a.status === "hired"
+                      ? <span className="text-[13px] font-semibold text-forest">✓ Hired — employee profile created</span>
+                      : <HireApplicant applicationId={a.id} roleOptions={ROLE_OPTIONS} suggested={a.position} />}
+                  </div>
                 </div>
               </details>
             ))}
