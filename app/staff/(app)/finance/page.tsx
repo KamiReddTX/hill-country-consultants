@@ -51,6 +51,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
     admin.from("expenses").select("*").order("incurred_on", { ascending: false }),
     admin.from("expense_budgets").select("*"),
   ]);
+  const { data: vendorList } = await admin.from("vendors").select("id, name").order("name");
 
   // Contracted run-rate MRR: active plan clients that are actually billed.
   const billable = clients.filter((c) => {
@@ -246,7 +247,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
         <div className="border border-line-warm bg-white p-4">
           <p className="mb-1 text-[13px] font-semibold text-forest">Log an expense</p>
           <p className="mb-3 text-[12px] prose-muted">Recorded against the date you choose, so it lands in that month&rsquo;s totals.</p>
-          <ExpenseForm defaultDate={`${selMonth}-15`.slice(0, 10)} />
+          <ExpenseForm defaultDate={`${selMonth}-15`.slice(0, 10)} vendors={(vendorList ?? []) as any} />
         </div>
 
         <div>

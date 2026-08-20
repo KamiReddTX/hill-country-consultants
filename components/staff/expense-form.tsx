@@ -4,7 +4,7 @@ import { addExpense } from "@/app/staff/actions";
 import { EXPENSE_CATEGORIES } from "@/content/expenses";
 
 /** Log a business expense. Administrator only (page is admin-gated). */
-export function ExpenseForm({ defaultDate }: { defaultDate: string }) {
+export function ExpenseForm({ defaultDate, vendors = [] }: { defaultDate: string; vendors?: { id: string; name: string }[] }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState("");
   return (
@@ -27,6 +27,14 @@ export function ExpenseForm({ defaultDate }: { defaultDate: string }) {
       <label className="flex flex-col gap-0.5 text-[11px] text-ink-faint">Vendor
         <input name="vendor" type="text" placeholder="e.g. Adobe" className="min-h-touch w-40 border border-line-warm bg-white px-2 text-[13px]" />
       </label>
+      {vendors.length > 0 && (
+        <label className="flex flex-col gap-0.5 text-[11px] text-ink-faint">Link to vendor
+          <select name="vendorId" className="min-h-touch w-44 border border-line-warm bg-white px-2 text-[13px]">
+            <option value="">— none —</option>
+            {vendors.map((v) => <option key={v.id} value={v.id}>{v.name}</option>)}
+          </select>
+        </label>
+      )}
       <label className="flex flex-col gap-0.5 text-[11px] text-ink-faint">Note
         <input name="description" type="text" placeholder="optional" className="min-h-touch w-48 border border-line-warm bg-white px-2 text-[13px]" />
       </label>

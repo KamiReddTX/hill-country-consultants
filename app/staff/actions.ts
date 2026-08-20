@@ -59,6 +59,7 @@ export async function assignClient(clientId: string, staffId: string): Promise<A
   // assigned_to now holds the owning employee's staff id (was a role string).
   const { error } = await db.from("clients").update({ assigned_to: staffId }).eq("id", clientId);
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "client", entityId: clientId, summary: "owner reassigned" });
   revalidatePath("/staff/admin"); revalidatePath("/staff");
   return { ok: true };
 }
@@ -76,6 +77,7 @@ export async function deleteClient(clientId: string): Promise<ActionResult> {
   // Remove the portal login so the email can be reused for a fresh test.
   const uid = (client as any)?.user_id;
   if (uid) { try { await admin.auth.admin.deleteUser(uid); } catch (e) { console.warn("[deleteClient] auth", e); } }
+  await logAudit({ actorEmail: me!.email, action: "delete", entity: "client", entityId: clientId, summary: "client deleted" });
   revalidatePath("/staff/admin"); revalidatePath("/staff");
   return { ok: true };
 }
@@ -87,6 +89,7 @@ export async function setClientStatus(clientId: string, status: string): Promise
   const db = createServiceClient(); // clients write policy is admin-only; guarded above
   const { error } = await db.from("clients").update({ status }).eq("id", clientId);
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "client", entityId: clientId, summary: `status → ${status}` });
   revalidatePath("/staff/admin");
   return { ok: true };
 }
@@ -266,6 +269,7 @@ export async function setStaffActive(staffId: string, active: boolean): Promise<
   if (staffId === me.id && !active) return { error: "You can't suspend your own account." };
   const { error } = await createServiceClient().from("staff").update({ active }).eq("id", staffId);
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "staff", entityId: staffId, summary: active ? "reactivated" : "suspended" });
   revalidatePath("/staff/admin");
   return { ok: true };
 }
@@ -1256,6 +1260,7 @@ export async function setClientPlan(clientId: string, plan: string): Promise<Act
   const value = plan === "Foundation" || plan === "Momentum" || plan === "Enterprise" ? plan : null;
   const { error } = await createServiceClient().from("clients").update({ plan: value }).eq("id", clientId);
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "client", entityId: clientId, summary: `plan → ${value || "none"}` });
   revalidatePath("/staff/clients"); revalidatePath("/staff/billing"); revalidatePath("/staff");
   return { ok: true };
 }
@@ -1327,6 +1332,7 @@ export async function generatePlanInvoices(month: string): Promise<ActionResult 
     });
     if (!error) created++;
   }
+  if (created) await logAudit({ actorEmail: me!.email, action: "create", entity: "invoice", summary: `drafted ${created} plan invoice(s) for ${month}` });
   revalidatePath("/staff/billing");
   return { ok: true, created };
 }
@@ -1349,6 +1355,7 @@ export async function createInvoice(formData: FormData): Promise<ActionResult> {
     description, amount_cents: Math.round(dollars * 100), status: "draft", pay_url: payUrl, created_by: me!.email,
   });
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "create", entity: "invoice", summary: `${kind} invoice $${dollars}` });
   revalidatePath("/staff/billing");
   return { ok: true };
 }
@@ -1368,6 +1375,7 @@ export async function updateInvoice(id: string, patch: { status?: string; payUrl
   }
   const { error } = await createServiceClient().from("invoices").update(upd).eq("id", id);
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "invoice", entityId: id, summary: patch.status ? `status → ${patch.status}${patch.status === "paid" ? ` (${patch.paidMethod || "manual"})` : ""}` : "pay link updated" });
   revalidatePath("/staff/billing"); revalidatePath("/staff");
   return { ok: true };
 }
@@ -1385,10 +1393,12 @@ export async function addExpense(formData: FormData): Promise<ActionResult> {
   const incurred_on = String(formData.get("incurred_on") || "").slice(0, 10) || undefined;
   const dollars = Number(formData.get("amount") || 0);
   if (!Number.isFinite(dollars) || dollars <= 0) return { error: "Enter an amount." };
+  const vendorId = String(formData.get("vendorId") || "").trim() || null;
   const { error } = await createServiceClient().from("expenses").insert({
-    category, vendor, description, incurred_on, amount_cents: Math.round(dollars * 100), created_by: me!.email,
+    category, vendor, vendor_id: vendorId, description, incurred_on, amount_cents: Math.round(dollars * 100), created_by: me!.email,
   });
   if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "create", entity: "expense", summary: `${category} $${dollars}` });
   revalidatePath("/staff/finance");
   return { ok: true };
 }
@@ -1424,5 +1434,244 @@ export async function setClientRenewalDate(clientId: string, date: string): Prom
   const { error } = await createServiceClient().from("clients").update({ renewal_date: value }).eq("id", clientId);
   if (error) return { error: error.message };
   revalidatePath("/staff/clients"); revalidatePath("/staff/renewals");
+  return { ok: true };
+}
+
+// ── Tier 3a: Contracts & SOWs (with DocuSign e-signature) ─────────────────────
+import { combinedPdf, envelopeStatus } from "@/lib/docusign";
+import { logAudit } from "@/lib/audit";
+
+/** Create a contract/SOW for a client, optionally attaching a PDF. Admin/BM. */
+export async function addContract(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const clientId = String(formData.get("clientId") || "");
+  const title = String(formData.get("title") || "").slice(0, 200);
+  const kind = String(formData.get("kind") || "SOW");
+  if (!clientId || !title) return { error: "Client and title are required." };
+  const dollars = Number(formData.get("amount") || 0);
+  const admin = createServiceClient();
+  const { data: row, error } = await admin.from("contracts").insert({
+    client_id: clientId, kind, title,
+    amount_cents: Number.isFinite(dollars) && dollars > 0 ? Math.round(dollars * 100) : null,
+    start_date: String(formData.get("startDate") || "").slice(0, 10) || null,
+    end_date: String(formData.get("endDate") || "").slice(0, 10) || null,
+    signer_email: String(formData.get("signerEmail") || "").trim() || null,
+    signer_name: String(formData.get("signerName") || "").trim() || null,
+    status: "draft", created_by: me!.email,
+  }).select("id").single();
+  if (error) return { error: error.message };
+  // Optional PDF attachment.
+  const file = formData.get("file");
+  if (file instanceof File && file.size > 0) {
+    const path = `contracts/${clientId}/${row!.id}-${file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120)}`;
+    const up = await admin.storage.from("client-files").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type || "application/pdf" });
+    if (!up.error) await admin.from("contracts").update({ file_path: path }).eq("id", row!.id);
+  }
+  await logAudit({ actorEmail: me!.email, action: "create", entity: "contract", entityId: row!.id, summary: `${kind}: ${title}` });
+  revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+  return { ok: true };
+}
+
+/** Replace/attach a contract's PDF. */
+export async function uploadContractFile(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const id = String(formData.get("id") || "");
+  const file = formData.get("file");
+  if (!id || !(file instanceof File) || file.size === 0) return { error: "Pick a PDF to upload." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("contracts").select("client_id").eq("id", id).maybeSingle();
+  if (!c) return { error: "Contract not found." };
+  const path = `contracts/${(c as any).client_id}/${id}-${file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120)}`;
+  const up = await admin.storage.from("client-files").upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type || "application/pdf", upsert: true });
+  if (up.error) return { error: up.error.message };
+  await admin.from("contracts").update({ file_path: path }).eq("id", id);
+  revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+  return { ok: true };
+}
+
+/** Manually set a contract's status (e.g. signed offline, or void). */
+export async function setContractStatus(id: string, status: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!["draft", "sent", "signed", "void"].includes(status)) return { error: "Bad status." };
+  const patch: any = { status };
+  if (status === "signed") patch.signed_at = new Date().toISOString();
+  const { error } = await createServiceClient().from("contracts").update(patch).eq("id", id);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "contract", entityId: id, summary: `status → ${status}` });
+  revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+  return { ok: true };
+}
+
+/** Delete a contract (and its stored file). */
+export async function deleteContract(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("contracts").select("file_path").eq("id", id).maybeSingle();
+  if (c && (c as any).file_path) await admin.storage.from("client-files").remove([(c as any).file_path]);
+  const { error } = await admin.from("contracts").delete().eq("id", id);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "delete", entity: "contract", entityId: id });
+  revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+  return { ok: true };
+}
+
+/** Send a contract's PDF to its signer for signature via DocuSign. */
+export async function sendContractForSignature(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!docusignConfigured()) return { error: "DocuSign isn't set up yet — ask your administrator." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("contracts").select("*").eq("id", id).maybeSingle();
+  if (!c) return { error: "Contract not found." };
+  const contract = c as any;
+  if (!contract.file_path) return { error: "Attach the contract PDF first." };
+  if (!contract.signer_email) return { error: "Add a signer email first." };
+  const { data: file, error: dErr } = await admin.storage.from("client-files").download(contract.file_path);
+  if (dErr || !file) return { error: "Could not read the contract file." };
+  try {
+    const b64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+    const envelopeId = await createEnvelope({
+      pdfBase64: b64, docName: contract.title,
+      signerEmail: contract.signer_email, signerName: contract.signer_name || contract.signer_email,
+      clientUserId: id,
+    });
+    await admin.from("contracts").update({ docusign_envelope_id: envelopeId, status: "sent", sent_at: new Date().toISOString() }).eq("id", id);
+    await logAudit({ actorEmail: me!.email, action: "send", entity: "contract", entityId: id, summary: `sent for signature to ${contract.signer_email}` });
+    revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+    return { ok: true };
+  } catch (e: any) {
+    return { error: e?.message || "DocuSign send failed." };
+  }
+}
+
+/** Poll DocuSign for a sent contract; if completed, store the signed PDF and mark signed. */
+export async function checkContractSignature(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("contracts").select("*").eq("id", id).maybeSingle();
+  if (!c) return { error: "Contract not found." };
+  const contract = c as any;
+  if (!contract.docusign_envelope_id) return { error: "This contract hasn't been sent for signature." };
+  try {
+    const status = await envelopeStatus(contract.docusign_envelope_id);
+    if (status === "completed") {
+      const pdf = await combinedPdf(contract.docusign_envelope_id);
+      const path = contract.file_path || `contracts/${contract.client_id}/${id}-signed.pdf`;
+      await admin.storage.from("client-files").upload(path, pdf, { contentType: "application/pdf", upsert: true });
+      await admin.from("contracts").update({ status: "signed", signed_at: new Date().toISOString(), file_path: path }).eq("id", id);
+      await logAudit({ actorEmail: me!.email, action: "sign", entity: "contract", entityId: id, summary: "signed (DocuSign completed)" });
+    }
+    revalidatePath("/staff/contracts"); revalidatePath("/staff/clients");
+    return { ok: true };
+  } catch (e: any) {
+    return { error: e?.message || "Could not check DocuSign status." };
+  }
+}
+
+/** A short-lived signed URL to view/download a contract's stored PDF. */
+export async function contractFileUrl(id: string): Promise<{ url?: string; error?: string }> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("contracts").select("file_path").eq("id", id).maybeSingle();
+  if (!c || !(c as any).file_path) return { error: "No file on this contract." };
+  const { data, error } = await admin.storage.from("client-files").createSignedUrl((c as any).file_path, 300);
+  if (error || !data) return { error: "Could not create a link." };
+  return { url: data.signedUrl };
+}
+
+// ── Tier 3b: Capacity target per staffer ──────────────────────────────────────
+/** Set a staffer's weekly capacity target (hours). Admin/BM. */
+export async function setStaffCapacity(staffId: string, hours: number): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const h = Math.max(0, Math.min(168, Number(hours || 0)));
+  const { error } = await createServiceClient().from("staff").update({ weekly_capacity_hours: h }).eq("id", staffId);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "staff", entityId: staffId, summary: `weekly capacity → ${h}h` });
+  revalidatePath("/staff/capacity");
+  return { ok: true };
+}
+
+// ── Tier 3c: Vendors & 1099 ───────────────────────────────────────────────────
+/** Add a vendor / contractor. Administrator only (finance-adjacent). */
+export async function addVendor(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const name = String(formData.get("name") || "").trim().slice(0, 200);
+  if (!name) return { error: "Vendor name is required." };
+  const { error } = await createServiceClient().from("vendors").insert({
+    name,
+    email: String(formData.get("email") || "").trim() || null,
+    ein_last4: String(formData.get("ein_last4") || "").replace(/\D/g, "").slice(-4) || null,
+    is_1099: formData.get("is_1099") === "on",
+    notes: String(formData.get("notes") || "").slice(0, 300) || null,
+    created_by: me!.email,
+  });
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "create", entity: "vendor", summary: name });
+  revalidatePath("/staff/vendors"); revalidatePath("/staff/finance");
+  return { ok: true };
+}
+
+/** Toggle a vendor's 1099 flag. */
+export async function setVendor1099(id: string, on: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const { error } = await createServiceClient().from("vendors").update({ is_1099: on }).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/vendors");
+  return { ok: true };
+}
+
+/** Delete a vendor (expenses keep their free-text vendor; vendor_id is nulled by FK). */
+export async function deleteVendor(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const { error } = await createServiceClient().from("vendors").delete().eq("id", id);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "delete", entity: "vendor", entityId: id });
+  revalidatePath("/staff/vendors"); revalidatePath("/staff/finance");
+  return { ok: true };
+}
+
+// ── Tier 3e: Knowledge base ───────────────────────────────────────────────────
+/** Create or update a KB article. Admin / Business Manager (write). */
+export async function saveKbArticle(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const id = String(formData.get("id") || "").trim();
+  const title = String(formData.get("title") || "").trim().slice(0, 200);
+  const category = String(formData.get("category") || "General").trim().slice(0, 80) || "General";
+  const body = String(formData.get("body") || "").slice(0, 20000);
+  const tags = String(formData.get("tags") || "").split(",").map((t) => t.trim()).filter(Boolean).slice(0, 20);
+  if (!title) return { error: "Title is required." };
+  const admin = createServiceClient();
+  if (id) {
+    const { error } = await admin.from("kb_articles").update({ title, category, body, tags, updated_by: me!.email, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) return { error: error.message };
+    await logAudit({ actorEmail: me!.email, action: "update", entity: "kb", entityId: id, summary: title });
+  } else {
+    const { error } = await admin.from("kb_articles").insert({ title, category, body, tags, created_by: me!.email, updated_by: me!.email });
+    if (error) return { error: error.message };
+    await logAudit({ actorEmail: me!.email, action: "create", entity: "kb", summary: title });
+  }
+  revalidatePath("/staff/kb");
+  return { ok: true };
+}
+
+/** Delete a KB article. */
+export async function deleteKbArticle(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const { error } = await createServiceClient().from("kb_articles").delete().eq("id", id);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "delete", entity: "kb", entityId: id });
+  revalidatePath("/staff/kb");
   return { ok: true };
 }

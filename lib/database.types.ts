@@ -49,6 +49,7 @@ export interface Database {
           employee_code: string | null;
           hourly: boolean;
           active: boolean;
+          weekly_capacity_hours: number;
           created_at: string;
         };
         Insert: {
@@ -64,6 +65,7 @@ export interface Database {
           employee_code?: string | null;
           hourly?: boolean;
           active?: boolean;
+          weekly_capacity_hours?: number;
         };
         Update: Partial<Database["public"]["Tables"]["staff"]["Insert"]>;
       };
@@ -158,6 +160,7 @@ export interface Database {
           incurred_on: string;
           category: string;
           vendor: string | null;
+          vendor_id: string | null;
           description: string | null;
           amount_cents: number;
           created_by: string | null;
@@ -168,11 +171,116 @@ export interface Database {
           incurred_on?: string;
           category?: string;
           vendor?: string | null;
+          vendor_id?: string | null;
           description?: string | null;
           amount_cents?: number;
           created_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["expenses"]["Insert"]>;
+      };
+      contracts: {
+        Row: {
+          id: string;
+          client_id: string;
+          kind: string;
+          title: string;
+          amount_cents: number | null;
+          start_date: string | null;
+          end_date: string | null;
+          status: string;
+          file_path: string | null;
+          signer_email: string | null;
+          signer_name: string | null;
+          docusign_envelope_id: string | null;
+          created_by: string | null;
+          created_at: string;
+          sent_at: string | null;
+          signed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          client_id: string;
+          kind?: string;
+          title: string;
+          amount_cents?: number | null;
+          start_date?: string | null;
+          end_date?: string | null;
+          status?: string;
+          file_path?: string | null;
+          signer_email?: string | null;
+          signer_name?: string | null;
+          docusign_envelope_id?: string | null;
+          created_by?: string | null;
+          sent_at?: string | null;
+          signed_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["contracts"]["Insert"]>;
+      };
+      vendors: {
+        Row: {
+          id: string;
+          name: string;
+          email: string | null;
+          ein_last4: string | null;
+          is_1099: boolean;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          email?: string | null;
+          ein_last4?: string | null;
+          is_1099?: boolean;
+          notes?: string | null;
+          created_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["vendors"]["Insert"]>;
+      };
+      audit_log: {
+        Row: {
+          id: string;
+          actor_email: string | null;
+          action: string;
+          entity: string;
+          entity_id: string | null;
+          summary: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          actor_email?: string | null;
+          action: string;
+          entity: string;
+          entity_id?: string | null;
+          summary?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["audit_log"]["Insert"]>;
+      };
+      kb_articles: {
+        Row: {
+          id: string;
+          title: string;
+          category: string;
+          body: string;
+          tags: string[];
+          created_by: string | null;
+          updated_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          category?: string;
+          body?: string;
+          tags?: string[];
+          created_by?: string | null;
+          updated_by?: string | null;
+          updated_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["kb_articles"]["Insert"]>;
       };
       expense_budgets: {
         Row: { category: string; monthly_cents: number; created_at: string };
