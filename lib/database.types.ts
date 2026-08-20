@@ -89,6 +89,7 @@ export interface Database {
           roadmap_at: string | null;
           billing_type: string;
           plan: string | null;
+          renewal_date: string | null;
           suspended: boolean | null;
           suspended_reason: string | null;
           suspended_at: string | null;
@@ -109,6 +110,7 @@ export interface Database {
           roadmap_at?: string | null;
           billing_type?: string;
           plan?: string | null;
+          renewal_date?: string | null;
           suspended?: boolean | null;
           suspended_reason?: string | null;
           suspended_at?: string | null;
@@ -149,6 +151,33 @@ export interface Database {
           created_by?: string | null;
         };
         Update: Partial<Database["public"]["Tables"]["invoices"]["Insert"]>;
+      };
+      expenses: {
+        Row: {
+          id: string;
+          incurred_on: string;
+          category: string;
+          vendor: string | null;
+          description: string | null;
+          amount_cents: number;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          incurred_on?: string;
+          category?: string;
+          vendor?: string | null;
+          description?: string | null;
+          amount_cents?: number;
+          created_by?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["expenses"]["Insert"]>;
+      };
+      expense_budgets: {
+        Row: { category: string; monthly_cents: number; created_at: string };
+        Insert: { category: string; monthly_cents?: number };
+        Update: Partial<Database["public"]["Tables"]["expense_budgets"]["Insert"]>;
       };
       client_allotment_adjustments: {
         Row: {

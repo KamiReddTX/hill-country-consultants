@@ -1371,3 +1371,58 @@ export async function updateInvoice(id: string, patch: { status?: string; payUrl
   revalidatePath("/staff/billing"); revalidatePath("/staff");
   return { ok: true };
 }
+
+// ── Tier 2: finance (expenses/budgets) + client renewals ─────────────────────
+import { isAdmin } from "@/lib/staff";
+
+/** Record a business expense. Administrator only (finance is admin-gated). */
+export async function addExpense(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const category = String(formData.get("category") || "Other");
+  const vendor = String(formData.get("vendor") || "").slice(0, 200) || null;
+  const description = String(formData.get("description") || "").slice(0, 300) || null;
+  const incurred_on = String(formData.get("incurred_on") || "").slice(0, 10) || undefined;
+  const dollars = Number(formData.get("amount") || 0);
+  if (!Number.isFinite(dollars) || dollars <= 0) return { error: "Enter an amount." };
+  const { error } = await createServiceClient().from("expenses").insert({
+    category, vendor, description, incurred_on, amount_cents: Math.round(dollars * 100), created_by: me!.email,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/finance");
+  return { ok: true };
+}
+
+/** Delete an expense entry. */
+export async function deleteExpense(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const { error } = await createServiceClient().from("expenses").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/finance");
+  return { ok: true };
+}
+
+/** Set (upsert) the steady monthly budget for a category. 0 clears it. */
+export async function setCategoryBudget(category: string, dollars: number): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  if (!category) return { error: "Pick a category." };
+  const cents = Math.max(0, Math.round(Number(dollars || 0) * 100));
+  const { error } = await createServiceClient().from("expense_budgets").upsert({ category, monthly_cents: cents }, { onConflict: "category" });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/finance");
+  return { ok: true };
+}
+
+/** Set or clear a client's manual renewal-date override. Admin / Business
+ *  Manager (client operations). Null falls back to retained_since + 12 months. */
+export async function setClientRenewalDate(clientId: string, date: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const value = /^\d{4}-\d{2}-\d{2}$/.test(date) ? date : null;
+  const { error } = await createServiceClient().from("clients").update({ renewal_date: value }).eq("id", clientId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/clients"); revalidatePath("/staff/renewals");
+  return { ok: true };
+}
