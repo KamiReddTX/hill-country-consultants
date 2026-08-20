@@ -9,9 +9,12 @@ import { EXPENSE_CATEGORIES } from "@/content/expenses";
 import { ExpenseForm } from "@/components/staff/expense-form";
 import { DeleteExpenseButton } from "@/components/staff/delete-expense-button";
 import { BudgetEditor } from "@/components/staff/budget-editor";
-import { LocalTime } from "@/components/local-time";
 
 export const dynamic = "force-dynamic";
+
+/** Format a date-only value as a local day (avoids the UTC-midnight off-by-one). */
+const fmtDay = (iso: string) =>
+  new Date(`${String(iso).slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const addMonth = (ym: string, delta: number) => {
   const [y, m] = ym.split("-").map(Number);
@@ -255,7 +258,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
                 <tbody>
                   {monthExpenses.map((e: any) => (
                     <tr key={e.id} className="border-b border-line-soft/60">
-                      <td className="p-3 prose-muted"><LocalTime iso={e.incurred_on} mode="date" /></td>
+                      <td className="p-3 prose-muted">{fmtDay(e.incurred_on)}</td>
                       <td className="p-3 text-charcoal">{e.category}</td>
                       <td className="p-3 prose-soft">{e.vendor || "—"}</td>
                       <td className="p-3 prose-muted">{e.description || "—"}</td>

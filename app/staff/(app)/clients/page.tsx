@@ -15,6 +15,12 @@ import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { LocalTime } from "@/components/local-time";
 import { PlanSelect } from "@/components/staff/plan-select";
 import { AutoOpenDetails } from "@/components/staff/auto-open-details";
+import { RenewalDateInput } from "@/components/staff/renewal-date-input";
+import { renewalDate } from "@/lib/health";
+
+/** Format an ISO date-only string as a local day, or null. */
+const fmtRenewal = (iso: string | null) =>
+  iso ? new Date(`${iso}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : null;
 import { AllotmentAdjustForm } from "@/components/staff/allotment-adjust-form";
 import { DeleteAdjustmentButton } from "@/components/staff/delete-adjustment-button";
 import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
@@ -157,8 +163,9 @@ export default async function ClientsPage() {
                 {/* Plan & allotments */}
                 <div>
                   <H>Plan &amp; allotments · {ym}</H>
-                  <div className="grid gap-3 md:max-w-[420px]">
+                  <div className="grid gap-3 md:max-w-[560px] md:grid-cols-2">
                     <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Retainer tier<PlanSelect clientId={c.id} current={plan} /></label>
+                    <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Renewal date<RenewalDateInput clientId={c.id} current={(c as any).renewal_date || ""} autoHint={fmtRenewal(renewalDate(c.retained_since, null))} /></label>
                   </div>
                   {plan ? (
                     <div className="mt-3 flex flex-col gap-3">
