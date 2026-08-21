@@ -3,7 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd } from "@/content/pricing";
-import { sendBookingConfirmation, sendPurchaseAdminAlert } from "@/lib/email";
+import { sendBookingConfirmation, sendPurchaseAdminAlert, sendClientWelcome } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -93,17 +93,39 @@ export async function POST(req: NextRequest) {
       } catch (e) { console.warn("[webhook] class staff events", e); }
     }
 
-    // Invite the client to set a password and sign in; /auth/callback binds their
-    // user_id to their client row on first login.
+    // Welcome the client and get them into the portal. We send our OWN branded
+    // welcome via Resend (reliable) using a generated invite link, and only fall
+    // back to Supabase's invite email if the link can't be generated. Either way,
+    // /auth/callback binds their user_id to their client row on first login.
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
     try {
-      await db.auth.admin.inviteUserByEmail(
-        m.email,
-        site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
-      );
-    } catch (e) { console.warn("[webhook] invite", e); }
+      const { data: link } = await db.auth.admin.generateLink({
+        type: "invite", email: m.email,
+        options: site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
+      } as any);
+      const hashed = (link as any)?.properties?.hashed_token;
+      if (site && hashed) {
+        const actionUrl = `${site}/auth/callback?token_hash=${hashed}&type=invite&next=/portal`;
+        await sendClientWelcome({ to: m.email, name: m.contact || null, actionUrl });
+      } else {
+        await db.auth.admin.inviteUserByEmail(m.email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined);
+      }
+    } catch (e) {
+      console.warn("[webhook] welcome/invite", e);
+      // Last resort: the plain Supabase invite so the client can still get in.
+      try { await db.auth.admin.inviteUserByEmail(m.email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined); } catch {}
+    }
+    // A booked class carries its name in metadata (not the cart), so surface it
+    // at the top of "what you booked" — otherwise the confirmation shows no class.
+    const attendeeN = Number(m.attendees) || 0;
+    const classLine = m.className
+      ? `• <strong>${m.className}</strong>${m.classSlot ? ` · ${m.classSlot}` : ""}${attendeeN ? ` · ${attendeeN} attendee${attendeeN === 1 ? "" : "s"}` : ""}`
+      : "";
     const itemsHtml =
-      items.map((i: any) => `• ${i.name}${i.qty > 1 ? ` × ${i.qty}` : ""} — ${usd(i.price * i.qty)}`).join("<br>") +
+      [
+        classLine,
+        ...items.map((i: any) => `• ${i.name}${i.qty > 1 ? ` × ${i.qty}` : ""} — ${usd(i.price * i.qty)}`),
+      ].filter(Boolean).join("<br>") +
       (quotes.length ? `<br><em>Quote requests:</em><br>` + quotes.map((q: any) => `• ${q.name} (${q.from})`).join("<br>") : "");
     try {
       await sendBookingConfirmation({ to: m.email, ref, itemsHtml, startDate: m.startDate || "", portalUrl: `${site}/portal/login` });
