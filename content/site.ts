@@ -31,6 +31,7 @@ export const NAV: { href: string; label: string }[] = [
   { href: "/industries", label: "Industries" },
   { href: "/training", label: "Training" },
   { href: "/about", label: "About" },
+  { href: "/careers", label: "Careers" },
   { href: "/faq", label: "FAQ" },
 ];
 

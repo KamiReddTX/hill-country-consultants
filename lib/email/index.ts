@@ -197,6 +197,27 @@ export async function sendClientWelcome(opts: { to: string; name: string | null;
   await send(opts.to, "Welcome to Hill Country Consultants — set up your client portal", shell("Welcome — let's get started", body));
 }
 
+/** Onboarding check-in drip (day 3 and day 14) to a new client. Sent by the
+ *  daily cron; each phase fires once per client. */
+export async function sendClientCheckin(opts: { to: string; name: string | null; phase: 3 | 14 }) {
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const hi = opts.name ? `Hi ${esc(opts.name)},` : "Hello,";
+  const portal = site ? `<p style="margin:22px 0"><a href="${site}/portal/login" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your client portal</a></p>` : "";
+  if (opts.phase === 3) {
+    const body = `<p style="font-size:16px;line-height:1.6">${hi}</p>
+      <p style="font-size:15px;line-height:1.6;color:#3a3f38">You&rsquo;re a few days in — a quick check that onboarding is on track. Your portal has an onboarding checklist to work through: confirm your point of contact, share access securely in your vault, and review your first-30-day priorities.</p>
+      ${portal}
+      <p style="font-size:13px;color:#6b6552">Anything unclear? Reply to this email or call 470-478-1590.</p>`;
+    await send(opts.to, "How&rsquo;s your onboarding going?", shell("Checking in", body));
+  } else {
+    const body = `<p style="font-size:16px;line-height:1.6">${hi}</p>
+      <p style="font-size:15px;line-height:1.6;color:#3a3f38">Two weeks in — a midpoint check on your first 30 days. Your weekly report goes out every Friday, and your task board shows what&rsquo;s in progress. If priorities have shifted, tell your team and we&rsquo;ll adjust.</p>
+      ${portal}
+      <p style="font-size:13px;color:#6b6552">We&rsquo;ll schedule your 30-day review soon. Reply anytime or call 470-478-1590.</p>`;
+    await send(opts.to, "Two weeks in — how are we doing?", shell("Midpoint check-in", body));
+  }
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `
