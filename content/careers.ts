@@ -167,7 +167,317 @@ Commission is paid on collected funds, not on signature. Full terms are stated i
 
 Use the application below. Tell us about a time you had to explain something complicated to someone who didn't want to hear it — there's a place for it in the form.`;
 
+const BUSINESS_MANAGER = `## The role in one line
+
+You run the firm day to day so the owner can build it — approving the work that goes out, holding the standard on what gets delivered, keeping clients with us, growing the accounts we already have, and making sure we never sell more than we can actually do.
+
+## About Hill Country Consultants
+
+**The capability of a full staff. Without the payroll.**
+
+One flat monthly fee puts a whole firm behind a business — admin, documentation, compliance, coordination, marketing, publishing and more. On site when it matters, virtual when it counts.
+
+Four pillars sit behind every engagement: **Documentation, Compliance, Coordination, and Systems**, across six industries: Construction & Contractors · Authors & Personal Brands · Food & Hospitality · Small & Mid-Size Business · Nonprofits & Mission-Driven · Landowners & Agriculture.
+
+## Why this role exists
+
+We're honest about where we are. Every proposal, every exception, every delivery handoff, every new specialist's first three contracts, every collections question and every capacity call currently lands on one desk. That works until it doesn't, and we're at the point where it doesn't.
+
+**This is the firm's first management hire.** You're not inheriting a machine — you're helping assemble one that's still being built. You'll manage the staff, run the day, catch what's breaking, and bring the Administrator decisions that are ready to make instead of problems that aren't.
+
+If you need a role where the systems already work and you maintain them, this isn't that. If you've ever looked at a growing business and thought *"I could organize this,"* it is exactly that.
+
+## What you'll own
+
+### 1 · The daily management meeting
+
+**You host it, every business day.** It's the heartbeat of the firm — where the day gets set, blockers surface before they cost a client, and nobody works a whole day in the wrong direction.
+
+- Set the agenda and run it on time, start and finish
+- Confirm what each specialist is doing that day: sales activity, client deliverables, deadlines in play
+- Surface blockers and resolve them in the room, or assign the resolution before it ends
+- Review yesterday against commitments — what shipped, what didn't, why
+- Flag capacity strain and approaching deadlines early
+- Publish notes and action items to the team afterward, so decisions are documented and not just spoken
+
+Running the same meeting well every day, especially on days when nothing seems to be happening, is a real skill. It's also the discipline this role is built on.
+
+### 2 · Sales operations and quality control
+
+- **Review every proposal before it goes up for approval.** Every exception request routes to you first. You're the filter between what a specialist wants to promise and what the firm can actually deliver — you work it up, mark what's wrong, and forward it with a recommendation. The Administrator releases it.
+- **Review the first three contracts** for every new Engagement Specialist during their supervised ramp before they go for approval, with a debrief inside 48 hours — one behavior coached at a time.
+- **Run weekly coaching:** twenty minutes of live role-play and one recorded call reviewed, per specialist, permanently.
+- **Run the monthly drills:** the overpromise drill and the closed-book price check. Nobody quotes from memory, including you.
+- **Maintain the rate reference** in the employee portal so it is never wrong. A stale rate sheet is how a specialist quotes a price we can't honor.
+
+### 3 · Capacity and intake control
+
+This may be the most consequential thing you do.
+
+Sales can outrun delivery, and when it does the damage lands on clients who already paid us. You build and defend the monthly intake ceiling — how much new work the firm can accept, matched against the hours we actually have. You bring the number and the math to the Administrator, who sets it. Then you're the one who holds the line day to day, telling a specialist *not this month* when their commission depends on hearing yes. That takes spine.
+
+- Track committed delivery hours against available hours, continuously
+- Recommend the monthly intake ceiling, then enforce the approved number
+- Flag when an account exceeds what one specialist can service, and route it
+- Forecast when the next hire is needed — before the strain shows up in client work
+
+### 4 · Delivery standards
+
+- Review every **Delivery Handoff** within 24 hours of signature: what was sold, what was promised, first-30-day deadlines, kickoff date
+- Audit **daily work logs** against client hour allotments — clients pay for hours and we account for every one
+- Spot-check outbound deliverables for quality. Submittals go to architects. Grant applications go to funders. Compliance files go to inspectors. Our name is on all of it.
+- Confirm the **Friday weekly report** goes out on every account, every week, without exception
+- Own client escalations before they become cancellations
+
+### 5 · Client retention
+
+**This is the number you're paid on, and it's the number the firm lives on.** A client who stays two years is worth more than three who leave at month four — and far cheaper than replacing them. Keeping people happy is not a soft duty here. It's an owned outcome with your name on it.
+
+**Know where every client stands, before they tell you**
+
+- Own the renewal calendar. Every contract end date, tracked, with the conversation started well before it arrives — never in the final week.
+- Watch the early warning signs: a client going quiet, unused hours piling up month after month, skipped check-ins, slower payments, a tone shift in email. Churn almost always announces itself before it happens.
+- Review work logs and weekly reports for accounts that are *technically* fine but where nothing meaningful is getting done.
+
+**Make the value visible**
+
+- Clients don't renew because we worked hard. They renew because they can *see* what they got. Make sure they can.
+- Run periodic account reviews: here's what we delivered, here's what it saved you, here's what's next.
+- Make sure every client is actually using what they're paying for. A Momentum client using Foundation-level service is a cancellation waiting for a slow month — find the unused service lines in their tier and put them to work.
+- Confirm onboarding lands right. The first 30 days set whether a client ever trusts us, and it's the cheapest place to prevent a loss.
+
+**Handle the hard conversations**
+
+- Own client escalations personally before they become cancellations
+- Take the save conversation when a client signals they're leaving — find out what actually went wrong and, where we can fix it, fix it
+- When a client does leave, find out why and write it down. A loss you don't understand is a loss you'll repeat.
+- Track retention as a real number, reported quarterly
+
+**Turn good relationships into growth**
+
+- Ask satisfied clients for referrals and testimonials. Nobody sells this firm better than a client who's had a good year with us.
+- Spot genuine expansion opportunities — a client who's outgrown their tier — and route them to the specialist. Never sell a client something that doesn't help them; that's the fastest way to lose the ones you have.
+
+### 6 · Sales — about 10% of the role
+
+You are not primarily a salesperson, but you do sell. Roughly four hours of a forty-hour week, and it comes from three places:
+
+**Expansion on accounts you already know.** This is the natural one. You're the person who sees a client outgrowing their tier, or paying for a plan while their real problem sits in a service line they've never used. You already know the account better than anyone. Have the conversation.
+
+**Referrals from happy clients.** Retention and referral are the same muscle. A client who's had a good year with us is our best source of the next one, and asking is your job.
+
+**Coverage.** When a lead comes in and no specialist is free, or a prospect needs someone senior in the room, you take it. You'll be certified through the same three gates every specialist passes, so you can run a discovery call and close a contract properly.
+
+**The rules that apply to everyone apply to you.**
+
+- Zero pricing exceptions. You review other people's exception requests; your own go straight to the Administrator with no exceptions and no shortcuts.
+- Every hard line in this document applies to your sales too
+- You quote from the rate reference, not from memory
+- Every deal you close gets a delivery handoff like anyone else's
+
+**And one rule that applies only to you:** your own deals never move the intake ceiling. If the firm is at capacity, it's at capacity — including for work you sold. You will be the only person in a position to quietly bend that, which is exactly why it's written down.
+
+### 7 · Money
+
+- Invoicing, payment schedules, and the five-business-day grace period
+- Collections follow-up — firmly, early, and without apology
+- Calculate and verify commissions, residuals and any clawbacks, and submit them for release
+- Track revenue against capacity so we know which service lines actually earn
+- Expense tracking, vendor and contractor payments
+- Coordinate with the firm's bookkeeper and CPA
+
+### 8 · People
+
+**Every employee in this firm reports to you.** You're their manager — the person they come to, and the person accountable for whether they succeed.
+
+- Recruit, screen and interview Engagement Specialists, and bring finalists forward with a recommendation
+- Run Phase 1 foundation training and administer the three certification gates
+- Manage schedules, and submit additional-hour requests on accounts that need them
+- Hold performance conversations — the encouraging ones and the hard ones. Corrective action goes up for approval before it's taken.
+- Maintain personnel records and onboarding documentation
+- Be reachable. A remote team with an unreachable manager isn't managed.
+
+### 9 · Systems, build and design
+
+We're a firm that sells documentation, systems and brand work. We're expected to look like it and run like it. You're the person who makes that true internally.
+
+**Systems and process**
+
+- Own the employee portal: lead intake, discovery notes, proposal requests, delivery handoff, rate reference, and resources
+- Build the process documentation this firm still needs, so the next hire onboards from a document instead of a conversation
+- Identify what's breaking, bring a fix with the reasoning attached, and implement it once approved
+
+**Coding and technical build**
+
+- Maintain and update the public website — pages, copy, service and rate changes, forms, links — working directly in the code where the builder won't do it
+- Build and maintain the employee portal: pages, gated access, forms, and where each submission lands
+- Connect our platforms to each other so information stops being retyped — forms into trackers, intake into the CRM, notifications where they're needed
+- Read, modify and troubleshoot existing code rather than waiting on a developer for every small change
+- Build internal tools when buying one doesn't make sense — trackers, calculators, dashboards
+- Support the Systems & Automation service line, including AI workflow setup for client teams
+
+**Graphic design**
+
+- Design internal and client-facing materials: one-sheets, proposals, capability documents, reports, presentations
+- Produce marketing and social graphics, and support brand work on client accounts
+- Hold brand consistency across everything the firm puts out — colors, type, logo usage, layout. A proposal that looks thrown together undercuts a firm that sells organization.
+- Build reusable templates so specialists produce on-brand work without designing from scratch every time
+
+## Where this role sits
+
+**The Administrator has authority over managers. You have authority over everyone else.**
+
+> **Administrator** → **Business Manager** → **Engagement Specialists · all staff**
+
+**You are the firm's line of authority over its people.** Every employee reports to you, takes direction from you, and answers to you. Specialists bring you their questions, their problems, and their exceptions — not to the Administrator. You assign the work, set the schedules, run the coaching, hold the standard, and handle it when someone isn't meeting it.
+
+Nobody on this team goes around you, and you don't go around anybody. If a specialist has a concern about you, it goes to the Administrator — that's the one exception, and it's how it should work.
+
+**You report to the Administrator, and the Administrator approves your decisions before they take effect.**
+
+That distinction matters, so here it is plainly:
+
+| You direct — no approval needed | The Administrator approves before it takes effect |
+|---|---|
+| Who does what work, and when | Anything that binds the firm to a client |
+| Daily priorities and assignments | Every proposal, quote and exception |
+| Schedules and coverage | Hires, terminations and corrective action |
+| How a problem gets solved internally | Money going out — payroll, commissions, vendors |
+| Coaching, feedback and standards | The monthly intake ceiling |
+| Who runs which account | Pricing, policy and process changes |
+| The daily meeting and its agenda | Your own sales proposals — never self-approved |
+
+**In short: you run the people and the day. The Administrator approves anything that commits the firm's money, its clients, or its policy.**
+
+**What that means in practice**
+
+- Your job is to make approval fast. Bring complete work-ups with a clear recommendation and reasoning attached — not open questions, not raw problems.
+- If it's a close call, say which way you'd go and why. A recommendation you're willing to defend beats a neutral summary every time.
+- Nothing is said to a client, vendor, or applicant as settled until it's approved. *"Let me confirm that and come right back to you"* is a professional answer and you'll use it often.
+- When something is genuinely urgent, escalate immediately rather than acting first and reporting after.
+
+**This is real management authority inside a firm that keeps final approval at the top.** If you need to commit the company without checking, this isn't the seat. If you're strong at running people and handing over decisions that are ready to make, you'll do well here — and what you carry grows as the firm does.
+
+## Who we're hiring
+
+**Required**
+
+- **A bachelor's degree**
+- **Five or more years** managing operations, a team, or a book of client accounts
+- You can hold several moving projects and several people in your head at once without dropping one
+- You are comfortable telling someone no, including someone whose income depends on yes
+- **You've actually managed people**, not just projects — assigned work, given hard feedback, and been the one accountable when someone underperformed
+- **You can work inside an approval structure without stalling or resenting it.** You'll prepare a great deal you don't get the final say on, and you'll do it again the next day.
+- **You can hold a client relationship.** You've kept accounts, handled unhappy customers, and turned a complaint into a longer relationship rather than an exit.
+- **You can ask for business without flinching.** Not a career closer — but able to name a price, ask a client to expand, and request a referral without apologizing for it.
+- Strong written communication — you'll write process documents, coaching notes, meeting summaries, and client escalation responses
+- Numbers literacy: invoicing, commission math, hours against allotments, revenue against capacity
+- A dedicated, quiet workspace, reliable high-speed internet, and a setup you can host a video meeting from every morning
+
+**Technology — this one is not negotiable**
+
+You will live in software all day, across several platforms at once, and you'll be the person others come to when something won't work.
+
+- **Strong general computer skills.** Comfortable troubleshooting your own problems before asking anyone.
+- **Fluent in a full productivity suite** — Google Workspace or Microsoft 365: documents, spreadsheets, shared drives, calendars, video meetings.
+- **Comfortable running several platforms simultaneously** — our employee portal, our website, a CRM, project and task tracking, video conferencing, e-signature, invoicing and payment tools, cloud storage, and a shared credential vault.
+- **Quick to learn new software without hand-holding.** You'll be asked to evaluate and roll out tools, not just use the ones already here.
+- **Spreadsheet capable.** Formulas, sorting, filtering, and building a simple tracker from scratch — the capacity model is a spreadsheet before it's anything else.
+- Able to teach a tool to someone else once you've learned it, since you'll be onboarding every new specialist.
+
+**Coding and programming — required**
+
+- **Working knowledge of HTML, CSS and JavaScript.** You should be able to open a page, find what's wrong, fix it, and know you didn't break something else.
+- Comfortable inside a website builder *and* in the underlying code when the builder won't do what's needed
+- Understand how APIs, integrations and webhooks connect one platform to another — and able to set them up
+- Experience with automation tools — Zapier, Make, or the equivalent
+- Able to read documentation and work out an unfamiliar system without being walked through it
+- Version control and basic debugging habits: change one thing, test it, keep a record of what you changed
+
+You will not be building enterprise software. You will be the person who makes our website, our portals and our platforms work together — and who fixes it Tuesday morning instead of waiting a week for a contractor.
+
+**Graphic design — required**
+
+- **Fluent in a professional design tool** — Canva at minimum; Adobe Creative Suite or Figma preferred
+- Able to design a clean, professional business document from a blank page: proposals, one-sheets, reports, decks
+- Working understanding of layout, typography, color and hierarchy — enough to know *why* something looks unprofessional, not just that it does
+- Can build and maintain brand templates others can use without breaking them
+- Comfortable producing social and marketing graphics at the sizes each platform actually needs
+- A portfolio or work samples. We'll ask.
+
+**Strongly preferred**
+
+- Experience in a service business where hours are sold and delivered — agency, consulting, staffing, professional services
+- Account management, client success, or retention experience in a recurring-revenue business
+- Any exposure to construction, food service, agriculture, publishing, media or nonprofit work
+- You've built a process from nothing before, not just followed one
+- Bookkeeping or light financial operations experience
+
+**Work arrangement:** fully remote. You can do this job from anywhere with reliable internet. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
+
+Remote does not mean loosely supervised or loosely supervising. You'll be the most visible person on this team: first on the call every morning, and the one specialists reach when something breaks. If you've worked remote before and know how to build presence without a hallway, that experience matters more here than it would in an office.
+
+## What we can't train
+
+- **Judgment.** Half this job is working out the right answer quickly with incomplete information — then making the case for it well enough that a decision can be made on the spot.
+- **Follow-through.** A Friday report that goes out 47 weeks out of 52 is a broken system.
+- **Directness delivered with respect.** You'll tell a specialist their proposal is wrong, a client their expectation isn't in the contract, and the owner that we're at capacity.
+- **Reading a room you can't see.** Much of retention is noticing that a client who used to reply in an hour now takes three days, and picking up the phone about it before anyone asks you to.
+
+## Your first 90 days
+
+**Days 1–30 · Learn the machine.** Every service line, every rate, every term. Sit in on discovery calls. Read every active client file. Shadow delivery on real accounts. Meet every person on the team one on one. Ask why about everything — this is the only window where you get to.
+
+**Days 31–60 · Take the controls.** Assume the daily management meeting as host. Take first-line proposal review and delivery handoff review. Build the capacity model and bring the first intake ceiling recommendation forward. Start weekly coaching.
+
+**Certification runs alongside all of this.** You'll pass the same three gates every specialist does — Product, Discovery, and Close — before selling anything on your own.
+
+**Days 61–90 · Fix something.** Identify the three worst operational bottlenecks and resolve at least one completely. Document two processes that currently live only in someone's head. Audit the website and portal, and build one template set specialists can actually use. Own collections end to end. Establish the renewal calendar and complete a first account review with every active client.
+
+## How you'll be measured
+
+| Area | What good looks like |
+|---|---|
+| **Delivery** | Weekly reports out on every account, every week. Work logs reconciled. Zero missed contract commitments. |
+| **Quality** | Nothing reaches a client without approval. Work-ups complete enough to be decided on the first pass. Deliverables that don't come back. |
+| **Capacity** | The firm never sells more than it can service, including work you sold. |
+| **Retention** | Clients still with us at month twelve. Renewals started early, not in the final week. Every loss understood and written up. |
+| **Money** | Receivables current. Commissions accurate and on time. |
+| **Team** | Specialists certified, coached, and producing. Problems reaching you before they reach the Administrator. |
+| **Sales** | Expansion and referral conversations happening on existing accounts — never at the expense of capacity discipline. |
+| **Systems & brand** | Website and portals current and working. Everything the firm sends out looks like it came from the same firm. |
+| **The daily meeting** | Held every business day, on time, with notes published. |
+| **The Administrator's day** | Decisions arriving ready to make — complete, recommended, and not needing to be sent back for more. |
+
+That last one is the real test. The Administrator will still approve everything in month six — that's the structure. What should change is *how much work approval takes*. If items come back for rework, or arrive without a recommendation, or surface as problems instead of decisions, the hire isn't landing.
+
+## Compensation
+
+**$40,000 per year, salaried.** Fully remote.
+
+**Quarterly client-retention bonus — 5% of quarterly profits.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
+
+Schedule is set with the owner; the daily management meeting anchors every business morning.
+
+## To apply
+
+Use the application below. Tell us about a system or process you built from nothing — what was broken before, what you put in place, how you got it approved, and how you knew it worked.
+
+**Please include work samples:** something you designed, and something you built or coded.`;
+
 export const JOBS: Job[] = [
+  {
+    slug: "business-manager",
+    title: "Business Manager",
+    type: "Full-time · Salaried · Remote",
+    location: "Fully remote · Longview, TX · Atlanta, GA · Nationwide",
+    tagline: "Clarity. Strategy. Organized Growth.",
+    pay: "$40,000/yr salaried + 5% quarterly retention bonus",
+    summary:
+      "The firm's first management hire — run the firm day to day so the owner can build it. Approve the work that goes out, hold the delivery standard, keep and grow client accounts, manage the team, and defend the capacity line. Real management authority under an approval structure.",
+    open: true,
+    body: BUSINESS_MANAGER,
+  },
   {
     slug: "engagement-specialist",
     title: "Engagement Specialist",

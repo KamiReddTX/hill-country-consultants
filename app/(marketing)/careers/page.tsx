@@ -5,12 +5,12 @@ import { openJobs } from "@/content/careers";
 
 export const metadata: Metadata = {
   title: "Careers — Open Roles · Hill Country Consultants",
-  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Hybrid, Eastern-time business hours.",
+  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Mostly remote, with some on-site work as needed.",
 };
 
 const WHY = [
   { t: "One firm, many crafts", d: "Work alongside specialists across operations, marketing, publishing, media, web, and more — real variety, real coordination." },
-  { t: "Hybrid, not remote-first", d: "We serve clients nationwide and work virtually on Eastern-time business hours, on site when a project calls for it." },
+  { t: "Mostly remote, on site when it counts", d: "We're about 90% remote and serve clients nationwide across time zones — with some on-site work when a project calls for it." },
   { t: "Clear systems", d: "Task boards, checklists, weekly reporting, and a shared portal mean you always know what's expected and where work stands." },
 ];
 
