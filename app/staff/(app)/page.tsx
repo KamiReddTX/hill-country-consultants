@@ -13,6 +13,7 @@ import { computeRepEarnings } from "@/lib/commission";
 import { COMMISSION } from "@/content/commission";
 import { renewalDate, daysUntil } from "@/lib/health";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
+import { KickoffHandledButton } from "@/components/staff/kickoff-handled-button";
 
 const STAGES = ["New lead", "Contacted", "Qualified", "Proposal", "Closed won", "Closed lost"];
 
@@ -52,6 +53,16 @@ export default async function Dashboard() {
     revenueCents += (paidInv ?? []).reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
   }
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
+
+  // Kickoff calls a client scheduled that still need staff added to the invite.
+  // Shown to the account owner and to managers.
+  const kickoffCutoff = Date.now() - 30 * 86400000;
+  const pendingKickoffs = clients.filter((c) => {
+    const k = (c as any).kickoff_at;
+    if (!k || (c as any).kickoff_confirmed_at) return false;
+    if (new Date(k).getTime() < kickoffCutoff) return false; // ignore old ones from before this flag existed
+    return priv || c.assigned_to === me.id;
+  });
 
   // "Needs attention" roll-up for managers: renewals due soon, unpaid AR,
   // pending time off, and employees who haven't signed the current IT/security ack.
@@ -145,6 +156,26 @@ export default async function Dashboard() {
         )}
         {me.hourly && open && <p className="mt-3 border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">You&apos;re on the clock since {new Date(open.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.</p>}
       </div>
+
+      {/* Kickoff calls to set up (owner + managers) */}
+      {pendingKickoffs.length > 0 && (
+        <section className="border-2 border-gold bg-cream/40 p-4">
+          <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Kickoff calls to set up</h2>
+          <p className="mb-3 text-[13px] prose-muted">These clients scheduled their kickoff. Find it on the calendar, add the account owner and any service specialists to the invite, then mark it handled.</p>
+          <ul className="flex flex-col gap-2">
+            {pendingKickoffs.map((c) => (
+              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2 text-[14px]">
+                <span className="text-charcoal">
+                  <span className="font-medium">{c.business || c.contact || c.email}</span>
+                  {(c as any).kickoff_at && <span className="prose-muted"> · marked scheduled {new Date((c as any).kickoff_at).toLocaleDateString()}</span>}
+                  <span className="prose-muted"> · owner {ownerName.get(c.assigned_to) || "unassigned"}</span>
+                </span>
+                <KickoffHandledButton clientId={c.id} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Needs attention (managers) */}
       {priv && attentionItems.length > 0 && (

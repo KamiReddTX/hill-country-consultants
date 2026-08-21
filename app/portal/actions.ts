@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
-import { sendStaffTaskAlert, sendStaffMessageAlert } from "@/lib/email";
+import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert } from "@/lib/email";
 import { uploadNoteFiles } from "@/lib/message-files";
 import type { ClientRow } from "@/lib/database.types";
 
@@ -208,7 +208,29 @@ export async function markKickoffScheduled(): Promise<{ ok?: boolean; error?: st
   const db = createClient();
   const { error } = await db.rpc("mark_kickoff_scheduled");
   if (error) return { error: error.message };
+
+  // Alert the account owner + the team inbox so someone adds the right staff to
+  // the calendar invite. Best-effort; also flags on their dashboards.
+  try {
+    const client = await getPortalClient();
+    if (client) {
+      const admin = createServiceClient();
+      const recipients = new Set<string>();
+      const notify = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+      if (notify) recipients.add(notify);
+      const aid = (client as any).assigned_to as string | null;
+      if (aid && /^[0-9a-f-]{36}$/i.test(aid)) {
+        const { data: s } = await admin.from("staff").select("email").eq("id", aid).maybeSingle();
+        if ((s as any)?.email) recipients.add((s as any).email);
+      }
+      if (recipients.size) {
+        await sendKickoffScheduledAlert({ to: [...recipients], clientName: clientLabel(client), portalUrl: siteUrl() ? `${siteUrl()}/staff` : "" });
+      }
+    }
+  } catch (e) { console.warn("[markKickoffScheduled] alert", e); }
+
   revalidatePath("/portal");
+  revalidatePath("/staff");
   return { ok: true };
 }
 

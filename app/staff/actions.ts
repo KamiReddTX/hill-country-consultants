@@ -1887,3 +1887,22 @@ export async function decideTimeOff(id: string, status: "approved" | "denied"): 
   revalidatePath("/staff/profile");
   return { ok: true };
 }
+
+// ── Kickoff hand-off ─────────────────────────────────────────────────────────
+
+/** Owner or manager marks a scheduled kickoff handled (staff added to invite),
+ *  clearing it from dashboards. */
+export async function confirmKickoff(clientId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { data: c } = await admin.from("clients").select("id, assigned_to").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  const owner = (c as any).assigned_to === me.id;
+  if (!isPrivileged(me) && !owner) return { error: "Only the account owner or a manager can confirm this." };
+  const { error } = await admin.from("clients").update({ kickoff_confirmed_at: new Date().toISOString() }).eq("id", clientId);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me.email, action: "update", entity: "client", entityId: clientId, summary: "kickoff handled (staff added to invite)" });
+  revalidatePath("/staff");
+  return { ok: true };
+}

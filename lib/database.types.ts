@@ -88,6 +88,7 @@ export interface Database {
           created_at: string;
           retained_since: string | null;
           kickoff_at: string | null;
+          kickoff_confirmed_at: string | null;
           roadmap_at: string | null;
           billing_type: string;
           plan: string | null;
@@ -109,6 +110,7 @@ export interface Database {
           rep_code?: string;
           retained_since?: string | null;
           kickoff_at?: string | null;
+          kickoff_confirmed_at?: string | null;
           roadmap_at?: string | null;
           billing_type?: string;
           plan?: string | null;

@@ -232,6 +232,16 @@ export async function sendOpsDigest(opts: { items: { n: number; label: string }[
   await send(to, "Hill Country Consultants — daily ops digest", shell("Daily ops digest", body));
 }
 
+/** A client marked their kickoff call scheduled — tell the owner + managers to
+ *  find the appointment and add the right staff to the invite. */
+export async function sendKickoffScheduledAlert(opts: { to: string | string[]; clientName: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.clientName)}</strong> just scheduled their kickoff call.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">It will appear on the Google Calendar. Open the appointment and <strong>add the necessary staff</strong> to the invite (account owner + any service specialists), then mark it handled on your dashboard.</p>
+    ${opts.portalUrl ? `<p style="margin:20px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Open your dashboard</a></p>` : ""}`;
+  await send(opts.to, `Kickoff scheduled · ${opts.clientName}`, shell("Kickoff call scheduled", body));
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `
