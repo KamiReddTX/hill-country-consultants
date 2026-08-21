@@ -7,6 +7,8 @@ import { AvatarUpload } from "@/components/staff/avatar-upload";
 import { SignDocumentButton } from "@/components/staff/sign-document-button";
 import { DocusignSignButton } from "@/components/staff/docusign-sign-button";
 import { docusignConfigured } from "@/lib/docusign";
+import { SecurityAck } from "@/components/staff/security-ack";
+import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 
 export default async function ProfilePage() {
   const me = await getStaffMember();
@@ -23,6 +25,9 @@ export default async function ProfilePage() {
   const toSign = rows.filter((d) => d.requires_signature && !d.signed_at);
   const dsEnabled = docusignConfigured();
   const otherDocs = rows.filter((d) => d.kind !== "paystub" && !(d.requires_signature && !d.signed_at));
+
+  const { data: ack } = await db.from("staff_acknowledgments").select("agreed_at,agreed_name").eq("staff_id", me.id).eq("kind", ACK_KIND).eq("version", ACK_VERSION).maybeSingle();
+  const ackSigned = ack ? { at: (ack as any).agreed_at as string, name: (ack as any).agreed_name as string | null } : null;
 
   const managed: [string, string][] = [
     ["Role(s)", roles.length ? roles.join(", ") : me.role],
@@ -73,6 +78,8 @@ export default async function ProfilePage() {
           </ul>
         </section>
       )}
+
+      <SecurityAck signed={ackSigned} />
 
       <section>
         <h2 className="mb-2 font-fraunces text-[20px] font-medium text-forest">Photo</h2>

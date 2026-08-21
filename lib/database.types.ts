@@ -282,6 +282,25 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["kb_articles"]["Insert"]>;
       };
+      staff_acknowledgments: {
+        Row: {
+          id: string;
+          staff_id: string;
+          kind: string;
+          version: string;
+          agreed_name: string | null;
+          agreed_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          kind?: string;
+          version: string;
+          agreed_name?: string | null;
+          agreed_at?: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["staff_acknowledgments"]["Insert"]>;
+      };
       expense_budgets: {
         Row: { category: string; monthly_cents: number; created_at: string };
         Insert: { category: string; monthly_cents?: number };

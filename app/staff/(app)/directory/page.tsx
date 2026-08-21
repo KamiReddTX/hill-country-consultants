@@ -14,6 +14,7 @@ import { DocumentLibrary } from "@/components/staff/document-library";
 import { HireApplicant } from "@/components/staff/hire-applicant";
 import { ApplicationDecision } from "@/components/staff/application-decision";
 import { LocalTime } from "@/components/local-time";
+import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 
 export default async function DirectoryPage() {
   const me = await getStaffMember();
@@ -29,6 +30,8 @@ export default async function DirectoryPage() {
   const { data: allDocs } = await db.from("staff_documents").select("*").order("created_at", { ascending: false });
   const { data: templates } = await db.from("document_templates").select("*").order("created_at", { ascending: false });
   const { data: applications } = await db.from("job_applications").select("*").order("created_at", { ascending: false });
+  const { data: acks } = await db.from("staff_acknowledgments").select("staff_id,agreed_at").eq("kind", ACK_KIND).eq("version", ACK_VERSION);
+  const ackedAt = new Map<string, string>((acks ?? []).map((a: any) => [a.staff_id, a.agreed_at]));
   const employeeOpts = directory.filter((s) => s.active !== false).map((s) => ({ id: s.id, label: s.name || s.email }));
   const docsByStaff = new Map<string, any[]>();
   (allDocs ?? []).forEach((d: any) => { const a = docsByStaff.get(d.staff_id) || []; a.push(d); docsByStaff.set(d.staff_id, a); });
@@ -137,8 +140,14 @@ export default async function DirectoryPage() {
         <div className="flex flex-col gap-2">
           {directory.map((s) => (
             <details key={s.id} className="border border-line-warm bg-white">
-              <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">{s.name || s.email}</summary>
+              <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">
+                {s.name || s.email}
+                {ackedAt.has(s.id)
+                  ? <span className="ml-2 text-[12px] font-normal text-forest">· IT/security ack ✓</span>
+                  : <span className="ml-2 text-[12px] font-normal text-gold-hover">· IT/security ack pending</span>}
+              </summary>
               <div className="border-t border-line-soft p-4">
+                <p className="mb-3 text-[13px] prose-muted">IT, Security &amp; Confidentiality Acknowledgment: {ackedAt.has(s.id) ? <>signed <LocalTime iso={ackedAt.get(s.id)!} mode="date" /></> : <span className="text-gold-hover">not yet signed</span>} (v{ACK_VERSION}).</p>
                 <StaffDocsManager staffId={s.id} employmentType={(s as any).employment_type || ""} startDate={(s as any).start_date || ""} docs={docsByStaff.get(s.id) || []} />
               </div>
             </details>

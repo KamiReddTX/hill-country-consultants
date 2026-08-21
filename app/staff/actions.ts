@@ -1766,3 +1766,27 @@ export async function declineApplication(applicationId: string): Promise<ActionR
   revalidatePath("/staff/directory");
   return { ok: true };
 }
+
+// ── IT / security / confidentiality acknowledgment ────────────────────────────
+import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
+
+/** Record the signed-in employee's acknowledgment of the current IT/security &
+ *  confidentiality terms (typed signature + timestamp). Idempotent per version. */
+export async function acknowledgeSecurity(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const agreedName = String(formData.get("agreedName") || "").trim();
+  if (agreedName.length < 2) return { error: "Please type your full name to sign." };
+  const admin = createServiceClient();
+  const { error } = await admin
+    .from("staff_acknowledgments")
+    .upsert(
+      { staff_id: me.id, kind: ACK_KIND, version: ACK_VERSION, agreed_name: agreedName },
+      { onConflict: "staff_id,kind,version", ignoreDuplicates: true },
+    );
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me.email, action: "sign", entity: "security_ack", entityId: me.id, summary: `${me.name || me.email} acknowledged IT/security terms v${ACK_VERSION}` });
+  revalidatePath("/staff/profile");
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
