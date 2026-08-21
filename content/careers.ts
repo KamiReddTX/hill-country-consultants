@@ -116,7 +116,17 @@ Once the contract is signed, you are the firm to that client. Depending on the a
 - Comfortable with Google Workspace or Microsoft 365, and quick on new software
 - **Able to learn and navigate our website and employee portal independently.**
 - Reliable transportation, valid driver's license, reliable internet, and a private space for client calls
+- **Based in the United States** — this role is open to U.S.-based applicants only
+- **Your equipment:** a Windows computer with a **dual-monitor** setup, a **wired Ethernet** connection (not Wi-Fi only), and a **smartphone and/or tablet** that can run apps
 - Comfortable working from your phone — the staff portal is built mobile-first
+
+**Security & data protection — required of everyone**
+
+- **Consent to a background check**, and legal authorization to work in the United States (18 or older)
+- **A supported, auto-updating Windows** with current antivirus, full-disk encryption (BitLocker), a password login, and automatic screen-lock — on a computer not shared with anyone else
+- **A secured home network** (WPA2/WPA3 Wi-Fi with the default router password changed); you never do client work over public or unsecured Wi-Fi
+- **Two-factor authentication (2FA)** on every work account, and a password manager with strong, unique passwords
+- **Confidentiality:** sign a confidentiality/NDA agreement, keep client data only in approved company tools (never personal email, cloud, or USB drives), keep your screen private and lock your computer when you step away, shred any printed client material, and return or delete all client data if you leave
 
 **Helps, doesn't gate:** you've worked inside construction, food service, agriculture, publishing, media or a nonprofit. Prior admin, executive assistant, office manager or coordinator experience transfers directly to delivery.
 
@@ -373,6 +383,16 @@ That distinction matters, so here it is plainly:
 - Strong written communication — you'll write process documents, coaching notes, meeting summaries, and client escalation responses
 - Numbers literacy: invoicing, commission math, hours against allotments, revenue against capacity
 - A dedicated, quiet workspace, reliable high-speed internet, and a setup you can host a video meeting from every morning
+- **Based in the United States.** This role is open to U.S.-based applicants only.
+- **Your equipment.** A Windows computer with a **dual-monitor** setup, a **wired Ethernet** connection (not Wi-Fi only), and a **smartphone and/or tablet** that can run apps.
+
+**Security & data protection — required of everyone, held to a higher bar for this seat**
+
+- **Consent to a background check** — this role handles money and client accounts — and legal authorization to work in the United States (18 or older)
+- **A supported, auto-updating Windows** with current antivirus, full-disk encryption (BitLocker), a password login, and automatic screen-lock — on a computer not shared with anyone else
+- **A secured home network** (WPA2/WPA3 Wi-Fi with the default router password changed); you never do client work over public or unsecured Wi-Fi
+- **Two-factor authentication (2FA)** on every work account, and a password manager with strong, unique passwords
+- **Confidentiality:** sign a confidentiality/NDA agreement, keep client data only in approved company tools (never personal email, cloud, or USB drives), keep your screen private and lock your computer when you step away, shred any printed client material, and return or delete all client data if you leave
 
 **Technology — this one is not negotiable**
 
@@ -413,7 +433,7 @@ You will not be building enterprise software. You will be the person who makes o
 - You've built a process from nothing before, not just followed one
 - Bookkeeping or light financial operations experience
 
-**Work arrangement:** hybrid — about 80% remote, with occasional on-site work (roughly 10%) when a project calls for it. You can do most of this job from anywhere with reliable internet, across time zones. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
+**Work arrangement:** hybrid — about 80% remote, with occasional on-site work (roughly 10%) when a project calls for it. You can do most of this job from anywhere in the U.S. with reliable internet. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
 
 Mostly remote does not mean loosely supervised or loosely supervising. You'll be the most visible person on this team: first on the call every morning, and the one specialists reach when something breaks. If you've worked remote before and know how to build presence without a hallway, that experience matters more here than it would in an office.
 
@@ -470,7 +490,7 @@ export const JOBS: Job[] = [
     slug: "business-manager",
     title: "Business Manager",
     type: "Full-time · Salaried · Hybrid",
-    location: "Hybrid · ~80% remote · Longview, TX · Atlanta, GA · Nationwide",
+    location: "United States · Hybrid (~80% remote) · Longview, TX · Atlanta, GA",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$40,000/yr salaried + 5% quarterly retention bonus",
     summary:
@@ -482,7 +502,7 @@ export const JOBS: Job[] = [
     slug: "engagement-specialist",
     title: "Engagement Specialist",
     type: "Contracted · Part-time",
-    location: "Hybrid · ~80% remote · Longview, TX · Atlanta, GA · Nationwide",
+    location: "United States · Hybrid (~80% remote) · Longview, TX · Atlanta, GA",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$10/hr base + 15% initial · 5% recurring · 10% à-la-carte",
     summary:

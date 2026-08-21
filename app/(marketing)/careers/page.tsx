@@ -5,7 +5,7 @@ import { openJobs } from "@/content/careers";
 
 export const metadata: Metadata = {
   title: "Careers — Open Roles · Hill Country Consultants",
-  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Hybrid roles — about 80% remote, with occasional on-site work, serving clients nationwide across time zones.",
+  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. U.S.-based hybrid roles — about 80% remote, with occasional on-site work, serving clients nationwide.",
 };
 
 const WHY = [
@@ -37,6 +37,10 @@ export default function CareersPage() {
           </div>
         ))}
       </div>
+
+      <p className="mt-6 max-w-[52em] border-l-2 border-gold pl-4 text-[14px] leading-relaxed prose-muted">
+        <strong className="text-charcoal">Every role is U.S.-based</strong> and hybrid (about 80% remote, with occasional on-site work). You&apos;ll need a <strong>Windows computer</strong> with a <strong>dual-monitor</strong> setup, a <strong>wired Ethernet</strong> connection (not Wi-Fi only), and a <strong>smartphone and/or tablet</strong> that can run apps. Because we handle client data, every role also meets standard security basics &mdash; antivirus and an updated, encrypted Windows, 2FA on work accounts, a secured home network, and a signed confidentiality agreement &mdash; and consents to a background check.
+      </p>
 
       {/* Open roles */}
       <section className="mt-12">
