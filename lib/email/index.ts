@@ -242,6 +242,16 @@ export async function sendKickoffScheduledAlert(opts: { to: string | string[]; c
   await send(opts.to, `Kickoff scheduled · ${opts.clientName}`, shell("Kickoff call scheduled", body));
 }
 
+/** A client booked an appointment (detected from Google Calendar) — tell the
+ *  owner + managers to add the right staff to the invite. */
+export async function sendAppointmentAlert(opts: { to: string | string[]; clientName: string; summary: string; whenText: string; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.clientName)}</strong> has an appointment: <strong>${esc(opts.summary || "Appointment")}</strong>${opts.whenText ? ` — ${esc(opts.whenText)}` : ""}.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">It&rsquo;s on the calendar. Add the necessary staff (account owner + any specialists) to the invite, then mark it handled on your dashboard.</p>
+    ${opts.portalUrl ? `<p style="margin:20px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Open your dashboard</a></p>` : ""}`;
+  await send(opts.to, `Appointment booked · ${opts.clientName}`, shell("Appointment booked", body));
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `

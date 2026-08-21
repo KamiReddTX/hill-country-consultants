@@ -308,6 +308,11 @@ export interface Database {
         Insert: { id?: string; client_id: string; rating: number; comment?: string | null };
         Update: Partial<Database["public"]["Tables"]["client_feedback"]["Insert"]>;
       };
+      synced_calendar_events: {
+        Row: { event_id: string; calendar_id: string | null; client_id: string | null; summary: string | null; start_at: string | null; created_at: string };
+        Insert: { event_id: string; calendar_id?: string | null; client_id?: string | null; summary?: string | null; start_at?: string | null };
+        Update: Partial<Database["public"]["Tables"]["synced_calendar_events"]["Insert"]>;
+      };
       time_off_requests: {
         Row: {
           id: string;

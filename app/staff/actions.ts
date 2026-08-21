@@ -1906,3 +1906,17 @@ export async function confirmKickoff(clientId: string): Promise<ActionResult> {
   revalidatePath("/staff");
   return { ok: true };
 }
+
+// ── Google Calendar: on-demand sync ──────────────────────────────────────────
+import { runCalendarSync } from "@/lib/google-calendar";
+
+/** Manager triggers a Google Calendar sync now (safety net between daily runs). */
+export async function syncCalendarNow(): Promise<ActionResult & { found?: number; flagged?: number; disabled?: boolean }> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  try {
+    const r = await runCalendarSync(3);
+    revalidatePath("/staff");
+    return { ok: true, found: r.found, flagged: r.flagged, disabled: r.disabled };
+  } catch (e: any) { return { error: e?.message || "Sync failed." }; }
+}

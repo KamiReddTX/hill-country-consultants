@@ -4,6 +4,7 @@ import { sendClientCheckin, sendOpsDigest } from "@/lib/email";
 import { renewalDate, daysUntil } from "@/lib/health";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 import { money } from "@/lib/portal";
+import { runCalendarSync } from "@/lib/google-calendar";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -72,5 +73,9 @@ export async function GET(req: NextRequest) {
     if (items.length) { await sendOpsDigest({ items }); digestSent = true; }
   } catch (e) { console.warn("[cron/onboarding] digest", e); }
 
-  return NextResponse.json({ ok: true, sent: { d3, d14, digest: digestSent } });
+  // Google Calendar sync (no-op unless GOOGLE_* env is configured).
+  let calendar: any = { skipped: true };
+  try { calendar = await runCalendarSync(2); } catch (e) { console.warn("[cron] calendar", e); }
+
+  return NextResponse.json({ ok: true, sent: { d3, d14, digest: digestSent }, calendar });
 }

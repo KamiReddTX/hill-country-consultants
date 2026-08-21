@@ -14,6 +14,8 @@ import { COMMISSION } from "@/content/commission";
 import { renewalDate, daysUntil } from "@/lib/health";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 import { KickoffHandledButton } from "@/components/staff/kickoff-handled-button";
+import { SyncCalendarButton } from "@/components/staff/sync-calendar-button";
+import { gcalConfigured } from "@/lib/google-calendar";
 
 const STAGES = ["New lead", "Contacted", "Qualified", "Proposal", "Closed won", "Closed lost"];
 
@@ -156,6 +158,10 @@ export default async function Dashboard() {
         )}
         {me.hourly && open && <p className="mt-3 border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">You&apos;re on the clock since {new Date(open.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.</p>}
       </div>
+
+      {priv && gcalConfigured() && (
+        <div className="flex items-center gap-2 text-[13px] prose-muted">Google Calendar: <SyncCalendarButton /></div>
+      )}
 
       {/* Kickoff calls to set up (owner + managers) */}
       {pendingKickoffs.length > 0 && (
