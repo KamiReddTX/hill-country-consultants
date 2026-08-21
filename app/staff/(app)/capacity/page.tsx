@@ -4,7 +4,6 @@ import { createServiceClient } from "@/lib/supabase/server";
 import { allotmentFor } from "@/content/pricing";
 import { CapacityEditor } from "@/components/staff/capacity-editor";
 import { TimeOffDecision } from "@/components/staff/time-off-actions";
-import { LocalTime } from "@/components/local-time";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +39,7 @@ export default async function CapacityPage() {
   }
   const nameById = new Map(directory.map((s) => [s.id, s.name || s.email]));
   const pendingTimeOff = (timeOff ?? []).filter((t) => (t as any).status === "pending");
+  const fmtDay = (iso: string) => new Date(`${String(iso).slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   // Logged hours this week, per staffer.
   const loggedByStaff = new Map<string, number>();
@@ -104,7 +104,7 @@ export default async function CapacityPage() {
             {pendingTimeOff.map((t: any) => (
               <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2 text-[14px]">
                 <span className="text-charcoal">
-                  <span className="font-medium">{nameById.get(t.staff_id) || "—"}</span> · {t.kind} · <LocalTime iso={t.start_date} mode="date" />{t.end_date !== t.start_date && <> – <LocalTime iso={t.end_date} mode="date" /></>}
+                  <span className="font-medium">{nameById.get(t.staff_id) || "—"}</span> · {t.kind} · {fmtDay(t.start_date)}{t.end_date !== t.start_date && ` – ${fmtDay(t.end_date)}`}
                   {t.note && <span className="prose-muted"> · {t.note}</span>}
                 </span>
                 <TimeOffDecision id={t.id} />

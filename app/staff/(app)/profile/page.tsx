@@ -34,6 +34,8 @@ export default async function ProfilePage() {
   const { data: myTimeOff } = await db.from("time_off_requests").select("*").eq("staff_id", me.id).order("start_date", { ascending: false });
   const timeOff = (myTimeOff ?? []) as any[];
   const toStatusColor = (s: string) => (s === "approved" ? "text-forest" : s === "denied" ? "text-red-700" : "text-gold-hover");
+  // Date-only values render without the UTC-midnight off-by-one.
+  const fmtDay = (iso: string) => new Date(`${String(iso).slice(0, 10)}T00:00:00`).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 
   const managed: [string, string][] = [
     ["Role(s)", roles.length ? roles.join(", ") : me.role],
@@ -106,7 +108,7 @@ export default async function ProfilePage() {
             {timeOff.map((t) => (
               <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-3 text-[14px]">
                 <span className="text-charcoal">
-                  <span className="font-medium">{t.kind}</span> · <LocalTime iso={t.start_date} mode="date" />{t.end_date !== t.start_date && <> – <LocalTime iso={t.end_date} mode="date" /></>}
+                  <span className="font-medium">{t.kind}</span> · {fmtDay(t.start_date)}{t.end_date !== t.start_date && ` – ${fmtDay(t.end_date)}`}
                   {t.note && <span className="prose-muted"> · {t.note}</span>}
                 </span>
                 <span className="flex items-center gap-3">
