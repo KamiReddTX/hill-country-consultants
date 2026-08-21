@@ -102,6 +102,15 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
   const churnedClients = [...priorSet].filter((id) => !latestSet.has(id)).map((id) => clientName.get(id) || "Client");
 
+  // Revenue vs expenses, last 6 months (for the visual chart).
+  const revByMonth = new Map<string, number>();
+  for (const i of (allInvoices ?? []) as any[]) if (i.status === "paid" && i.paid_at) { const ym = String(i.paid_at).slice(0, 7); revByMonth.set(ym, (revByMonth.get(ym) || 0) + Number(i.amount_cents || 0)); }
+  for (const b of (bookings ?? []) as any[]) { const ym = String(b.created_at).slice(0, 7); revByMonth.set(ym, (revByMonth.get(ym) || 0) + Number(b.paid_cents || 0)); }
+  const expByMonth = new Map<string, number>();
+  for (const e of (expenseRows ?? []) as any[]) { const ym = String(e.incurred_on).slice(0, 7); expByMonth.set(ym, (expByMonth.get(ym) || 0) + Number(e.amount_cents || 0)); }
+  const chart = months.map((m) => ({ label: monthLabel(m), rev: revByMonth.get(m) || 0, exp: expByMonth.get(m) || 0 }));
+  const chartMax = Math.max(1, ...chart.flatMap((c) => [c.rev, c.exp]));
+
   // ── Expenses, budget vs actual, and net profit for the selected month ──
   const inMonth = (d?: string | null) => String(d || "").slice(0, 7) === selMonth;
   const monthExpenses = (expenseRows ?? []).filter((e: any) => inMonth(e.incurred_on));
@@ -154,6 +163,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
           <a href="/api/export?kind=clients" className="btn-gold text-[14px]">Clients CSV</a>
           <a href="/api/export?kind=invoices" className="border border-line-warm bg-white px-4 py-2 text-[14px] font-medium text-forest">Invoices &amp; AR CSV</a>
           <a href="/api/export?kind=expenses" className="border border-line-warm bg-white px-4 py-2 text-[14px] font-medium text-forest">Expenses CSV</a>
+          <a href="/api/report/exec" className="btn-gold text-[14px]">Executive report (PDF)</a>
         </div>
       </section>
 
@@ -197,6 +207,31 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
               </div>
             );
           })}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Revenue vs expenses — last 6 months</h2>
+        <p className="mb-3 text-[13px] prose-muted">Revenue collected (paid invoices + bookings) against expenses each month. <span className="text-forest">Forest</span> = revenue, <span className="text-gold-hover">gold</span> = expenses.</p>
+        <div className="border border-line-warm bg-white p-4">
+          <svg viewBox="0 0 600 210" className="w-full" role="img" aria-label="Revenue versus expenses, last six months">
+            <line x1="40" y1="170" x2="590" y2="170" stroke="#e4ddcd" />
+            {chart.map((c, idx) => {
+              const groupW = 550 / chart.length;
+              const gx = 40 + idx * groupW + groupW / 2;
+              const bw = Math.min(26, groupW / 3);
+              const revH = Math.round((c.rev / chartMax) * 150);
+              const expH = Math.round((c.exp / chartMax) * 150);
+              return (
+                <g key={c.label}>
+                  <rect x={gx - bw - 2} y={170 - revH} width={bw} height={revH} fill="#23482f" />
+                  <rect x={gx + 2} y={170 - expH} width={bw} height={expH} fill="#c2a24a" />
+                  <text x={gx} y={186} textAnchor="middle" fontSize="11" fill="#6b6552">{c.label}</text>
+                </g>
+              );
+            })}
+            <text x="40" y="14" fontSize="10" fill="#6b6552">Top of scale: {money(chartMax)}</text>
+          </svg>
         </div>
       </section>
 
