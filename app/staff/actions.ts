@@ -165,7 +165,7 @@ export async function markLeadWon(leadId: string): Promise<ActionResult & { clie
  *  claims the row on first login (link_staff_to_user). */
 export async function addStaff(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const db = createClient();
   const role = String(formData.get("role") || "Virtual assistant");
@@ -206,7 +206,7 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
  *  on /auth/callback, which establishes a session and routes them to set-password. */
 export async function sendPasswordReset(email: string, portal: "client" | "staff"): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const clean = String(email || "").trim().toLowerCase();
   if (!clean || !clean.includes("@")) return { error: "Enter a valid email address." };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
@@ -265,7 +265,7 @@ export async function denyStaffReset(id: string): Promise<ActionResult> {
  *  are blocked from every staff surface (getStaffMember requires active). */
 export async function setStaffActive(staffId: string, active: boolean): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   if (staffId === me.id && !active) return { error: "You can't suspend your own account." };
   const { error } = await createServiceClient().from("staff").update({ active }).eq("id", staffId);
   if (error) return { error: error.message };
@@ -411,7 +411,7 @@ export async function deleteClientVaultEntry(id: string): Promise<ActionResult> 
 /** Admin/BM: permanently delete an employee and their staff login. */
 export async function deleteEmployee(staffId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   if (staffId === me.id) return { error: "You can't delete your own account." };
   const admin = createServiceClient();
   const { data: s } = await admin.from("staff").select("user_id").eq("id", staffId).maybeSingle();
@@ -426,7 +426,7 @@ export async function deleteEmployee(staffId: string): Promise<ActionResult> {
 /** Admin/BM: set the full set of roles an employee holds (multi-role). */
 export async function setStaffRoles(staffId: string, roles: string[]): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const clean = Array.from(new Set((roles || []).filter(Boolean)));
   if (clean.length === 0) return { error: "Pick at least one role." };
   const { error } = await createServiceClient().from("staff")
@@ -530,7 +530,7 @@ export async function setClientBilling(clientId: string, billingType: string): P
 /** Admin/BM: set a sales rep's commission rate (percent). */
 export async function setStaffCommission(staffId: string, pct: number): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const clean = Math.max(0, Math.min(100, Number(pct) || 0));
   const { error } = await createServiceClient().from("staff").update({ commission_pct: clean }).eq("id", staffId);
   if (error) return { error: error.message };
@@ -591,7 +591,7 @@ export async function uploadMyAvatar(formData: FormData): Promise<ActionResult> 
 /** Admin/BM: set an employee's employment type and start date. */
 export async function setEmploymentInfo(staffId: string, employmentType: string, startDate: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const { error } = await createServiceClient().from("staff")
     .update({ employment_type: employmentType || null, start_date: startDate || null }).eq("id", staffId);
   if (error) return { error: error.message };
@@ -602,7 +602,7 @@ export async function setEmploymentInfo(staffId: string, employmentType: string,
 /** Admin/BM: upload a document (paystub, contract, NDA, tax form) to an employee. */
 export async function uploadStaffDocument(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const staffId = String(formData.get("staffId") || "");
   const kind = String(formData.get("kind") || "document");
   const requires = formData.get("requires_signature") === "on";
@@ -626,7 +626,7 @@ export async function uploadStaffDocument(formData: FormData): Promise<ActionRes
 /** Admin/BM: remove an employee document. */
 export async function deleteStaffDocument(docId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
   const { data: d } = await admin.from("staff_documents").select("path").eq("id", docId).maybeSingle();
   if (d) await admin.storage.from("staff-docs").remove([(d as any).path]);
@@ -882,7 +882,7 @@ export async function addDeliverable(formData: FormData): Promise<ActionResult> 
 /** Admin/BM: add a reusable document template to the library. */
 export async function uploadDocumentTemplate(formData: FormData): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const file = formData.getAll("files").find((f): f is File => f instanceof File && f.size > 0);
   if (!file) return { error: "Choose a file (PDF recommended for signing)." };
   const name = String(formData.get("name") || file.name).trim();
@@ -902,7 +902,7 @@ export async function uploadDocumentTemplate(formData: FormData): Promise<Action
 /** Admin/BM: remove a template from the library (does not touch already-assigned copies). */
 export async function deleteDocumentTemplate(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const { error } = await createServiceClient().from("document_templates").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/directory");
@@ -913,7 +913,7 @@ export async function deleteDocumentTemplate(id: string): Promise<ActionResult> 
  *  Creates a staff_documents row (to complete / e-sign) for each target. */
 export async function assignTemplate(templateId: string, opts: { staffIds?: string[]; role?: string }): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
   const { data: tpl } = await admin.from("document_templates").select("*").eq("id", templateId).maybeSingle();
   if (!tpl) return { error: "Template not found." };
@@ -1682,7 +1682,7 @@ export async function deleteKbArticle(id: string): Promise<ActionResult> {
  *  application is marked 'hired'. Admin / Business Manager. */
 export async function hireFromApplication(applicationId: string, role: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
   const { data: app } = await admin.from("job_applications").select("*").eq("id", applicationId).maybeSingle();
   if (!app) return { error: "Application not found." };
@@ -1734,7 +1734,7 @@ const INTERVIEW_BOOKING_URL = process.env.INTERVIEW_BOOKING_URL || "https://cale
 /** Email the applicant an interview-scheduling link and mark them 'interview'. */
 export async function inviteToInterview(applicationId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
   const { data: app } = await admin.from("job_applications").select("email, name, position").eq("id", applicationId).maybeSingle();
   if (!app) return { error: "Application not found." };
@@ -1752,7 +1752,7 @@ export async function inviteToInterview(applicationId: string): Promise<ActionRe
 /** Email the applicant a polite decline (résumé kept 6 months) and mark 'declined'. */
 export async function declineApplication(applicationId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
   const { data: app } = await admin.from("job_applications").select("email, name").eq("id", applicationId).maybeSingle();
   if (!app) return { error: "Application not found." };

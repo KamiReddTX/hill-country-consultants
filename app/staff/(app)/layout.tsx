@@ -18,7 +18,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff", label: "Dashboard" }];
   // Manager overview + tools (the Admin tab is retired — its queues now live on
   // the Dashboard, and per-client work lives on the Clients tab).
-  if (priv) tabs.push({ href: "/staff/directory", label: "Directory" });
+  if (salesLead) tabs.push({ href: "/staff/directory", label: "Directory" });
   if (admin) tabs.push({ href: "/staff/payroll", label: "Payroll" });
   if (salesLead) tabs.push({ href: "/staff/sales", label: "Sales" });
   // Everyday work tabs — every employee's job surface (scoped to their clients)

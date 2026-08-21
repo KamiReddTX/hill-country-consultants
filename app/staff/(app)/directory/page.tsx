@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
-import { getStaffMember, isPrivileged, getDirectory, rolesOf, usd } from "@/lib/staff";
-import { createClient } from "@/lib/supabase/server";
+import { getStaffMember, isSalesLead, rolesOf, usd } from "@/lib/staff";
+import { createServiceClient } from "@/lib/supabase/server";
+import type { StaffRow } from "@/lib/database.types";
 import { ROLE_OPTIONS } from "@/content/roles";
 import { AddStaffForm } from "@/components/staff/add-staff-form";
 import { RoleEditor } from "@/components/staff/role-editor";
@@ -17,10 +18,14 @@ import { LocalTime } from "@/components/local-time";
 export default async function DirectoryPage() {
   const me = await getStaffMember();
   if (!me) redirect("/staff/login");
-  if (!isPrivileged(me)) return <p className="text-[15px] prose-muted">The Directory is for administrators and business managers only.</p>;
+  if (!isSalesLead(me)) return <p className="text-[15px] prose-muted">The Directory is for administrators, business managers, and sales managers only.</p>;
 
-  const directory = await getDirectory();
-  const db = createClient();
+  // Access is gated above; read directory data with the service client so sales
+  // managers (who aren't privileged under RLS) still see the full roster, docs,
+  // templates, and applications.
+  const db = createServiceClient();
+  const { data: directoryData } = await db.from("staff").select("*").order("created_at", { ascending: false });
+  const directory = (directoryData ?? []) as StaffRow[];
   const { data: allDocs } = await db.from("staff_documents").select("*").order("created_at", { ascending: false });
   const { data: templates } = await db.from("document_templates").select("*").order("created_at", { ascending: false });
   const { data: applications } = await db.from("job_applications").select("*").order("created_at", { ascending: false });
