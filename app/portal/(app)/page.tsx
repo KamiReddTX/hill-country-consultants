@@ -4,6 +4,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { SITE } from "@/content/site";
 import { KickoffStep } from "@/components/portal/kickoff-step";
 import { PhotoShootButton } from "@/components/portal/photo-shoot-button";
+import { FeedbackCard, ReferralCard } from "@/components/portal/client-extras";
 
 export default async function OnboardingPage() {
   const client = await getPortalClient();
@@ -110,6 +111,14 @@ export default async function OnboardingPage() {
             ))}
           </div>
         )}
+      </section>
+
+      <section>
+        <h2 className="mb-3 font-fraunces text-[22px] font-medium text-forest">Stay in touch</h2>
+        <div className="grid gap-4 md:grid-cols-2">
+          <FeedbackCard />
+          <ReferralCard />
+        </div>
       </section>
 
       <section>

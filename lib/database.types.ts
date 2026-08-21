@@ -301,6 +301,11 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["staff_acknowledgments"]["Insert"]>;
       };
+      client_feedback: {
+        Row: { id: string; client_id: string; rating: number; comment: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; rating: number; comment?: string | null };
+        Update: Partial<Database["public"]["Tables"]["client_feedback"]["Insert"]>;
+      };
       time_off_requests: {
         Row: {
           id: string;

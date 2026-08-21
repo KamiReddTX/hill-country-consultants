@@ -55,14 +55,19 @@ export default async function Dashboard() {
 
   // "Needs attention" roll-up for managers: renewals due soon, unpaid AR,
   // pending time off, and employees who haven't signed the current IT/security ack.
-  const attention = { renewalsSoon: 0, unpaidCount: 0, unpaidCents: 0, ptoPending: 0, missingAck: 0 };
+  const attention = { renewalsSoon: 0, unpaidCount: 0, unpaidCents: 0, ptoPending: 0, missingAck: 0, lowRatings: 0 };
+  let recentFeedback: any[] = [];
   if (priv) {
     const admin = createServiceClient();
-    const [{ data: unpaid }, { data: pto }, { data: acks }] = await Promise.all([
+    const [{ data: unpaid }, { data: pto }, { data: acks }, { data: fb }] = await Promise.all([
       admin.from("invoices").select("amount_cents,status").in("status", ["sent", "overdue"]),
       admin.from("time_off_requests").select("id").eq("status", "pending"),
       admin.from("staff_acknowledgments").select("staff_id").eq("kind", ACK_KIND).eq("version", ACK_VERSION),
+      admin.from("client_feedback").select("client_id,rating,comment,created_at").order("created_at", { ascending: false }).limit(12),
     ]);
+    recentFeedback = fb ?? [];
+    const cutoff30 = Date.now() - 30 * 86400000;
+    attention.lowRatings = recentFeedback.filter((f: any) => f.rating <= 2 && new Date(f.created_at).getTime() >= cutoff30).length;
     attention.unpaidCount = (unpaid ?? []).length;
     attention.unpaidCents = (unpaid ?? []).reduce((s: number, i: any) => s + Number(i.amount_cents || 0), 0);
     attention.ptoPending = (pto ?? []).length;
@@ -78,6 +83,7 @@ export default async function Dashboard() {
     { n: attention.unpaidCount, label: `unpaid invoices${attention.unpaidCents ? ` · ${money(attention.unpaidCents)}` : ""}`, href: "/staff/billing" },
     { n: attention.ptoPending, label: "time-off requests to review", href: "/staff/capacity" },
     { n: attention.missingAck, label: "staff missing security ack", href: "/staff/directory" },
+    { n: attention.lowRatings, label: "low satisfaction ratings (≤2, 30d)", href: "#recent-feedback" },
   ].filter((i) => i.n > 0);
 
   // A rep's own running income + estimated commission. Invoices are biller-only
@@ -151,6 +157,26 @@ export default async function Dashboard() {
                   <span className="font-fraunces text-[22px] text-forest tabular-nums">{i.n}</span>
                   <span className="text-[13px] prose-soft">{i.label} →</span>
                 </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Recent client feedback (managers) */}
+      {priv && recentFeedback.length > 0 && (
+        <section id="recent-feedback">
+          <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Recent client feedback</h2>
+          <p className="mb-3 text-[14px] prose-muted">Satisfaction check-ins from the client portal. Low scores (≤2) get an alert to the account owner too.</p>
+          <ul className="flex flex-col gap-2">
+            {recentFeedback.slice(0, 8).map((f: any, i: number) => (
+              <li key={i} className={`flex flex-wrap items-center justify-between gap-2 border bg-white p-3 ${f.rating <= 2 ? "border-red-300" : "border-line-warm"}`}>
+                <span className="text-[14px]">
+                  <span className={`mr-2 tabular-nums ${f.rating <= 2 ? "text-red-700" : "text-gold"}`}>{"★".repeat(f.rating)}<span className="text-line-warm">{"★".repeat(5 - f.rating)}</span></span>
+                  <span className="font-medium text-charcoal">{clientName.get(f.client_id) || "Client"}</span>
+                  {f.comment && <span className="prose-muted"> — {f.comment}</span>}
+                </span>
+                <span className="text-[12px] text-ink-faint">{f.created_at ? new Date(f.created_at).toLocaleDateString() : ""}</span>
               </li>
             ))}
           </ul>

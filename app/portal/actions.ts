@@ -237,3 +237,44 @@ export async function requestPhotoShoot(): Promise<ActionResult> {
   revalidatePath("/portal/tasks"); revalidatePath("/staff/daily");
   return { ok: true };
 }
+
+// ── Client satisfaction check-in + referral ──────────────────────────────────
+
+/** Client submits a 1–5 satisfaction rating with an optional comment. */
+export async function submitFeedback(formData: FormData): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const rating = Math.round(Number(formData.get("rating") || 0));
+  if (rating < 1 || rating > 5) return { error: "Pick a rating from 1 to 5." };
+  const comment = String(formData.get("comment") || "").slice(0, 2000) || null;
+  const db = createClient();
+  const { error } = await db.from("client_feedback").insert({ client_id: client.id, rating, comment });
+  if (error) return { error: error.message };
+  // Low scores nudge the assigned owner right away.
+  if (rating <= 2) {
+    await notifyAssignedStaff(client, (to) =>
+      sendStaffMessageAlert({ to, clientName: clientLabel(client), message: `Left a ${rating}/5 satisfaction rating${comment ? `: ${comment.slice(0, 120)}` : ""}`, portalUrl: siteUrl() ? `${siteUrl()}/staff/clients` : "" }),
+    );
+  }
+  revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Client refers another business — creates a New lead for the sales team. */
+export async function submitReferral(formData: FormData): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  const business = String(formData.get("business") || "").trim();
+  const contact = String(formData.get("contact") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  if (!business && !contact && !email) return { error: "Add at least a name or a way to reach them." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("leads").insert({
+    business: business || null, contact: contact || null, email: email || null, phone: phone || null,
+    stage: "New lead", pain: `Referral from ${clientLabel(client)}`,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/portal");
+  return { ok: true };
+}
