@@ -21,8 +21,8 @@ function inline(text: string, keyBase: string): ReactNode[] {
 
 const cells = (line: string) => line.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
 
-/** Minimal markdown → styled JSX. Supports #/##/### headings, --- rules,
- *  GFM tables, - bullet lists, blockquotes, **bold**/*italic*, and paragraphs.
+/** Minimal markdown to styled JSX. Supports h1-h4 headings, horizontal rules,
+ *  GFM tables, bullet lists, blockquotes, bold and italic, and paragraphs.
  *  Enough for job postings without pulling in a markdown dependency. */
 export function Markdown({ source }: { source: string }) {
   const lines = source.replace(/\r\n/g, "\n").split("\n");
