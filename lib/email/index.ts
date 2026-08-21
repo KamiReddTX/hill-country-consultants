@@ -131,20 +131,25 @@ export async function sendStaffMessageAlert(opts: { to: string; clientName: stri
   await send(opts.to, `New message from ${opts.clientName}`, shell("New client message", body), opts.replyTo, opts.clientName);
 }
 
-/** Invite the client to set up the shared password vault with their account team. */
-export async function sendVaultInvite(opts: { to: string; from: string; portalUrl: string }) {
+/** Invite the client to set up the shared password vault with their account team.
+ *  The real credential share comes from our password manager as a SEPARATE invite;
+ *  this email is the heads-up. If `shareLink` is provided, it's the direct accept
+ *  link from that tool. The portal is only the read-only record, linked secondarily. */
+export async function sendVaultInvite(opts: { to: string; from: string; portalUrl: string; shareLink?: string; managerName?: string }) {
+  const pm = opts.managerName ? esc(opts.managerName) : "our password manager";
+  const link = (opts.shareLink || "").trim();
   const body = `
-    <p style="font-size:16px;line-height:1.6"><strong>${opts.from}</strong> is setting up your shared password vault.</p>
-    <p style="font-size:15px;line-height:1.6;color:#3a3f38">This is how we securely hold the logins we need to work on your behalf. Live passwords always live in the encrypted password manager we share with you — never in an email or a web page.</p>
-    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Next steps:</p>
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.from)}</strong> is setting up secure credential sharing so we can work on your behalf.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Your logins live in an <strong>encrypted password manager</strong> — never in an email, and never on a web page. ${link ? `Use the button below to accept the ${pm} share.` : `A separate invitation from <strong>${pm}</strong> is on its way to this address — that email is where you accept access.`}</p>
+    ${link ? `<p style="margin:22px 0"><a href="${esc(link)}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Accept the vault share</a></p>` : ""}
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">What to do:</p>
     <ol style="font-size:15px;line-height:1.7;color:#3a3f38">
-      <li>Accept the vault share when it arrives from our password manager (confirm the sender is hillcountryconsultants.com).</li>
-      <li>Create your own master password — we never see it.</li>
-      <li>Add each login you want us to have; we confirm in writing what access we hold and why.</li>
+      <li>${link ? `Accept the share above` : `Accept the ${pm} invitation when it arrives`} and create your own master password — we never see it.</li>
+      <li>Add each login you want us to have. We confirm in writing what access we hold and why.</li>
+      <li>At offboarding, access is returned or revoked the same day and the share is deleted.</li>
     </ol>
-    <p style="font-size:15px;line-height:1.6;color:#3a3f38">You can see the running list of accounts we hold on your portal&apos;s <strong>Shared Vault</strong> tab.</p>
-    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Open your portal</a></p>` : ""}`;
-  await send(opts.to, `Setting up your shared password vault`, shell("Your shared password vault", body));
+    <p style="font-size:14px;line-height:1.6;color:#6b7167">Heads up: passwords are <strong>only</strong> exchanged inside ${pm}. Your portal's <strong>Shared Vault</strong> tab is just a running record of which accounts we hold and why — it has no password fields.${opts.portalUrl ? ` <a href="${opts.portalUrl}" style="color:#3a5a40">See the record →</a>` : ""}</p>`;
+  await send(opts.to, `Your secure credential share — accept the ${opts.managerName ? esc(opts.managerName) : "password-manager"} invite`, shell("Secure credential sharing", body));
 }
 
 /** Tell a client their VA/AM sent a message. The message is included, and

@@ -348,8 +348,11 @@ export async function deleteClientFile(fileId: string): Promise<ActionResult> {
   return { ok: true };
 }
 
-/** Owner/BM/admin: email the client to set up the shared password vault. */
-export async function sendVaultInviteEmail(clientId: string): Promise<ActionResult> {
+/** Owner/BM/admin: email the client the heads-up for secure credential sharing.
+ *  Passwords are shared inside the password manager (a separate invite from that
+ *  tool). Optionally paste the direct accept link + the tool's name so the email
+ *  leads with the real share instead of the portal. */
+export async function sendVaultInviteEmail(clientId: string, shareLink?: string, managerName?: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   const db = createClient();
@@ -357,9 +360,15 @@ export async function sendVaultInviteEmail(clientId: string): Promise<ActionResu
   if (!c) return { error: "Client not found." };
   if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   if (!(c as any).email) return { error: "This client has no email on file." };
+  const link = (shareLink || "").trim();
+  if (link && !/^https:\/\//i.test(link)) return { error: "The share link must start with https://" };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
   try {
-    await sendVaultInvite({ to: (c as any).email, from: me.name || "Your account team", portalUrl: site ? `${site}/portal/vault` : "" });
+    await sendVaultInvite({
+      to: (c as any).email, from: me.name || "Your account team",
+      portalUrl: site ? `${site}/portal/vault` : "",
+      shareLink: link || undefined, managerName: (managerName || "").trim() || undefined,
+    });
   } catch (e) { return { error: "Could not send the invite — try again." }; }
   return { ok: true };
 }
