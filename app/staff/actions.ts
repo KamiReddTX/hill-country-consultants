@@ -1790,3 +1790,47 @@ export async function acknowledgeSecurity(formData: FormData): Promise<ActionRes
   revalidatePath("/staff/directory");
   return { ok: true };
 }
+
+// ── Hiring pipeline (ATS-lite) ────────────────────────────────────────────────
+
+/** Manual stage moves that carry no side effects (no email / no hire). The
+ *  email/hire stages — interview, declined, hired — go through their own actions
+ *  (inviteToInterview, declineApplication, hireFromApplication). */
+const MANUAL_STAGES = ["new", "reviewing", "offer"] as const;
+
+/** Move an application to a manual stage (new / reviewing / offer). */
+export async function setApplicationStage(applicationId: string, stage: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
+  if (!(MANUAL_STAGES as readonly string[]).includes(stage)) return { error: "Use the interview, decline, or hire controls for that stage." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("job_applications").update({ status: stage }).eq("id", applicationId);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "application", entityId: applicationId, summary: `stage → ${stage}` });
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Set a 1–5 reviewer rating (0/empty clears it). */
+export async function setApplicationRating(applicationId: string, rating: number): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
+  const r = Math.round(Number(rating) || 0);
+  const value = r >= 1 && r <= 5 ? r : null;
+  const admin = createServiceClient();
+  const { error } = await admin.from("job_applications").update({ rating: value }).eq("id", applicationId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Save freeform reviewer notes on an application. */
+export async function setApplicationNotes(applicationId: string, notes: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("job_applications").update({ review_notes: notes.slice(0, 4000) }).eq("id", applicationId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}

@@ -11,8 +11,7 @@ import { EmployeeResetButton } from "@/components/staff/employee-reset-button";
 import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button";
 import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
 import { DocumentLibrary } from "@/components/staff/document-library";
-import { HireApplicant } from "@/components/staff/hire-applicant";
-import { ApplicationDecision } from "@/components/staff/application-decision";
+import { ApplicationPipeline } from "@/components/staff/application-pipeline";
 import { LocalTime } from "@/components/local-time";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 
@@ -79,53 +78,9 @@ export default async function DirectoryPage() {
       </section>
 
       <section>
-        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Employment applications</h2>
-        <p className="mb-3 text-[13px] prose-muted">People who applied through the public Careers page. Open one for full details; résumés download securely and you can reply by email.</p>
-        {(applications ?? []).length === 0 ? <p className="text-[15px] prose-muted">No applications yet.</p> : (
-          <div className="flex flex-col gap-2">
-            {(applications ?? []).map((a: any) => (
-              <details key={a.id} className="border border-line-warm bg-white">
-                <summary className="min-h-touch cursor-pointer list-none px-4 py-3">
-                  <span className="flex flex-wrap items-center gap-x-3">
-                    <span className="text-[15px] font-medium text-charcoal">{a.name}</span>
-                    {a.position && <span className="text-[12px] text-forest">{a.position}</span>}
-                    {a.employment_type && <span className="text-[11px] uppercase tracking-wide text-ink-faint">{a.employment_type}</span>}
-                    <span className="text-[12px] prose-muted">· <LocalTime iso={a.created_at} mode="date" /></span>
-                  </span>
-                </summary>
-                <div className="grid gap-x-8 gap-y-1 border-t border-line-soft p-4 text-[14px] md:grid-cols-2">
-                  <p><span className="text-ink-faint">Email:</span> <a href={`mailto:${a.email}`} className="link-underline">{a.email}</a></p>
-                  <p><span className="text-ink-faint">Phone:</span> {a.phone || "—"}</p>
-                  <p><span className="text-ink-faint">Location:</span> {a.location || "—"}</p>
-                  <p><span className="text-ink-faint">Availability:</span> {a.availability || "—"}</p>
-                  <p><span className="text-ink-faint">Desired pay:</span> {a.desired_pay || "—"}</p>
-                  <p><span className="text-ink-faint">Heard via:</span> {a.referral || "—"}</p>
-                  {a.portfolio_url && <p className="md:col-span-2"><span className="text-ink-faint">Portfolio:</span> <a href={a.portfolio_url} target="_blank" rel="noreferrer" className="link-underline break-all">{a.portfolio_url}</a></p>}
-                  {a.skills && <p className="md:col-span-2"><span className="text-ink-faint">Skills:</span> {a.skills}</p>}
-                  {a.experience && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Experience:</span> {a.experience}</p>}
-                  {a.why && <p className="whitespace-pre-wrap md:col-span-2"><span className="text-ink-faint">Why HCC:</span> {a.why}</p>}
-                  <div className="flex flex-wrap items-center gap-3 pt-1 md:col-span-2">
-                    {a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[13px]">Download résumé</a> : <span className="text-[12px] prose-muted">No résumé attached.</span>}
-                    {a.credentials_path && <a href={`/api/application-file/${a.id}?kind=credentials`} className="border border-line-warm px-3 py-1 text-[13px] text-forest">Download credentials</a>}
-                  </div>
-                  <div className="flex flex-col gap-3 border-t border-line-soft pt-3 md:col-span-2">
-                    {a.status === "hired" ? (
-                      <span className="text-[13px] font-semibold text-forest">✓ Hired — employee profile created</span>
-                    ) : a.status === "declined" ? (
-                      <span className="text-[13px] prose-muted">Declined — a note was emailed to the applicant.</span>
-                    ) : (
-                      <>
-                        {a.status === "interview" && <span className="text-[12px] font-medium text-forest">Interview invite sent — booking link emailed. You can still hire or decline.</span>}
-                        <HireApplicant applicationId={a.id} roleOptions={ROLE_OPTIONS} suggested={a.position} />
-                        <ApplicationDecision applicationId={a.id} />
-                      </>
-                    )}
-                  </div>
-                </div>
-              </details>
-            ))}
-          </div>
-        )}
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Hiring pipeline</h2>
+        <p className="mb-3 text-[13px] prose-muted">Applications from the public Careers page, by stage. Open a card to review, rate, add notes, set up an interview, decline, or hire. Résumés download securely.</p>
+        <ApplicationPipeline applications={(applications ?? []) as any} roleOptions={ROLE_OPTIONS} />
       </section>
 
       <section>
