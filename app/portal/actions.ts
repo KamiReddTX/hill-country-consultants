@@ -278,3 +278,26 @@ export async function submitReferral(formData: FormData): Promise<ActionResult> 
   revalidatePath("/portal");
   return { ok: true };
 }
+
+// ── Client deliverable approvals ─────────────────────────────────────────────
+
+/** Client approves or requests changes on a delivered item, with optional note. */
+export async function reviewDeliverable(id: string, status: "approved" | "changes_requested", note: string): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  if (status !== "approved" && status !== "changes_requested") return { error: "Invalid action." };
+  const admin = createServiceClient();
+  const { data: d } = await admin.from("client_deliverables").select("id, client_id, name").eq("id", id).maybeSingle();
+  if (!d || (d as any).client_id !== client.id) return { error: "Deliverable not found." };
+  const { error } = await admin.from("client_deliverables")
+    .update({ approval_status: status, approval_note: note.slice(0, 1000) || null, approval_at: new Date().toISOString() })
+    .eq("id", id);
+  if (error) return { error: error.message };
+  if (status === "changes_requested") {
+    await notifyAssignedStaff(client, (to) =>
+      sendStaffMessageAlert({ to, clientName: clientLabel(client), message: `Requested changes on "${(d as any).name}"${note ? `: ${note.slice(0, 150)}` : ""}`, portalUrl: siteUrl() ? `${siteUrl()}/staff/delivery` : "" }),
+    );
+  }
+  revalidatePath("/portal/files");
+  return { ok: true };
+}

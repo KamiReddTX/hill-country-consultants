@@ -5,6 +5,7 @@ import { SITE } from "@/content/site";
 import { KickoffStep } from "@/components/portal/kickoff-step";
 import { PhotoShootButton } from "@/components/portal/photo-shoot-button";
 import { FeedbackCard, ReferralCard } from "@/components/portal/client-extras";
+import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
 
 export default async function OnboardingPage() {
   const client = await getPortalClient();
@@ -17,6 +18,24 @@ export default async function OnboardingPage() {
   const { data: checklist } = await createClient()
     .from("client_checklist_items").select("*").eq("client_id", client.id).order("position", { ascending: true });
   const cl = (checklist ?? []) as any[];
+
+  // This month's plan usage (included vs used). Read this client's rows with the
+  // service client (the page is already scoped to the signed-in client).
+  const ym = monthKey();
+  const svc = createServiceClient();
+  const [{ data: wl }, { data: adj }] = await Promise.all([
+    svc.from("client_work_log").select("hours,worked_on,approved").eq("client_id", client.id),
+    svc.from("client_allotment_adjustments").select("service_key,delta").eq("client_id", client.id).eq("period_month", `${ym}-01`),
+  ]);
+  const vaHours = (wl ?? []).filter((w: any) => String(w.worked_on || "").slice(0, 7) === ym && w.approved !== false).reduce((s: number, w: any) => s + Number(w.hours || 0), 0);
+  const usageLines = computeAllotmentUsage((client as any).plan, vaHours, ((adj ?? []) as any[]).map((a) => ({ service_key: a.service_key, delta: Number(a.delta) }))).filter((u) => u.allot != null);
+
+  // Recent activity feed — merged from what's already loaded, newest first.
+  const activity = [
+    ...data.deliverables.map((d: any) => ({ when: d.delivered_on || d.created_at, text: `Deliverable: ${d.name}${d.status ? ` — ${d.status}` : ""}` })),
+    ...data.tasks.map((t: any) => ({ when: t.created_at, text: `Task: ${t.title} (${t.column_name})` })),
+    ...data.notes.map((n: any) => ({ when: n.created_at, text: "Message posted in your portal" })),
+  ].filter((a) => a.when).sort((a, b) => new Date(b.when).getTime() - new Date(a.when).getTime()).slice(0, 8);
   const clDone = cl.filter((i) => i.done).length;
   const clGroups: { section: string | null; items: any[] }[] = [];
   { const idx = new Map<string, number>(); for (const it of cl) { const k = it.section || ""; if (!idx.has(k)) { idx.set(k, clGroups.length); clGroups.push({ section: it.section, items: [] }); } clGroups[idx.get(k)!].items.push(it); } }
@@ -59,6 +78,21 @@ export default async function OnboardingPage() {
         </ul>
       </section>
 
+      {activity.length > 0 && (
+        <section>
+          <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Recent activity</h2>
+          <p className="mb-3 text-[14px] prose-muted">The latest on your account. Open the tabs above for full detail.</p>
+          <ul className="flex flex-col gap-1.5">
+            {activity.map((a, i) => (
+              <li key={i} className="flex flex-wrap items-baseline justify-between gap-2 border-b border-line-soft/60 pb-1.5 text-[14px]">
+                <span className="text-charcoal">{a.text}</span>
+                <span className="text-[12px] text-ink-faint">{new Date(a.when).toLocaleDateString()}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       {cl.length > 0 && (
         <section>
           <div className="flex flex-wrap items-end justify-between gap-2">
@@ -80,6 +114,30 @@ export default async function OnboardingPage() {
                 </ul>
               </div>
             ))}
+          </div>
+        </section>
+      )}
+
+      {usageLines.length > 0 && (
+        <section>
+          <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">This month&rsquo;s usage</h2>
+          <p className="mb-3 max-w-[48em] text-[14px] prose-muted">What your plan includes this month and how much has been used. Resets at the start of each month.</p>
+          <div className="grid gap-3 md:grid-cols-2">
+            {usageLines.map((u) => {
+              const pct = u.allot ? Math.min(100, Math.round((u.used / u.allot) * 100)) : 0;
+              return (
+                <div key={u.key} className="border border-line-warm bg-white p-4">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <span className="text-[14px] font-medium text-charcoal">{u.label}</span>
+                    <span className="text-[13px] tabular-nums prose-muted">{u.used} / {u.allot} {u.unit}</span>
+                  </div>
+                  <div className="mt-2 h-2 w-full bg-line-soft"><div className={`h-2 ${u.over ? "bg-red-600" : "bg-forest"}`} style={{ width: `${pct}%` }} /></div>
+                  {u.over
+                    ? <p className="mt-1 text-[12px] text-red-700">Over by {Math.abs(u.remaining as number)} {u.unit} — additional usage may be billed.</p>
+                    : <p className="mt-1 text-[12px] prose-muted">{u.remaining} {u.unit} remaining</p>}
+                </div>
+              );
+            })}
           </div>
         </section>
       )}

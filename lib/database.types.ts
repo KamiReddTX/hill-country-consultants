@@ -547,6 +547,9 @@ export interface Database {
           status: string;
           file_url: string | null;
           delivered_on: string | null;
+          approval_status: string | null;
+          approval_note: string | null;
+          approval_at: string | null;
         };
         Insert: {
           id?: string;
@@ -554,6 +557,9 @@ export interface Database {
           name: string;
           service?: string | null;
           status?: string;
+          approval_status?: string | null;
+          approval_note?: string | null;
+          approval_at?: string | null;
           file_url?: string | null;
           delivered_on?: string | null;
         };

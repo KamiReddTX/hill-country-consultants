@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
 import { LocalTime } from "@/components/local-time";
 import { createClient } from "@/lib/supabase/server";
+import { DeliverableReview } from "@/components/portal/deliverable-review";
 
 function kb(n: number | null) {
   if (!n) return "";
@@ -52,7 +53,10 @@ export default async function FilesPage() {
             {deliverables.map((d) => (
               <li key={d.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-3">
                 <div><p className="text-[15px] text-charcoal">{d.name}</p><p className="text-[12px] prose-muted">{d.service || "—"}{d.delivered_on ? ` · ${d.delivered_on}` : ""}</p></div>
-                {d.file_url ? <a href={d.file_url} className="link-underline text-[13px]" target="_blank" rel="noreferrer">Open</a> : <span className="text-[12px] text-forest">{d.status}</span>}
+                <span className="flex flex-wrap items-center gap-3">
+                  {d.file_url && <a href={d.file_url} className="link-underline text-[13px]" target="_blank" rel="noreferrer">Open</a>}
+                  {(d.file_url || /deliver/i.test(d.status || "")) ? <DeliverableReview id={d.id} status={(d as any).approval_status ?? null} /> : <span className="text-[12px] text-forest">{d.status}</span>}
+                </span>
               </li>
             ))}
           </ul>
