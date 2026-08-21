@@ -230,3 +230,27 @@ export async function sendShiftAlert(opts: { to: string; name: string; hours: nu
   const body = `<p style="font-size:16px;line-height:1.6">${opts.name} has been clocked in for <strong>${opts.hours.toFixed(1)} hours</strong>. Shifts over 4 hours are flagged for review.</p>`;
   await send(opts.to, `Shift over 4 hours · ${opts.name}`, shell("Shift alert", body));
 }
+
+/** Invite an applicant to schedule an interview via the firm's booking link. */
+export async function sendInterviewInvite(opts: { to: string; name: string | null; position?: string | null; link: string }) {
+  const hi = opts.name ? `Hi ${esc(opts.name)},` : "Hello,";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">${hi}</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Thank you for applying to Hill Country Consultants${opts.position ? ` for the <strong>${esc(opts.position)}</strong> role` : ""}. We&rsquo;d like to invite you to an interview.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Please pick a time that works for you:</p>
+    <p style="margin:22px 0"><a href="${opts.link}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Schedule your interview</a></p>
+    <p style="font-size:13px;color:#6b6552">If the button doesn&rsquo;t work, use this link: <a href="${opts.link}">${esc(opts.link)}</a></p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">We look forward to speaking with you.</p>`;
+  await send(opts.to, "Interview invitation · Hill Country Consultants", shell("You&rsquo;re invited to interview", body));
+}
+
+/** Politely decline an applicant and let them know we keep résumés on file 6 months. */
+export async function sendApplicationDecline(opts: { to: string; name: string | null }) {
+  const hi = opts.name ? `Hi ${esc(opts.name)},` : "Hello,";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">${hi}</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Thank you for your interest in Hill Country Consultants and for taking the time to apply. After careful review, we&rsquo;ve decided to move forward with other candidates at this time.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">We&rsquo;ll keep your résumé on file for six months and will reach out if a role that fits your background opens up. We genuinely appreciate your interest and wish you the very best.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Warmly,<br/>The Hill Country Consultants team</p>`;
+  await send(opts.to, "Your application to Hill Country Consultants", shell("Thank you for applying", body));
+}

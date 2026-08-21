@@ -1725,3 +1725,44 @@ export async function hireFromApplication(applicationId: string, role: string): 
   revalidatePath("/staff/directory");
   return { ok: true };
 }
+
+// ── Careers: interview invite + decline ───────────────────────────────────────
+import { sendInterviewInvite, sendApplicationDecline } from "@/lib/email";
+
+const INTERVIEW_BOOKING_URL = process.env.INTERVIEW_BOOKING_URL || "https://calendar.app.google/A5xRj84DEisW8WcR9";
+
+/** Email the applicant an interview-scheduling link and mark them 'interview'. */
+export async function inviteToInterview(applicationId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: app } = await admin.from("job_applications").select("email, name, position").eq("id", applicationId).maybeSingle();
+  if (!app) return { error: "Application not found." };
+  const a = app as any;
+  if (!a.email) return { error: "Application has no email." };
+  try {
+    await sendInterviewInvite({ to: a.email, name: a.name || null, position: a.position || null, link: INTERVIEW_BOOKING_URL });
+  } catch (e: any) { return { error: e?.message || "Could not send the interview email." }; }
+  await admin.from("job_applications").update({ status: "interview" }).eq("id", applicationId);
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "application", entityId: applicationId, summary: `interview invite sent to ${a.name || a.email}` });
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Email the applicant a polite decline (résumé kept 6 months) and mark 'declined'. */
+export async function declineApplication(applicationId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { data: app } = await admin.from("job_applications").select("email, name").eq("id", applicationId).maybeSingle();
+  if (!app) return { error: "Application not found." };
+  const a = app as any;
+  if (!a.email) return { error: "Application has no email." };
+  try {
+    await sendApplicationDecline({ to: a.email, name: a.name || null });
+  } catch (e: any) { return { error: e?.message || "Could not send the decline email." }; }
+  await admin.from("job_applications").update({ status: "declined" }).eq("id", applicationId);
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "application", entityId: applicationId, summary: `declined ${a.name || a.email}` });
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}

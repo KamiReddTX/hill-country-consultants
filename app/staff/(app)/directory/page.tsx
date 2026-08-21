@@ -11,6 +11,7 @@ import { DeleteEmployeeButton } from "@/components/staff/delete-employee-button"
 import { StaffDocsManager } from "@/components/staff/staff-docs-manager";
 import { DocumentLibrary } from "@/components/staff/document-library";
 import { HireApplicant } from "@/components/staff/hire-applicant";
+import { ApplicationDecision } from "@/components/staff/application-decision";
 import { LocalTime } from "@/components/local-time";
 
 export default async function DirectoryPage() {
@@ -99,10 +100,18 @@ export default async function DirectoryPage() {
                     {a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[13px]">Download résumé</a> : <span className="text-[12px] prose-muted">No résumé attached.</span>}
                     {a.credentials_path && <a href={`/api/application-file/${a.id}?kind=credentials`} className="border border-line-warm px-3 py-1 text-[13px] text-forest">Download credentials</a>}
                   </div>
-                  <div className="border-t border-line-soft pt-3 md:col-span-2">
-                    {a.status === "hired"
-                      ? <span className="text-[13px] font-semibold text-forest">✓ Hired — employee profile created</span>
-                      : <HireApplicant applicationId={a.id} roleOptions={ROLE_OPTIONS} suggested={a.position} />}
+                  <div className="flex flex-col gap-3 border-t border-line-soft pt-3 md:col-span-2">
+                    {a.status === "hired" ? (
+                      <span className="text-[13px] font-semibold text-forest">✓ Hired — employee profile created</span>
+                    ) : a.status === "declined" ? (
+                      <span className="text-[13px] prose-muted">Declined — a note was emailed to the applicant.</span>
+                    ) : (
+                      <>
+                        {a.status === "interview" && <span className="text-[12px] font-medium text-forest">Interview invite sent — booking link emailed. You can still hire or decline.</span>}
+                        <HireApplicant applicationId={a.id} roleOptions={ROLE_OPTIONS} suggested={a.position} />
+                        <ApplicationDecision applicationId={a.id} />
+                      </>
+                    )}
                   </div>
                 </div>
               </details>
