@@ -4,6 +4,7 @@ import { getStripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/supabase/server";
 import { BOOK_ITEMS, QUOTE_ITEMS, bookItemById, quoteItemById, usd } from "@/content/pricing";
 import { sendBookingConfirmation, sendPurchaseAdminAlert, sendClientWelcome } from "@/lib/email";
+import { seedClientOnboarding } from "@/lib/onboarding";
 
 export const runtime = "nodejs";
 
@@ -67,6 +68,10 @@ export async function POST(req: NextRequest) {
       p_paid_cents: s.amount_total ?? 0, p_start: m.startDate || null, p_rep_code: m.repCode || "",
     });
     if (error) { console.error("[webhook] create_client_after_payment", error); return NextResponse.json({ error: error.message }, { status: 500 }); }
+
+    // Seed the standard onboarding checklist (once) so the client's portal and
+    // the staff Checklists tab are populated from the moment they sign up.
+    if (clientId) { try { await seedClientOnboarding(db, clientId as string); } catch (e) { console.warn("[webhook] onboarding seed", e); } }
 
     // Persist the dispute evidence + class/pay details on the booking row.
     await db.from("bookings").update({

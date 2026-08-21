@@ -186,6 +186,13 @@ export async function sendClientWelcome(opts: { to: string; name: string | null;
     <p style="font-size:16px;line-height:1.6">Welcome${opts.name ? `, ${opts.name}` : ""} — thank you for booking with Hill Country Consultants.</p>
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">Create your password to open your client portal, where you&apos;ll track your work, share files, and message your team. Your booking confirmation (with your reference number) arrived in a separate email.</p>
     <p style="margin:22px 0"><a href="${opts.actionUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Create your password &amp; open your portal</a></p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>What to expect in your first 30 days:</strong></p>
+    <ol style="font-size:14px;line-height:1.7;color:#3a3f38;margin:0 0 16px;padding-left:20px">
+      <li><strong>This week</strong> — a kickoff call to confirm your priorities and point of contact.</li>
+      <li><strong>Days 1–7</strong> — we set up secure access and your onboarding checklist (already waiting in your portal).</li>
+      <li><strong>Every Friday</strong> — a weekly report on what we moved.</li>
+      <li><strong>Day 30</strong> — a review of what we delivered and what&apos;s next.</li>
+    </ol>
     <p style="font-size:13px;color:#6b6552">This link is single-use and expires. If it doesn&apos;t work, use &ldquo;Forgot your password?&rdquo; on the portal login, or reply to this email and we&apos;ll help.</p>`;
   await send(opts.to, "Welcome to Hill Country Consultants — set up your client portal", shell("Welcome — let's get started", body));
 }

@@ -7,6 +7,7 @@ import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
+import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
 import { getClientEmails } from "@/lib/client-contacts";
 import { docusignConfigured, createEnvelope, recipientViewUrl } from "@/lib/docusign";
@@ -498,15 +499,17 @@ export async function addClient(formData: FormData): Promise<ActionResult> {
   if (!email || !email.includes("@")) return { error: "Enter a valid client email." };
   const billing = String(formData.get("billing_type") || "standard");
   const admin = createServiceClient();
-  const { error } = await admin.from("clients").insert({
+  const { data: created, error } = await admin.from("clients").insert({
     email,
     business: String(formData.get("business") || "") || null,
     contact: String(formData.get("contact") || "") || null,
     phone: String(formData.get("phone") || "") || null,
     status: "Active",
     billing_type: ["standard", "comp", "barter"].includes(billing) ? billing : "standard",
-  } as any);
+  } as any).select("id").single();
   if (error) return { error: error.message.includes("duplicate") ? "A client with that email already exists." : error.message };
+  // Seed the standard onboarding checklist for the new client (best-effort).
+  if (created?.id) await seedClientOnboarding(admin, created.id);
   // Invite them to set a password; /auth/callback binds the client row on first login.
   try {
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
