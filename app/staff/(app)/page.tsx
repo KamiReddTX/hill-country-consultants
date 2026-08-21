@@ -11,6 +11,8 @@ import { WorkLogApproveButton } from "@/components/staff/worklog-approve-button"
 import { money } from "@/lib/portal";
 import { computeRepEarnings } from "@/lib/commission";
 import { COMMISSION } from "@/content/commission";
+import { renewalDate, daysUntil } from "@/lib/health";
+import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 
 const STAGES = ["New lead", "Contacted", "Qualified", "Proposal", "Closed won", "Closed lost"];
 
@@ -50,6 +52,33 @@ export default async function Dashboard() {
     revenueCents += (paidInv ?? []).reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
   }
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
+
+  // "Needs attention" roll-up for managers: renewals due soon, unpaid AR,
+  // pending time off, and employees who haven't signed the current IT/security ack.
+  const attention = { renewalsSoon: 0, unpaidCount: 0, unpaidCents: 0, ptoPending: 0, missingAck: 0 };
+  if (priv) {
+    const admin = createServiceClient();
+    const [{ data: unpaid }, { data: pto }, { data: acks }] = await Promise.all([
+      admin.from("invoices").select("amount_cents,status").in("status", ["sent", "overdue"]),
+      admin.from("time_off_requests").select("id").eq("status", "pending"),
+      admin.from("staff_acknowledgments").select("staff_id").eq("kind", ACK_KIND).eq("version", ACK_VERSION),
+    ]);
+    attention.unpaidCount = (unpaid ?? []).length;
+    attention.unpaidCents = (unpaid ?? []).reduce((s: number, i: any) => s + Number(i.amount_cents || 0), 0);
+    attention.ptoPending = (pto ?? []).length;
+    const acked = new Set((acks ?? []).map((a: any) => a.staff_id));
+    attention.missingAck = directory.filter((s) => s.active !== false && !acked.has(s.id)).length;
+    attention.renewalsSoon = clients.filter((c) => {
+      const d = daysUntil(renewalDate((c as any).retained_since, (c as any).renewal_date));
+      return d !== null && d <= 30;
+    }).length;
+  }
+  const attentionItems = [
+    { n: attention.renewalsSoon, label: "renewals due ≤30d", href: "/staff/renewals" },
+    { n: attention.unpaidCount, label: `unpaid invoices${attention.unpaidCents ? ` · ${money(attention.unpaidCents)}` : ""}`, href: "/staff/billing" },
+    { n: attention.ptoPending, label: "time-off requests to review", href: "/staff/capacity" },
+    { n: attention.missingAck, label: "staff missing security ack", href: "/staff/directory" },
+  ].filter((i) => i.n > 0);
 
   // A rep's own running income + estimated commission. Invoices are biller-only
   // under RLS, so we read them with the service client and surface only this
@@ -110,6 +139,23 @@ export default async function Dashboard() {
         )}
         {me.hourly && open && <p className="mt-3 border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">You&apos;re on the clock since {new Date(open.started_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}.</p>}
       </div>
+
+      {/* Needs attention (managers) */}
+      {priv && attentionItems.length > 0 && (
+        <section className="border-2 border-gold bg-cream/40 p-4">
+          <h2 className="mb-2 font-fraunces text-[20px] font-medium text-forest">Needs attention</h2>
+          <ul className="flex flex-wrap gap-3">
+            {attentionItems.map((i) => (
+              <li key={i.href}>
+                <Link href={i.href} className="flex items-baseline gap-2 border border-line-warm bg-white px-4 py-2 hover:border-forest">
+                  <span className="font-fraunces text-[22px] text-forest tabular-nums">{i.n}</span>
+                  <span className="text-[13px] prose-soft">{i.label} →</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* Customer requests — new website leads (sales + admins) */}
       {canSeeRequests && (

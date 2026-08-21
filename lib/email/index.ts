@@ -218,6 +218,20 @@ export async function sendClientCheckin(opts: { to: string; name: string | null;
   }
 }
 
+/** Daily ops digest to the team inbox: items needing a manager's attention.
+ *  Only sent when there is something to report. */
+export async function sendOpsDigest(opts: { items: { n: number; label: string }[] }) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const rows = opts.items.map((i) => `<li style="margin:5px 0"><strong>${i.n}</strong> ${esc(i.label)}</li>`).join("");
+  const body = `
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">A few things need attention:</p>
+    <ul style="font-size:15px;line-height:1.7;color:#3a3f38;margin:0 0 8px;padding-left:20px">${rows}</ul>
+    ${site ? `<p style="margin:20px 0"><a href="${site}/staff" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Open your dashboard</a></p>` : ""}
+    <p style="font-size:12px;color:#6b6552">Sent once a day when there are open items. Full detail lives on each tab.</p>`;
+  await send(to, "Hill Country Consultants — daily ops digest", shell("Daily ops digest", body));
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `
