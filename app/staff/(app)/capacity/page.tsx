@@ -3,6 +3,8 @@ import { getStaffMember, isPrivileged, getClients, getDirectory } from "@/lib/st
 import { createServiceClient } from "@/lib/supabase/server";
 import { allotmentFor } from "@/content/pricing";
 import { CapacityEditor } from "@/components/staff/capacity-editor";
+import { TimeOffDecision } from "@/components/staff/time-off-actions";
+import { LocalTime } from "@/components/local-time";
 
 export const dynamic = "force-dynamic";
 
@@ -18,12 +20,26 @@ export default async function CapacityPage() {
   const cutoff = weekAgo.toISOString().slice(0, 10);
 
   const admin = createServiceClient();
-  const [directory, clients, { data: workLog }, { data: assignments }] = await Promise.all([
+  const [directory, clients, { data: workLog }, { data: assignments }, { data: timeOff }] = await Promise.all([
     getDirectory(),
     getClients(),
     admin.from("client_work_log").select("performed_by, hours, worked_on").gte("worked_on", cutoff),
     admin.from("client_assignments").select("client_id, staff_id"),
+    admin.from("time_off_requests").select("*").in("status", ["pending", "approved"]),
   ]);
+
+  // Approved time off overlapping the next 7 days reduces effective capacity.
+  const today = new Date();
+  const window: string[] = Array.from({ length: 7 }, (_, i) => { const d = new Date(today); d.setDate(d.getDate() + i); return d.toISOString().slice(0, 10); });
+  const offDaysByStaff = new Map<string, number>();
+  for (const t of timeOff ?? []) {
+    if ((t as any).status !== "approved") continue;
+    const sid = (t as any).staff_id; const s = (t as any).start_date; const e = (t as any).end_date;
+    const days = window.filter((d) => d >= s && d <= e).length;
+    if (days) offDaysByStaff.set(sid, (offDaysByStaff.get(sid) || 0) + days);
+  }
+  const nameById = new Map(directory.map((s) => [s.id, s.name || s.email]));
+  const pendingTimeOff = (timeOff ?? []).filter((t) => (t as any).status === "pending");
 
   // Logged hours this week, per staffer.
   const loggedByStaff = new Map<string, number>();
@@ -57,10 +73,12 @@ export default async function CapacityPage() {
     .filter((s) => s.active !== false)
     .map((s) => {
       const cap = Number((s as any).weekly_capacity_hours ?? 40);
+      const offHours = (offDaysByStaff.get(s.id) || 0) * (cap / 5); // days off × daily hours
+      const effective = Math.max(0, cap - offHours);
       const logged = loggedByStaff.get(s.id) || 0;
-      const util = cap > 0 ? Math.round((logged / cap) * 100) : 0;
+      const util = effective > 0 ? Math.round((logged / effective) * 100) : 0;
       const committed = committedWeekly(s.id);
-      return { s, cap, logged, util, committed, headroom: cap - logged };
+      return { s, cap, offHours, effective, logged, util, committed, headroom: effective - logged };
     })
     .sort((a, b) => b.util - a.util);
 
@@ -79,29 +97,47 @@ export default async function CapacityPage() {
         </p>
       </div>
 
+      {pendingTimeOff.length > 0 && (
+        <section className="border-2 border-gold bg-cream/40 p-4">
+          <p className="mb-2 text-[14px] font-semibold text-forest">Time-off requests awaiting your decision</p>
+          <ul className="flex flex-col gap-2">
+            {pendingTimeOff.map((t: any) => (
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2 text-[14px]">
+                <span className="text-charcoal">
+                  <span className="font-medium">{nameById.get(t.staff_id) || "—"}</span> · {t.kind} · <LocalTime iso={t.start_date} mode="date" />{t.end_date !== t.start_date && <> – <LocalTime iso={t.end_date} mode="date" /></>}
+                  {t.note && <span className="prose-muted"> · {t.note}</span>}
+                </span>
+                <TimeOffDecision id={t.id} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <div className="overflow-x-auto border border-line-warm">
-        <table className="w-full min-w-[820px] border-collapse bg-white text-left text-[14px]">
+        <table className="w-full min-w-[900px] border-collapse bg-white text-left text-[14px]">
           <thead>
             <tr className="border-b border-line-soft text-ink-faint">
               <th className="p-3 font-medium">Staffer</th><th className="p-3 font-medium">Role</th>
-              <th className="p-3 font-medium">Weekly target</th><th className="p-3 font-medium">Logged this week</th>
+              <th className="p-3 font-medium">Weekly target</th><th className="p-3 font-medium">Off this wk</th><th className="p-3 font-medium">Logged this week</th>
               <th className="p-3 font-medium">Utilization</th><th className="p-3 font-medium">Headroom</th>
               <th className="p-3 font-medium">Committed VA/wk</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map(({ s, cap, logged, util, committed, headroom }) => (
+            {rows.map(({ s, cap, offHours, logged, util, committed, headroom }) => (
               <tr key={s.id} className="border-b border-line-soft/60">
                 <td className="p-3 font-medium text-charcoal">{s.name || s.email}</td>
                 <td className="p-3 prose-muted">{(s.roles && s.roles.length ? s.roles.join(", ") : s.role)}</td>
                 <td className="p-3"><CapacityEditor staffId={s.id} current={cap} /></td>
+                <td className={`p-3 tabular-nums ${offHours > 0 ? "text-amber-700" : "prose-muted"}`}>{offHours > 0 ? `${offHours.toFixed(1)}h` : "—"}</td>
                 <td className="p-3 tabular-nums">{logged.toFixed(1)}h</td>
                 <td className={`p-3 font-medium tabular-nums ${utilClass(util)}`}>{util}%</td>
                 <td className={`p-3 tabular-nums ${headroom < 0 ? "text-red-700" : "text-charcoal"}`}>{headroom.toFixed(1)}h</td>
                 <td className="p-3 tabular-nums prose-soft">{committed >= 0.05 ? `${committed.toFixed(1)}h` : "—"}</td>
               </tr>
             ))}
-            {rows.length === 0 && <tr><td colSpan={7} className="p-3 prose-muted">No staff to show.</td></tr>}
+            {rows.length === 0 && <tr><td colSpan={8} className="p-3 prose-muted">No staff to show.</td></tr>}
           </tbody>
         </table>
       </div>

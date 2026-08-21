@@ -9,6 +9,8 @@ import { DocusignSignButton } from "@/components/staff/docusign-sign-button";
 import { docusignConfigured } from "@/lib/docusign";
 import { SecurityAck } from "@/components/staff/security-ack";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
+import { TimeOffForm } from "@/components/staff/time-off-form";
+import { CancelTimeOff } from "@/components/staff/time-off-actions";
 
 export default async function ProfilePage() {
   const me = await getStaffMember();
@@ -28,6 +30,10 @@ export default async function ProfilePage() {
 
   const { data: ack } = await db.from("staff_acknowledgments").select("agreed_at,agreed_name").eq("staff_id", me.id).eq("kind", ACK_KIND).eq("version", ACK_VERSION).maybeSingle();
   const ackSigned = ack ? { at: (ack as any).agreed_at as string, name: (ack as any).agreed_name as string | null } : null;
+
+  const { data: myTimeOff } = await db.from("time_off_requests").select("*").eq("staff_id", me.id).order("start_date", { ascending: false });
+  const timeOff = (myTimeOff ?? []) as any[];
+  const toStatusColor = (s: string) => (s === "approved" ? "text-forest" : s === "denied" ? "text-red-700" : "text-gold-hover");
 
   const managed: [string, string][] = [
     ["Role(s)", roles.length ? roles.join(", ") : me.role],
@@ -89,6 +95,28 @@ export default async function ProfilePage() {
       <section>
         <h2 className="mb-2 font-fraunces text-[20px] font-medium text-forest">Set up your profile</h2>
         <ProfileEditForm initial={initial} />
+      </section>
+
+      <section>
+        <h2 className="mb-2 font-fraunces text-[20px] font-medium text-forest">Time off</h2>
+        <p className="mb-3 max-w-[46em] text-[13px] prose-muted">Request time off below. Your manager approves or denies it, and approved time off is reflected on the team&apos;s capacity view.</p>
+        <TimeOffForm />
+        {timeOff.length > 0 && (
+          <ul className="mt-3 flex flex-col gap-2">
+            {timeOff.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-3 text-[14px]">
+                <span className="text-charcoal">
+                  <span className="font-medium">{t.kind}</span> · <LocalTime iso={t.start_date} mode="date" />{t.end_date !== t.start_date && <> – <LocalTime iso={t.end_date} mode="date" /></>}
+                  {t.note && <span className="prose-muted"> · {t.note}</span>}
+                </span>
+                <span className="flex items-center gap-3">
+                  <span className={`text-[12px] font-semibold uppercase tracking-wide ${toStatusColor(t.status)}`}>{t.status}</span>
+                  {t.status === "pending" && <CancelTimeOff id={t.id} />}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <div className="grid gap-5 md:grid-cols-2">

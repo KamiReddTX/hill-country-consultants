@@ -1837,3 +1837,53 @@ export async function setApplicationNotes(applicationId: string, notes: string):
   revalidatePath("/staff/directory");
   return { ok: true };
 }
+
+// ── PTO / time off ────────────────────────────────────────────────────────────
+
+/** Any employee: request time off (pending until a manager decides). */
+export async function requestTimeOff(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const kind = String(formData.get("kind") || "PTO");
+  const start = String(formData.get("start_date") || "");
+  const end = String(formData.get("end_date") || "") || start;
+  const note = String(formData.get("note") || "").slice(0, 500) || null;
+  if (!start) return { error: "Pick a start date." };
+  if (end < start) return { error: "End date can't be before the start date." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("time_off_requests").insert({
+    staff_id: me.id, kind: ["PTO", "Sick", "Unpaid"].includes(kind) ? kind : "PTO",
+    start_date: start, end_date: end, note,
+  });
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me.email, action: "create", entity: "time_off", summary: `${kind} ${start}${end !== start ? `–${end}` : ""}` });
+  revalidatePath("/staff/profile");
+  revalidatePath("/staff/capacity");
+  return { ok: true };
+}
+
+/** Employee: cancel their own still-pending request. */
+export async function cancelTimeOff(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("time_off_requests").delete().eq("id", id).eq("staff_id", me.id).eq("status", "pending");
+  if (error) return { error: error.message };
+  revalidatePath("/staff/profile");
+  revalidatePath("/staff/capacity");
+  return { ok: true };
+}
+
+/** Admin / Business Manager: approve or deny a time-off request. */
+export async function decideTimeOff(id: string, status: "approved" | "denied"): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  if (status !== "approved" && status !== "denied") return { error: "Invalid decision." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("time_off_requests").update({ status, decided_by: me!.id, decided_at: new Date().toISOString() }).eq("id", id);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "time_off", entityId: id, summary: `time off ${status}` });
+  revalidatePath("/staff/capacity");
+  revalidatePath("/staff/profile");
+  return { ok: true };
+}

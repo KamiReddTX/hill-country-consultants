@@ -301,6 +301,32 @@ export interface Database {
         };
         Update: Partial<Database["public"]["Tables"]["staff_acknowledgments"]["Insert"]>;
       };
+      time_off_requests: {
+        Row: {
+          id: string;
+          staff_id: string;
+          kind: string;
+          start_date: string;
+          end_date: string;
+          note: string | null;
+          status: string;
+          decided_by: string | null;
+          decided_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          staff_id: string;
+          kind?: string;
+          start_date: string;
+          end_date: string;
+          note?: string | null;
+          status?: string;
+          decided_by?: string | null;
+          decided_at?: string | null;
+        };
+        Update: Partial<Database["public"]["Tables"]["time_off_requests"]["Insert"]>;
+      };
       expense_budgets: {
         Row: { category: string; monthly_cents: number; created_at: string };
         Insert: { category: string; monthly_cents?: number };
