@@ -71,6 +71,8 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
   }
   const arrCents = mrrCents * 12;
   const avgCents = billable.length ? Math.round(mrrCents / billable.length) : 0;
+  const arOutstandingCents = (allInvoices ?? []).filter((i: any) => ["sent", "overdue"].includes(i.status)).reduce((s: number, i: any) => s + Number(i.amount_cents || 0), 0);
+  const activeClients = clients.filter((c) => c.status === "Active").length;
 
   // Billed-recurring trend from plan invoices, last 6 months.
   const planInv = (invoices ?? []).filter((i: any) => i.kind === "plan");
@@ -141,7 +143,19 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
         <Stat label="ARR (run rate)" value={money(arrCents)} sub="MRR × 12" />
         <Stat label="Avg revenue / client" value={money(avgCents)} sub="Monthly, per plan client" />
         <Stat label={`Movement · ${monthLabel(latest)}`} value={`+${newLogos} / −${churned}`} sub={`${retained} retained`} />
+        <Stat label="AR outstanding" value={money(arOutstandingCents)} sub="Sent + overdue invoices" />
+        <Stat label="Active clients" value={String(activeClients)} sub="Status = Active" />
       </div>
+
+      <section>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">Exports</h2>
+        <p className="mb-3 text-[13px] prose-muted">Download firm-wide data as CSV (opens in Excel or Google Sheets). Administrator-only.</p>
+        <div className="flex flex-wrap gap-3">
+          <a href="/api/export?kind=clients" className="btn-gold text-[14px]">Clients CSV</a>
+          <a href="/api/export?kind=invoices" className="border border-line-warm bg-white px-4 py-2 text-[14px] font-medium text-forest">Invoices &amp; AR CSV</a>
+          <a href="/api/export?kind=expenses" className="border border-line-warm bg-white px-4 py-2 text-[14px] font-medium text-forest">Expenses CSV</a>
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-2 font-fraunces text-[20px] font-medium text-forest">MRR by tier</h2>
