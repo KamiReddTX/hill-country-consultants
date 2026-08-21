@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
       const admin = createServiceClient();
       const { data: doc } = await admin.from("staff_documents").select("*").eq("id", docId).maybeSingle();
       const env = (doc as any)?.docusign_envelope_id;
-      if (env && (await envelopeStatus(env)) === "completed") {
+      // Only the employee the document belongs to may complete it.
+      if (doc && (doc as any).staff_id === me.id && env && (await envelopeStatus(env)) === "completed") {
         let signed_path = (doc as any).signed_path || null;
         try {
           const pdf = await combinedPdf(env);

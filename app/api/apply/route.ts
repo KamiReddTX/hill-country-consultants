@@ -44,10 +44,17 @@ export async function POST(req: Request) {
   if (!url || !key) return NextResponse.json({ ok: true, persisted: false });
   const admin = createClient<Database>(url, key, { auth: { persistSession: false } });
 
-  // File uploads — résumé and credentials, optional, up to ~8MB each.
+  // File uploads — résumé and credentials, optional, up to ~8MB each. Only
+  // document/image types are accepted (extension + MIME allowlist) to keep the
+  // public bucket free of executables and other unexpected content.
+  const OK_EXT = ["pdf", "doc", "docx", "rtf", "txt", "png", "jpg", "jpeg", "webp", "heic"];
+  const OK_MIME = ["application/pdf", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/rtf", "text/rtf", "text/plain", "image/png", "image/jpeg", "image/webp", "image/heic"];
   const uploadOne = async (fieldKey: string, prefix: string): Promise<string | null> => {
     const f = form.get(fieldKey);
     if (f instanceof File && f.size > 0 && f.size <= 8 * 1024 * 1024) {
+      const ext = (f.name.split(".").pop() || "").toLowerCase();
+      if (!OK_EXT.includes(ext)) return null;
+      if (f.type && !OK_MIME.includes(f.type)) return null;
       try {
         const buf = Buffer.from(await f.arrayBuffer());
         const path = `${prefix}/${Date.now()}-${safeName(f.name)}`;
