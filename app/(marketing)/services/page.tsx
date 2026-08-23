@@ -5,6 +5,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { RateLines } from "@/components/rate-lines";
 import { SERVICE_GROUPS, SERVICE_META, publicServiceSlug } from "@/content/services";
 import { INDUSTRIES } from "@/content/industries";
+import { getSiteContent, pick } from "@/lib/site-content";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Services",
@@ -19,7 +22,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const c = await getSiteContent();
   return (
     <>
       <section className="bg-white border-b border-line">
@@ -27,8 +31,8 @@ export default function ServicesPage() {
           <SectionHeading
             as="h1"
             kicker="Services"
-            title="Every service line, in one firm."
-            intro="Buy a plan and use all of them at your tier's volume, or book any one à la carte. Scoped work is quoted in writing before it begins."
+            title={pick(c, "services.title", "Every service line, in one firm.")}
+            intro={pick(c, "services.intro", "Buy a plan and use all of them at your tier's volume, or book any one à la carte. Scoped work is quoted in writing before it begins.")}
           />
           <div className="mt-8 border-t border-[#e8e0cd] pt-6">
             <p className="mb-3.5 font-inter text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-faint">

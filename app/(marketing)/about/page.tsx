@@ -4,6 +4,9 @@ import { SectionHeading } from "@/components/section-heading";
 import { ImageSlot } from "@/components/image-slot";
 import { PILLARS } from "@/content/about-faq";
 import { SITE, TRUST_POINTS } from "@/content/site";
+import { getSiteContent, pick } from "@/lib/site-content";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "About",
@@ -34,7 +37,8 @@ const TEAM: { t: string; d: string }[] = [
   { t: "Specialist partners", d: "Vetted contractors and licensed professionals brought in when a scope calls for them." },
 ];
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const c = await getSiteContent();
   return (
     <>
       <section className="bg-white border-b border-line">
@@ -42,8 +46,8 @@ export default function AboutPage() {
           <SectionHeading
             as="h1"
             kicker="About"
-            title="A whole firm behind your business."
-            intro="One flat monthly fee puts admin, documentation, compliance, coordination, marketing, publishing and more behind you. On-site when the moment calls for it — a walkthrough, an event, a kickoff — and virtual the rest of the time."
+            title={pick(c, "about.title", "A whole firm behind your business.")}
+            intro={pick(c, "about.intro", "One flat monthly fee puts admin, documentation, compliance, coordination, marketing, publishing and more behind you. On-site when the moment calls for it — a walkthrough, an event, a kickoff — and virtual the rest of the time.")}
           />
         </div>
       </section>

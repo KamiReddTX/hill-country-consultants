@@ -4,6 +4,9 @@ import { ImageSlot } from "@/components/image-slot";
 import { PLANS } from "@/content/pricing";
 import { HOME_STEPS, PILLARS, PORTAL_FEATURES } from "@/content/site";
 import { INDUSTRIES } from "@/content/industries";
+import { getSiteContent, pick } from "@/lib/site-content";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "The capability of a full staff. Without the payroll.",
@@ -25,7 +28,8 @@ const DIVISIONS: { t: string; items: string[] }[] = [
   { t: "Specialty Services", items: ["Construction Submittals", "Corporate Training", "Event Planning", "Agriculture & Land Services", "Grant & Nonprofit Administration", "Notary Services"] },
 ];
 
-export default function HomePage() {
+export default async function HomePage() {
+  const c = await getSiteContent();
   return (
     <>
       {/* ── Hero ─────────────────────────────────────────────── */}
@@ -34,12 +38,10 @@ export default function HomePage() {
           <div>
             <p className="kicker mb-5">Hybrid consulting &amp; virtual assistance</p>
             <h1 className="font-fraunces text-[clamp(38px,6vw,64px)] font-normal leading-[1.06] text-forest">
-              The capability of a full staff. Without the payroll.
+              {pick(c, "home.hero_title", "The capability of a full staff. Without the payroll.")}
             </h1>
             <p className="mt-6 max-w-[34em] prose-soft">
-              One flat monthly fee puts a whole firm behind your business. Admin, documentation,
-              compliance, coordination, marketing, publishing and more. On-site when it matters,
-              virtual when it counts. No salaries, no benefits, no office overhead.
+              {pick(c, "home.hero_intro", "One flat monthly fee puts a whole firm behind your business. Admin, documentation, compliance, coordination, marketing, publishing and more. On-site when it matters, virtual when it counts. No salaries, no benefits, no office overhead.")}
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link href="/get-started" className="btn-gold text-[15px]">

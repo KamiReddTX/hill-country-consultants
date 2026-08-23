@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
 import { FAQS } from "@/content/about-faq";
+import { getSiteFaqs } from "@/lib/site-content";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "FAQ",
@@ -16,11 +19,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function FaqPage() {
+export default async function FaqPage() {
+  const managed = await getSiteFaqs();
+  // Use the admin-managed list when present; otherwise the built-in defaults.
+  const faqs = managed.length ? managed.map((f) => ({ q: f.question, a: f.answer })) : FAQS;
   const faqLd = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
+    mainEntity: faqs.map((f) => ({
       "@type": "Question",
       name: f.q,
       acceptedAnswer: { "@type": "Answer", text: f.a },
@@ -37,7 +43,7 @@ export default function FaqPage() {
       <section className="section-cream">
         <div className="shell max-w-[60em] py-16">
           <dl className="flex flex-col">
-            {FAQS.map((f, i) => (
+            {faqs.map((f, i) => (
               <div key={i} className="border-t border-line-soft py-6">
                 <dt className="font-fraunces text-[20px] font-medium text-forest">{f.q}</dt>
                 <dd className="mt-2 text-[16.5px] prose-soft">{f.a}</dd>

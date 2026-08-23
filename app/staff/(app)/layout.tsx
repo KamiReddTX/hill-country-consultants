@@ -44,7 +44,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   // Manager operations
   if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "Clients" }, { href: "/staff/reports", label: "Reports" });
   if (priv) tabs.push({ href: "/staff/billing", label: "Billing & AR" }, { href: "/staff/renewals", label: "Renewals" }, { href: "/staff/contracts", label: "Contracts" }, { href: "/staff/capacity", label: "Capacity" });
-  if (admin) tabs.push({ href: "/staff/finance", label: "Finance" }, { href: "/staff/vendors", label: "Vendors" }, { href: "/staff/audit", label: "Audit log" });
+  if (admin) tabs.push({ href: "/staff/finance", label: "Finance" }, { href: "/staff/vendors", label: "Vendors" }, { href: "/staff/site-content", label: "Edit website" }, { href: "/staff/audit", label: "Audit log" });
   // My profile is always last.
   tabs.push({ href: "/staff/profile", label: "My profile" });
 

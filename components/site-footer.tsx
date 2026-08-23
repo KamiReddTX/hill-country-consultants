@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { SITE } from "@/content/site";
+import { getSiteContent, pick } from "@/lib/site-content";
 
 /** Footer nav — one row, matches the header with Home and Policies added. */
 const FOOTER_LINKS: { href: string; label: string }[] = [
@@ -22,7 +23,12 @@ const FOOTER_LINKS: { href: string; label: string }[] = [
  * then contact and business hours, then copyright with legal and portal links.
  * The employee and client portals are reached here — they are part of the site.
  */
-export function SiteFooter() {
+export async function SiteFooter() {
+  const c = await getSiteContent();
+  const email = pick(c, "biz.email", SITE.email);
+  const phone = pick(c, "biz.phone", SITE.phone);
+  const phoneHref = c["biz.phone"] ? `tel:${c["biz.phone"].replace(/[^0-9+]/g, "")}` : SITE.phoneHref;
+  const locations = pick(c, "biz.locations", "Longview, TX · Atlanta, GA");
   return (
     <footer className="bg-forest text-white">
       {/* Band 1 — logo + full nav */}
@@ -51,9 +57,9 @@ export function SiteFooter() {
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-baseline justify-between gap-x-9 gap-y-3 px-6 py-5 font-inter text-[13.5px]">
           <div className="flex flex-wrap items-baseline gap-x-[18px] gap-y-2">
-            <a href={`mailto:${SITE.email}`} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{SITE.email}</a>
-            <a href={SITE.phoneHref} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{SITE.phone}</a>
-            <span className="whitespace-nowrap text-white/85">Longview, TX · Atlanta, GA</span>
+            <a href={`mailto:${email}`} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{email}</a>
+            <a href={phoneHref} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{phone}</a>
+            <span className="whitespace-nowrap text-white/85">{locations}</span>
             <span className="whitespace-nowrap text-white/85">Nationwide since 2024</span>
           </div>
           <div className="flex flex-wrap items-baseline gap-x-[18px] gap-y-2 text-white/85">

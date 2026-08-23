@@ -2198,3 +2198,77 @@ export async function handleUpgradeRequest(id: string, status: "contacted" | "cl
   revalidatePath("/staff");
   return { ok: true };
 }
+
+// ── Site content (admin CMS, phase 1) ────────────────────────────────────────
+
+/** Admin: save editable site copy. Any field named `sc:<key>` is upserted as
+ *  that content key; checkboxes named `scbool:<key>` store "on"/"" so toggles
+ *  round-trip. Unlisted keys are left untouched. */
+export async function saveSiteContent(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const rows: { key: string; value: string; updated_by: string; updated_at: string }[] = [];
+  const now = new Date().toISOString();
+  const seenBool = new Set<string>();
+  for (const [name, val] of formData.entries()) {
+    if (typeof val !== "string") continue;
+    if (name.startsWith("sc:")) rows.push({ key: name.slice(3), value: val, updated_by: me!.id, updated_at: now });
+    else if (name.startsWith("scbool:")) { const k = name.slice(7); seenBool.add(k); rows.push({ key: k, value: val === "on" ? "on" : "", updated_by: me!.id, updated_at: now }); }
+  }
+  // Checkboxes that are unchecked submit nothing — but the editor sends a hidden
+  // marker `scbool_keys` listing every boolean key so we can clear the unticked.
+  const boolKeys = String(formData.get("scbool_keys") || "").split(",").map((s) => s.trim()).filter(Boolean);
+  for (const k of boolKeys) if (!seenBool.has(k)) rows.push({ key: k, value: "", updated_by: me!.id, updated_at: now });
+  if (!rows.length) return { ok: true };
+  const admin = createServiceClient();
+  const { error } = await admin.from("site_content").upsert(rows as any, { onConflict: "key" });
+  if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  return { ok: true };
+}
+
+/** Admin: add a FAQ entry. */
+export async function addSiteFaq(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const question = String(formData.get("question") || "").trim();
+  const answer = String(formData.get("answer") || "").trim();
+  if (!question || !answer) return { error: "Question and answer are both required." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("site_faqs").insert({
+    question, answer, sort: Number(formData.get("sort") || 0) || 0, active: true,
+  } as any);
+  if (error) return { error: error.message };
+  revalidatePath("/faq"); revalidatePath("/staff/site-content");
+  return { ok: true };
+}
+
+/** Admin: edit or toggle a FAQ entry. */
+export async function updateSiteFaq(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const id = String(formData.get("id") || "");
+  if (!id) return { error: "Missing FAQ id." };
+  const patch: Record<string, any> = {
+    question: String(formData.get("question") || "").trim(),
+    answer: String(formData.get("answer") || "").trim(),
+    sort: Number(formData.get("sort") || 0) || 0,
+    active: formData.get("active") === "on",
+  };
+  const admin = createServiceClient();
+  const { error } = await admin.from("site_faqs").update(patch as any).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/faq"); revalidatePath("/staff/site-content");
+  return { ok: true };
+}
+
+/** Admin: delete a FAQ entry. */
+export async function deleteSiteFaq(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isAdmin(me)) return { error: "Administrators only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("site_faqs").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/faq"); revalidatePath("/staff/site-content");
+  return { ok: true };
+}
