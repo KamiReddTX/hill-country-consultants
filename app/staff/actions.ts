@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
@@ -342,13 +342,14 @@ export async function uploadClientFile(formData: FormData): Promise<ActionResult
   const clientId = String(formData.get("clientId") || "");
   if (!clientId) return { error: "Missing client." };
   const db = createClient();
-  const { data: c } = await db.from("clients").select("id,assigned_to").eq("id", clientId).maybeSingle();
+  const { data: c } = await db.from("clients").select("id,assigned_to,email,contact").eq("id", clientId).maybeSingle();
   if (!c) return { error: "Client not found." };
   if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
   const files = formData.getAll("files").filter((f): f is File => f instanceof File && f.size > 0);
   if (!files.length) return { error: "Choose at least one file." };
+  const notify = formData.get("notify") === "on"; // checkbox, default-checked in the UI
   const admin = createServiceClient();
-  let saved = 0;
+  let saved = 0; let lastName = "";
   for (const file of files.slice(0, 10)) {
     const safe = file.name.replace(/[^\w.\-]+/g, "_").slice(0, 120);
     const path = `${clientId}/${Date.now()}-${safe}`;
@@ -356,10 +357,58 @@ export async function uploadClientFile(formData: FormData): Promise<ActionResult
     const up = await admin.storage.from("client-files").upload(path, buf, { contentType: file.type || "application/octet-stream" });
     if (!up.error) {
       await admin.from("client_files").insert({ client_id: clientId, name: file.name.slice(0, 200), path, size: file.size, uploaded_by: me.name || me.email } as any);
-      saved++;
+      saved++; lastName = file.name;
     }
   }
   if (!saved) return { error: "Upload failed — try again." };
+  if (notify) await notifyClientFileReady(admin, clientId, (c as any).email, (c as any).contact, { label: lastName, count: saved });
+  revalidatePath("/staff/files"); revalidatePath("/portal/files");
+  return { ok: true };
+}
+
+/** Email the client (and their contacts) that file(s)/a doc are ready in the portal.
+ *  Best-effort — never throws into the caller. */
+async function notifyClientFileReady(
+  admin: ReturnType<typeof createServiceClient>,
+  clientId: string, clientEmail: string | null, clientName: string | null,
+  opts: { label: string; count?: number; editable?: boolean },
+) {
+  try {
+    const recipients = new Set<string>();
+    if (clientEmail) recipients.add(String(clientEmail).toLowerCase());
+    const { data: contacts } = await admin.from("client_contacts").select("email").eq("client_id", clientId);
+    for (const ct of (contacts ?? []) as any[]) if (ct.email) recipients.add(String(ct.email).toLowerCase());
+    if (!recipients.size) return;
+    const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+    await sendClientFileReady({
+      to: [...recipients], name: clientName || null, label: opts.label,
+      count: opts.count, editable: opts.editable, portalUrl: site ? `${site}/portal/files` : "",
+    });
+  } catch (e) { console.warn("[notifyClientFileReady]", e); }
+}
+
+/** Staff (owner or admin) attaches a collaborative Google Doc (or any doc URL)
+ *  to a client's Files — the client can open & edit it. Notifies the client. */
+export async function attachClientDocLink(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const clientId = String(formData.get("clientId") || "");
+  const url = String(formData.get("doc_url") || "").trim();
+  const label = String(formData.get("label") || "").trim();
+  if (!clientId) return { error: "Missing client." };
+  if (!/^https:\/\//i.test(url)) return { error: "Paste a full https:// document link." };
+  if (!label) return { error: "Give the document a name the client will recognize." };
+  const db = createClient();
+  const { data: c } = await db.from("clients").select("id,email,contact").eq("id", clientId).maybeSingle();
+  if (!c) return { error: "Client not found." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your client." };
+  const notify = formData.get("notify") === "on";
+  const admin = createServiceClient();
+  const { error } = await admin.from("client_files").insert({
+    client_id: clientId, name: label.slice(0, 200), doc_url: url, size: 0, uploaded_by: me.name || me.email,
+  } as any);
+  if (error) return { error: error.message };
+  if (notify) await notifyClientFileReady(admin, clientId, (c as any).email, (c as any).contact, { label, editable: true });
   revalidatePath("/staff/files"); revalidatePath("/portal/files");
   return { ok: true };
 }

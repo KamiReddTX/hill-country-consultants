@@ -21,6 +21,7 @@ export function ClientFileUpload({ clientId }: { clientId: string }) {
     >
       <input type="file" name="files" multiple required className="text-[13px]" />
       <button disabled={pending} className="btn-gold text-[13px] disabled:opacity-50">{pending ? "Uploading…" : "Upload for client"}</button>
+      <label className="flex items-center gap-1.5 text-[12px] prose-muted"><input type="checkbox" name="notify" defaultChecked /> Email the client</label>
       {msg && <span className="text-[12px] text-forest">{msg}</span>}
     </form>
   );

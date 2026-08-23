@@ -485,8 +485,8 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["staff_reset_requests"]["Insert"]>;
       };
       client_files: {
-        Row: { id: string; client_id: string; name: string; path: string; size: number | null; uploaded_by: string | null; created_at: string };
-        Insert: { id?: string; client_id: string; name: string; path: string; size?: number | null; uploaded_by?: string | null };
+        Row: { id: string; client_id: string; name: string; path: string | null; doc_url: string | null; size: number | null; uploaded_by: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; name: string; path?: string | null; doc_url?: string | null; size?: number | null; uploaded_by?: string | null };
         Update: Partial<Database["public"]["Tables"]["client_files"]["Insert"]>;
       };
       client_notes: {

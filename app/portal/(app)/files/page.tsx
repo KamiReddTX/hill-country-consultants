@@ -37,9 +37,16 @@ export default async function FilesPage() {
           <ul className="flex flex-col gap-2">
             {(files ?? []).map((f: any) => (
               <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border border-line-warm bg-white p-4">
-                <div><p className="text-[15px] text-charcoal">{f.name}</p>
-                  <p className="text-[12px] prose-muted">{kb(f.size)}{f.uploaded_by ? ` · shared by ${f.uploaded_by}` : ""} · <LocalTime iso={f.created_at} mode="date" /></p></div>
-                <a href={`/api/client-file/${f.id}`} className="btn-gold text-[13px]">Open / Download</a>
+                <div><p className="text-[15px] text-charcoal">{f.name}{f.doc_url ? " · Google Doc" : ""}</p>
+                  <p className="text-[12px] prose-muted">{f.doc_url ? "editable document" : kb(f.size)}{f.uploaded_by ? ` · shared by ${f.uploaded_by}` : ""} · <LocalTime iso={f.created_at} mode="date" /></p></div>
+                {f.doc_url ? (
+                  <a href={f.doc_url} target="_blank" rel="noreferrer" className="btn-gold text-[13px]">Open &amp; edit in Google Docs</a>
+                ) : (
+                  <span className="flex flex-wrap items-center gap-3">
+                    <a href={`/api/client-file/${f.id}?preview=1`} target="_blank" rel="noreferrer" className="link-underline text-[13px]">Preview</a>
+                    <a href={`/api/client-file/${f.id}`} className="btn-gold text-[13px]">Download</a>
+                  </span>
+                )}
               </li>
             ))}
           </ul>

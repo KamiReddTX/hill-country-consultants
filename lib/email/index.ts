@@ -215,6 +215,24 @@ export async function sendPasswordResetLink(opts: { to: string; name: string | n
   await send(opts.to, `Set a new password for your ${which} portal`, shell("Reset your password", body));
 }
 
+/** Tell a client one or more files/documents are ready in their portal. Sent
+ *  when staff upload a file or attach a collaborative Google Doc. `editable`
+ *  flips the wording toward "open & edit". Accepts one or many recipients. */
+export async function sendClientFileReady(opts: { to: string | string[]; name: string | null; label: string; count?: number; editable?: boolean; portalUrl: string }) {
+  const hi = opts.name ? `Hi ${esc(opts.name)},` : "Hello,";
+  const many = (opts.count || 1) > 1;
+  const what = opts.editable
+    ? `a document to review and edit — <strong>${esc(opts.label)}</strong>`
+    : many ? `${opts.count} new files are ready in your portal` : `a new file is ready in your portal — <strong>${esc(opts.label)}</strong>`;
+  const cta = opts.editable ? "Open in your portal" : "Open your files";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">${hi}</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Your account team just shared ${what}. ${opts.editable ? "You can open it in Google Docs to answer questions or make edits directly." : "You can open or download it any time from your portal&apos;s Files tab."}</p>
+    ${opts.portalUrl ? `<p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">${cta}</a></p>` : ""}
+    <p style="font-size:13px;color:#6b6552">Only you, your account team, and administrators can see items in your portal.</p>`;
+  await send(opts.to, opts.editable ? "A document to review in your portal" : many ? "New files in your portal" : "A new file in your portal", shell(opts.editable ? "Document ready to review" : "Files ready", body));
+}
+
 /** Onboarding check-in drip (day 3 and day 14) to a new client. Sent by the
  *  daily cron; each phase fires once per client. */
 export async function sendClientCheckin(opts: { to: string; name: string | null; phase: 3 | 14 }) {

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getStaffMember, getClients, isPrivileged } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { ClientFileUpload } from "@/components/staff/client-file-upload";
+import { ClientDocLink } from "@/components/staff/client-doc-link";
 import { DeleteFileButton } from "@/components/staff/delete-file-button";
 
 function kb(n: number | null) {
@@ -47,10 +48,10 @@ export default async function StaffFilesPage() {
                   <ul className="mt-3 flex flex-col gap-2">
                     {list.map((f: any) => (
                       <li key={f.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-line-soft pt-2">
-                        <div><p className="text-[15px] text-charcoal">{f.name}</p>
-                          <p className="text-[12px] prose-muted">{kb(f.size)}{f.uploaded_by ? ` · ${f.uploaded_by}` : ""} · {new Date(f.created_at).toLocaleDateString()}</p></div>
+                        <div><p className="text-[15px] text-charcoal">{f.name}{f.doc_url ? " · Google Doc" : ""}</p>
+                          <p className="text-[12px] prose-muted">{f.doc_url ? "editable link" : kb(f.size)}{f.uploaded_by ? ` · ${f.uploaded_by}` : ""} · {new Date(f.created_at).toLocaleDateString()}</p></div>
                         <span className="flex items-center gap-3">
-                          <a href={`/api/client-file/${f.id}`} className="link-underline text-[13px]">Open</a>
+                          <a href={f.doc_url || `/api/client-file/${f.id}`} target="_blank" rel="noreferrer" className="link-underline text-[13px]">Open</a>
                           <DeleteFileButton fileId={f.id} />
                         </span>
                       </li>
@@ -58,6 +59,7 @@ export default async function StaffFilesPage() {
                   </ul>
                 )}
                 <ClientFileUpload clientId={c.id} />
+                <ClientDocLink clientId={c.id} />
               </li>
             );
           })}
