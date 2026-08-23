@@ -233,6 +233,29 @@ export async function sendClientFileReady(opts: { to: string | string[]; name: s
   await send(opts.to, opts.editable ? "A document to review in your portal" : many ? "New files in your portal" : "A new file in your portal", shell(opts.editable ? "Document ready to review" : "Files ready", body));
 }
 
+/** Hand-off email to a PREFERRED VENDOR: we've assigned them part of a client's
+ *  services. Reply-To is the assigning staffer so the vendor can coordinate. */
+export async function sendVendorAssignment(opts: { to: string; vendorName: string; clientName: string; scope?: string | null; note?: string | null; fromName?: string | null; replyTo?: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">Hi${opts.vendorName ? ` ${esc(opts.vendorName)}` : ""},</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Hill Country Consultants would like to bring you in on part of our work for <strong>${esc(opts.clientName)}</strong>.</p>
+    ${opts.scope ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>Scope:</strong> ${esc(opts.scope)}</p>` : ""}
+    ${opts.note ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>Details:</strong> ${esc(opts.note)}</p>` : ""}
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Reply to this email to coordinate next steps${opts.fromName ? ` with ${esc(opts.fromName)}` : ""}. Thank you for partnering with us.</p>`;
+  await send(opts.to, `Assignment from Hill Country Consultants — ${opts.clientName}`, shell("New assignment", body), opts.replyTo, "Hill Country Consultants");
+}
+
+/** Alert the team inbox that an employee referred a vendor for managers to action. */
+export async function sendVendorReferralAlert(opts: { vendorLabel: string; referredBy: string | null; clientName?: string | null; note?: string | null }) {
+  const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.referredBy || "An employee")}</strong> referred a vendor for review.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>Vendor:</strong> ${esc(opts.vendorLabel)}${opts.clientName ? ` · <strong>For client:</strong> ${esc(opts.clientName)}` : ""}</p>
+    ${opts.note ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38">${esc(opts.note)}</p>` : ""}
+    <p style="font-size:13px;color:#6b6552">Review it on the Preferred vendors tab in the employee portal.</p>`;
+  await send(to, `Vendor referral — ${opts.vendorLabel}`, shell("New vendor referral", body));
+}
+
 /** Onboarding check-in drip (day 3 and day 14) to a new client. Sent by the
  *  daily cron; each phase fires once per client. */
 export async function sendClientCheckin(opts: { to: string; name: string | null; phase: 3 | 14 }) {

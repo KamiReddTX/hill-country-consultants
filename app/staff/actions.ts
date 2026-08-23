@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady, sendVendorAssignment, sendVendorReferralAlert } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
@@ -2020,4 +2020,149 @@ export async function syncCalendarNow(): Promise<ActionResult & { found?: number
     revalidatePath("/staff");
     return { ok: true, found: r.found, flagged: r.flagged, disabled: r.disabled };
   } catch (e: any) { return { error: e?.message || "Sync failed." }; }
+}
+
+// ── Preferred Vendors (partners) ─────────────────────────────────────────────
+// Separate from AP/1099 `vendors`. Managers curate the directory and assign a
+// vendor to part of a client's services; any employee can refer a vendor.
+
+/** Admin/BM: create or edit a preferred vendor. Pass `id` to edit. */
+export async function savePreferredVendor(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const name = String(formData.get("name") || "").trim();
+  if (!name) return { error: "Vendor name is required." };
+  const website = String(formData.get("website") || "").trim();
+  if (website && !/^https?:\/\//i.test(website)) return { error: "Website must start with http:// or https://" };
+  const row = {
+    name: name.slice(0, 160),
+    category: String(formData.get("category") || "").trim() || null,
+    blurb: String(formData.get("blurb") || "").trim() || null,
+    website: website || null,
+    contact_name: String(formData.get("contact_name") || "").trim() || null,
+    contact_email: String(formData.get("contact_email") || "").trim().toLowerCase() || null,
+    phone: String(formData.get("phone") || "").trim() || null,
+    is_public: formData.get("is_public") === "on",
+    active: formData.get("active") !== "off",
+  };
+  const admin = createServiceClient();
+  const id = String(formData.get("id") || "").trim();
+  const { error } = id
+    ? await admin.from("preferred_vendors").update(row as any).eq("id", id)
+    : await admin.from("preferred_vendors").insert(row as any);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/partners"); revalidatePath("/preferred-vendors"); revalidatePath("/portal/vendors");
+  return { ok: true };
+}
+
+/** Admin/BM: toggle a vendor's public/active flags. */
+export async function setPreferredVendorFlag(id: string, field: "is_public" | "active", value: boolean): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("preferred_vendors").update({ [field]: value } as any).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/partners"); revalidatePath("/preferred-vendors"); revalidatePath("/portal/vendors");
+  return { ok: true };
+}
+
+/** Admin/BM: remove a preferred vendor (assignments cascade away). */
+export async function deletePreferredVendor(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("preferred_vendors").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/partners"); revalidatePath("/preferred-vendors"); revalidatePath("/portal/vendors");
+  return { ok: true };
+}
+
+/** Admin/BM: assign a preferred vendor to part of a client's services; optionally
+ *  email the vendor a hand-off with the scope + note. */
+export async function assignVendorToClient(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const clientId = String(formData.get("clientId") || "");
+  const vendorId = String(formData.get("vendorId") || "");
+  if (!clientId || !vendorId) return { error: "Pick a client and a vendor." };
+  const scope = String(formData.get("scope") || "").trim() || null;
+  const note = String(formData.get("note") || "").trim() || null;
+  const notify = formData.get("notify") === "on";
+  const admin = createServiceClient();
+  const { error } = await admin.from("client_preferred_vendors").insert({
+    client_id: clientId, vendor_id: vendorId, scope, note, assigned_by: me!.id,
+  } as any);
+  if (error) return { error: error.message };
+  if (notify) {
+    try {
+      const [{ data: v }, { data: c }] = await Promise.all([
+        admin.from("preferred_vendors").select("name,contact_email,contact_name").eq("id", vendorId).maybeSingle(),
+        admin.from("clients").select("business,contact").eq("id", clientId).maybeSingle(),
+      ]);
+      const email = (v as any)?.contact_email;
+      if (email) {
+        await sendVendorAssignment({
+          to: email, vendorName: (v as any)?.contact_name || (v as any)?.name || "",
+          clientName: (c as any)?.business || (c as any)?.contact || "our client",
+          scope, note, fromName: me!.name || null, replyTo: me!.email || undefined,
+        });
+      }
+    } catch (e) { console.warn("[assignVendorToClient] notify", e); }
+  }
+  revalidatePath("/staff/partners"); revalidatePath("/staff/clients"); revalidatePath("/portal/vendors");
+  return { ok: true };
+}
+
+/** Admin/BM: remove a vendor assignment from a client. */
+export async function removeVendorAssignment(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("client_preferred_vendors").delete().eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/partners"); revalidatePath("/staff/clients"); revalidatePath("/portal/vendors");
+  return { ok: true };
+}
+
+/** Any employee: refer a vendor (an existing one, or a brand-new suggestion),
+ *  optionally for a specific client. Routes to managers via email + the queue. */
+export async function referVendor(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const vendorId = String(formData.get("vendorId") || "").trim() || null;
+  const proposedName = String(formData.get("proposed_name") || "").trim() || null;
+  if (!vendorId && !proposedName) return { error: "Pick a vendor or enter a name to refer." };
+  const clientId = String(formData.get("clientId") || "").trim() || null;
+  const note = String(formData.get("note") || "").trim() || null;
+  const admin = createServiceClient();
+  const { error } = await admin.from("vendor_referrals").insert({
+    referred_by: me.id, vendor_id: vendorId,
+    proposed_name: proposedName,
+    proposed_website: String(formData.get("proposed_website") || "").trim() || null,
+    proposed_contact: String(formData.get("proposed_contact") || "").trim() || null,
+    client_id: clientId, note, status: "pending",
+  } as any);
+  if (error) return { error: error.message };
+  try {
+    let label = proposedName || "";
+    if (!label && vendorId) { const { data: v } = await admin.from("preferred_vendors").select("name").eq("id", vendorId).maybeSingle(); label = (v as any)?.name || "a vendor"; }
+    let clientName: string | null = null;
+    if (clientId) { const { data: c } = await admin.from("clients").select("business,contact").eq("id", clientId).maybeSingle(); clientName = (c as any)?.business || (c as any)?.contact || null; }
+    await sendVendorReferralAlert({ vendorLabel: label, referredBy: me.name || me.email, clientName, note });
+  } catch (e) { console.warn("[referVendor] alert", e); }
+  revalidatePath("/staff/partners");
+  return { ok: true };
+}
+
+/** Admin/BM: mark a referral actioned or dismissed. */
+export async function handleVendorReferral(id: string, status: "actioned" | "dismissed"): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("vendor_referrals").update({
+    status, handled_by: me!.id, handled_at: new Date().toISOString(),
+  } as any).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/partners");
+  return { ok: true };
 }

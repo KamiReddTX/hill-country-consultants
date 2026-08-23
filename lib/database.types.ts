@@ -489,6 +489,21 @@ export interface Database {
         Insert: { id?: string; client_id: string; name: string; path?: string | null; doc_url?: string | null; size?: number | null; uploaded_by?: string | null };
         Update: Partial<Database["public"]["Tables"]["client_files"]["Insert"]>;
       };
+      preferred_vendors: {
+        Row: { id: string; name: string; category: string | null; blurb: string | null; website: string | null; contact_name: string | null; contact_email: string | null; phone: string | null; logo_url: string | null; is_public: boolean; active: boolean; sort: number; created_at: string };
+        Insert: { id?: string; name: string; category?: string | null; blurb?: string | null; website?: string | null; contact_name?: string | null; contact_email?: string | null; phone?: string | null; logo_url?: string | null; is_public?: boolean; active?: boolean; sort?: number };
+        Update: Partial<Database["public"]["Tables"]["preferred_vendors"]["Insert"]>;
+      };
+      client_preferred_vendors: {
+        Row: { id: string; client_id: string; vendor_id: string; scope: string | null; note: string | null; assigned_by: string | null; created_at: string };
+        Insert: { id?: string; client_id: string; vendor_id: string; scope?: string | null; note?: string | null; assigned_by?: string | null };
+        Update: Partial<Database["public"]["Tables"]["client_preferred_vendors"]["Insert"]>;
+      };
+      vendor_referrals: {
+        Row: { id: string; referred_by: string | null; vendor_id: string | null; proposed_name: string | null; proposed_website: string | null; proposed_contact: string | null; client_id: string | null; note: string | null; status: string; created_at: string; handled_by: string | null; handled_at: string | null };
+        Insert: { id?: string; referred_by?: string | null; vendor_id?: string | null; proposed_name?: string | null; proposed_website?: string | null; proposed_contact?: string | null; client_id?: string | null; note?: string | null; status?: string; handled_by?: string | null; handled_at?: string | null };
+        Update: Partial<Database["public"]["Tables"]["vendor_referrals"]["Insert"]>;
+      };
       client_notes: {
         Row: { id: string; client_id: string; body: string; sender: string; author_name: string | null; created_at: string };
         Insert: { id?: string; client_id: string; body: string; sender?: string; author_name?: string | null };
@@ -695,5 +710,8 @@ export type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 export type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];
 export type ClientTaskRow = Database["public"]["Tables"]["client_tasks"]["Row"];
 export type VaultRow = Database["public"]["Tables"]["client_vault"]["Row"];
+export type PreferredVendor = Database["public"]["Tables"]["preferred_vendors"]["Row"];
+export type ClientPreferredVendor = Database["public"]["Tables"]["client_preferred_vendors"]["Row"];
+export type VendorReferral = Database["public"]["Tables"]["vendor_referrals"]["Row"];
 export type PunchRow = Database["public"]["Tables"]["punches"]["Row"];
 export type LeadRow = Database["public"]["Tables"]["leads"]["Row"];

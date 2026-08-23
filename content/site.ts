@@ -31,6 +31,7 @@ export const NAV: { href: string; label: string }[] = [
   { href: "/industries", label: "Industries" },
   { href: "/training", label: "Training" },
   { href: "/about", label: "About" },
+  { href: "/preferred-vendors", label: "Preferred Vendors" },
   { href: "/careers", label: "Careers" },
   { href: "/faq", label: "FAQ" },
 ];
@@ -44,6 +45,7 @@ export const FOOTER_NAV: { href: string; label: string }[] = [
   { href: "/book", label: "Book & Pay" },
   { href: "/training", label: "Training" },
   { href: "/about", label: "About" },
+  { href: "/preferred-vendors", label: "Preferred Vendors" },
   { href: "/faq", label: "FAQ" },
   { href: "/careers", label: "Careers" },
   { href: "/get-started", label: "Get Started" },

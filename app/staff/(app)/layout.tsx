@@ -32,6 +32,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/files", label: "Files" },
     { href: "/staff/weekly", label: "Weekly report" },
     { href: "/staff/kb", label: "Knowledge base" },
+    { href: "/staff/partners", label: "Preferred vendors" },
     { href: "/staff/messages", label: "Messages", badge: unread.total || undefined },
   );
   if (hourly) tabs.push({ href: "/staff/clock", label: "Timesheet" });

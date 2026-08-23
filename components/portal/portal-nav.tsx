@@ -11,6 +11,7 @@ const TABS = [
   { href: "/portal/work-log", label: "Work log" },
   { href: "/portal/weekly", label: "Weekly report" },
   { href: "/portal/files", label: "Files" },
+  { href: "/portal/vendors", label: "Preferred vendors" },
   { href: "/portal/messages", label: "Messages" },
 ];
 

@@ -11,6 +11,7 @@ import { BillingSelect } from "@/components/staff/billing-select";
 import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { DeleteClientButton } from "@/components/staff/delete-client-button";
 import { ClientPortalAccessButton } from "@/components/staff/client-portal-access-button";
+import { ClientVendorAssign } from "@/components/staff/client-vendor-assign";
 import { ClientContactsManager } from "@/components/staff/client-contacts-manager";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { LocalTime } from "@/components/local-time";
@@ -70,13 +71,23 @@ export default async function ClientsPage() {
 
   const db = createClient();
   const ym = monthKey();
-  const [{ data: assignments }, { data: allContacts }, { data: workLog }, { data: reports }, { data: adjustments }] = await Promise.all([
+  const [{ data: assignments }, { data: allContacts }, { data: workLog }, { data: reports }, { data: adjustments }, { data: prefVendors }, { data: vendorAssigns }] = await Promise.all([
     db.from("client_assignments").select("*"),
     db.from("client_contacts").select("*").order("created_at", { ascending: true }),
     db.from("client_work_log").select("*").order("worked_on", { ascending: false }).limit(400),
     db.from("client_reports").select("id,client_id,name,created_at").order("created_at", { ascending: false }),
     db.from("client_allotment_adjustments").select("*").eq("period_month", `${ym}-01`).order("created_at", { ascending: false }),
+    db.from("preferred_vendors").select("id,name,active").order("name"),
+    db.from("client_preferred_vendors").select("id,client_id,vendor_id,scope"),
   ]);
+  const vendorOpts = ((prefVendors ?? []) as any[]).filter((v) => v.active).map((v) => ({ id: v.id, label: v.name }));
+  const vendorNameById = new Map(((prefVendors ?? []) as any[]).map((v) => [v.id, v.name]));
+  const vendorAssignByClient = new Map<string, { id: string; vendor: string; scope: string | null }[]>();
+  ((vendorAssigns ?? []) as any[]).forEach((a) => {
+    const arr = vendorAssignByClient.get(a.client_id) || [];
+    arr.push({ id: a.id, vendor: vendorNameById.get(a.vendor_id) || "Vendor", scope: a.scope });
+    vendorAssignByClient.set(a.client_id, arr);
+  });
 
   const teamByClient = new Map<string, { id: string; staffId: string; label: string }[]>();
   (assignments ?? []).forEach((a: any) => {
@@ -208,6 +219,7 @@ export default async function ClientsPage() {
                   <H>Contacts &amp; account status</H>
                   <p className="mb-2 text-[12px] prose-muted">Every email here also receives client messages. Suspend to block portal access (e.g. non-payment).</p>
                   <ClientContactsManager clientId={c.id} contacts={contactsByClient.get(c.id) || []} suspended={suspended} reason={(c as any).suspended_reason || ""} />
+                  <ClientVendorAssign clientId={c.id} vendors={vendorOpts} assignments={vendorAssignByClient.get(c.id) || []} />
                 </div>
 
                 {/* Bookings */}
