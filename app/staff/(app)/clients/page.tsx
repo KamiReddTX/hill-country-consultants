@@ -10,6 +10,7 @@ import { StatusSelect } from "@/components/staff/status-select";
 import { BillingSelect } from "@/components/staff/billing-select";
 import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { DeleteClientButton } from "@/components/staff/delete-client-button";
+import { ClientPortalAccessButton } from "@/components/staff/client-portal-access-button";
 import { ClientContactsManager } from "@/components/staff/client-contacts-manager";
 import { GenerateReportForm } from "@/components/staff/generate-report-form";
 import { LocalTime } from "@/components/local-time";
@@ -156,6 +157,7 @@ export default async function ClientsPage() {
                   <div className="mt-3 flex flex-wrap items-center gap-4">
                     <span className="flex items-center gap-2 text-[13px] text-charcoal">30-day roadmap <RoadmapCheck clientId={c.id} done={!!c.roadmap_at} /></span>
                     {c.rep_code && <span className="text-[12px] prose-muted">Rep: {c.rep_code}</span>}
+                    <ClientPortalAccessButton email={c.email} />
                     {admin && <DeleteClientButton clientId={c.id} label={label} />}
                   </div>
                 </div>

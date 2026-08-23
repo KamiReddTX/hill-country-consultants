@@ -202,6 +202,19 @@ export async function sendClientWelcome(opts: { to: string; name: string | null;
   await send(opts.to, "Welcome to Hill Country Consultants — set up your client portal", shell("Welcome — let's get started", body));
 }
 
+/** Password-reset / set-a-new-password link for a client or employee portal.
+ *  Sent via our own Resend sender with a server-readable token_hash link so it
+ *  reliably lands on the set-password screen (not the login page). */
+export async function sendPasswordResetLink(opts: { to: string; name: string | null; actionUrl: string; portal: "client" | "staff" }) {
+  const which = opts.portal === "staff" ? "employee" : "client";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">Hi${opts.name ? ` ${esc(opts.name)}` : ""},</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Use the button below to set a new password for your ${which} portal. The link is single-use and expires shortly.</p>
+    <p style="margin:22px 0"><a href="${esc(opts.actionUrl)}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Set your password</a></p>
+    <p style="font-size:13px;color:#6b6552">If you didn&apos;t request this, you can ignore this email — your current password stays unchanged.</p>`;
+  await send(opts.to, `Set a new password for your ${which} portal`, shell("Reset your password", body));
+}
+
 /** Onboarding check-in drip (day 3 and day 14) to a new client. Sent by the
  *  daily cron; each phase fires once per client. */
 export async function sendClientCheckin(opts: { to: string; name: string | null; phase: 3 | 14 }) {

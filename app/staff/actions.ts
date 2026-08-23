@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
@@ -211,13 +211,43 @@ export async function sendPasswordReset(email: string, portal: "client" | "staff
   const clean = String(email || "").trim().toLowerCase();
   if (!clean || !clean.includes("@")) return { error: "Enter a valid email address." };
   const site = process.env.NEXT_PUBLIC_SITE_URL || "";
+  if (!site) return { error: "Site URL isn't configured — can't build the reset link." };
   const next = portal === "staff" ? "/staff" : "/portal";
-  const db = createClient();
-  const { error } = await db.auth.resetPasswordForEmail(
-    clean,
-    site ? { redirectTo: `${site}/auth/callback?next=${next}` } : undefined,
-  );
-  if (error) return { error: error.message };
+  const svc = createServiceClient();
+
+  // Look up a display name for the email (best-effort) for a warmer message.
+  let name: string | null = null;
+  try {
+    if (portal === "staff") {
+      const { data } = await svc.from("staff").select("name").eq("email", clean).maybeSingle();
+      name = (data as any)?.name ?? null;
+    } else {
+      const { data } = await svc.from("clients").select("contact").eq("email", clean).maybeSingle();
+      name = (data as any)?.contact ?? null;
+    }
+  } catch { /* non-fatal */ }
+
+  // Generate a server-readable link ourselves and send our OWN branded email via
+  // Resend — this reliably lands on the set-password screen. We try "recovery"
+  // first (existing user); if the account was never activated, fall back to
+  // "invite" so a brand-new/never-signed-in person can still set a password.
+  const redirectTo = `${site}/auth/callback?next=${next}`;
+  async function linkFor(kind: "recovery" | "invite"): Promise<string | null> {
+    try {
+      const { data, error } = await svc.auth.admin.generateLink({ type: kind, email: clean, options: { redirectTo } } as any);
+      if (error) return null;
+      const hashed = (data as any)?.properties?.hashed_token;
+      return hashed ? `${site}/auth/callback?token_hash=${hashed}&type=${kind}&next=${next}` : null;
+    } catch { return null; }
+  }
+
+  let actionUrl = await linkFor("recovery");
+  if (!actionUrl) actionUrl = await linkFor("invite");
+  if (!actionUrl) return { error: "No portal account exists for that email yet — add them first, then resend." };
+
+  try {
+    await sendPasswordResetLink({ to: clean, name, actionUrl, portal });
+  } catch (e) { return { error: "Could not send the reset email — try again." }; }
   return { ok: true };
 }
 
@@ -519,10 +549,23 @@ export async function addClient(formData: FormData): Promise<ActionResult> {
   if (error) return { error: error.message.includes("duplicate") ? "A client with that email already exists." : error.message };
   // Seed the standard onboarding checklist for the new client (best-effort).
   if (created?.id) await seedClientOnboarding(admin, created.id);
-  // Invite them to set a password; /auth/callback binds the client row on first login.
+  // Invite them to set a password; /auth/callback binds the client row on first
+  // login. Build a server-readable token_hash link and send our OWN branded email
+  // (reliable), so the client lands on the set-password screen — NOT the login
+  // page (the fragment-token invite email would dump them on login).
   try {
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
-    await admin.auth.admin.inviteUserByEmail(email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined);
+    const { data: link } = await admin.auth.admin.generateLink({
+      type: "invite", email,
+      options: site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
+    } as any);
+    const hashed = (link as any)?.properties?.hashed_token;
+    if (site && hashed) {
+      const actionUrl = `${site}/auth/callback?token_hash=${hashed}&type=invite&next=/portal`;
+      await sendClientWelcome({ to: email, name: String(formData.get("contact") || "") || null, actionUrl });
+    } else {
+      await admin.auth.admin.inviteUserByEmail(email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined);
+    }
   } catch (e) { console.warn("[addClient] invite", e); }
   revalidatePath("/staff/admin");
   return { ok: true };
