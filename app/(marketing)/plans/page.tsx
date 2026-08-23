@@ -4,6 +4,13 @@ import { SectionHeading } from "@/components/section-heading";
 import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS } from "@/content/pricing";
 import { PlanInterest } from "@/components/plan-interest";
 import { PlanChooser } from "@/components/plan-chooser";
+import { getSiteContent, pick } from "@/lib/site-content";
+
+export const dynamic = "force-dynamic";
+
+/** Split an admin-edited newline list into items, or fall back to the code list. */
+const lines = (v: string | undefined, fallback: string[]) =>
+  v && v.trim() ? v.split("\n").map((s) => s.trim()).filter(Boolean) : fallback;
 
 export const metadata: Metadata = {
   title: "Plans & Pricing",
@@ -18,7 +25,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PlansPage() {
+export default async function PlansPage() {
+  const c = await getSiteContent();
+  const included = lines(c["plans.included"], PLAN_INCLUDED);
+  const billed = lines(c["plans.billed"], PLAN_BILLED);
+  const terms = lines(c["plans.terms"], PLAN_TERMS);
   return (
     <>
       <section className="bg-white border-b border-line">
@@ -26,8 +37,8 @@ export default function PlansPage() {
           <SectionHeading
             as="h1"
             kicker="Plans & pricing"
-            title="Three plans. Every service line in all of them."
-            intro="Your tier sets how much of each you get — not which ones you're allowed to use."
+            title={pick(c, "plans.title", "Three plans. Every service line in all of them.")}
+            intro={pick(c, "plans.intro", "Your tier sets how much of each you get — not which ones you're allowed to use.")}
           />
           <div className="mt-10 grid gap-6 sm:grid-cols-3">
             {PLANS.map((pl) => (
@@ -113,19 +124,19 @@ export default function PlansPage() {
           <div>
             <p className="kicker mb-3">Every plan includes</p>
             <ul className="flex flex-col gap-2.5">
-              {PLAN_INCLUDED.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
+              {included.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
             </ul>
           </div>
           <div>
             <p className="kicker mb-3">Billed separately</p>
             <ul className="flex flex-col gap-2.5">
-              {PLAN_BILLED.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
+              {billed.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
             </ul>
           </div>
           <div>
             <p className="kicker mb-3">Terms</p>
             <ul className="flex flex-col gap-2.5">
-              {PLAN_TERMS.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
+              {terms.map((x, i) => <li key={i} className="text-[15.5px] prose-soft">{x}</li>)}
             </ul>
           </div>
         </div>
