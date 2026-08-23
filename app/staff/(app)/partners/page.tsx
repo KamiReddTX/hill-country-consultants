@@ -54,10 +54,19 @@ export default async function PartnersPage() {
             {vlist.map((v) => (
               <li key={v.id} className="border border-line-warm bg-white p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-[15px] font-medium text-charcoal">{v.name}{v.category ? <span className="ml-2 text-[12px] prose-muted">{v.category}</span> : null}</p>
-                    {v.blurb && <p className="mt-1 max-w-[52em] text-[13px] prose-soft">{v.blurb}</p>}
-                    <p className="mt-1 text-[12px] prose-muted">{[v.website, v.contact_email, v.phone].filter(Boolean).join(" · ") || "—"}</p>
+                  <div className="flex min-w-0 gap-3">
+                    {v.logo_url && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={v.logo_url} alt="" className="h-12 w-12 shrink-0 object-contain" />
+                    )}
+                    <div className="min-w-0">
+                      <p className="text-[15px] font-medium text-charcoal">{v.name}</p>
+                      {Array.isArray(v.services) && v.services.length > 0 && (
+                        <p className="mt-0.5 text-[12px] prose-muted">{v.services.join(" · ")}</p>
+                      )}
+                      {v.blurb && <p className="mt-1 max-w-[52em] text-[13px] prose-soft">{v.blurb}</p>}
+                      <p className="mt-1 text-[12px] prose-muted">{[v.website, v.contact_email, v.phone].filter(Boolean).join(" · ") || "—"}</p>
+                    </div>
                   </div>
                   {priv && <PreferredVendorControls id={v.id} isPublic={v.is_public} active={v.active} />}
                 </div>

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getPortalClient, getPortalData } from "@/lib/portal";
 import { TaskRequestForm } from "@/components/portal/task-request-form";
 import { TaskReviewActions } from "@/components/portal/task-review-actions";
+import { ServiceUpgrades } from "@/components/portal/service-upgrades";
 import { LocalTime } from "@/components/local-time";
 
 const COLUMNS = ["Requested", "In progress", "In review", "Delivered"];
@@ -30,6 +31,8 @@ export default async function TasksPage() {
       </div>
 
       <TaskRequestForm />
+
+      <ServiceUpgrades />
 
       <div className="grid gap-4 md:grid-cols-4">
         {COLUMNS.map((col) => {

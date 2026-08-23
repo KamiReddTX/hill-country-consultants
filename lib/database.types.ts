@@ -490,8 +490,8 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["client_files"]["Insert"]>;
       };
       preferred_vendors: {
-        Row: { id: string; name: string; category: string | null; blurb: string | null; website: string | null; contact_name: string | null; contact_email: string | null; phone: string | null; logo_url: string | null; is_public: boolean; active: boolean; sort: number; created_at: string };
-        Insert: { id?: string; name: string; category?: string | null; blurb?: string | null; website?: string | null; contact_name?: string | null; contact_email?: string | null; phone?: string | null; logo_url?: string | null; is_public?: boolean; active?: boolean; sort?: number };
+        Row: { id: string; name: string; category: string | null; services: string[]; blurb: string | null; website: string | null; contact_name: string | null; contact_email: string | null; phone: string | null; logo_url: string | null; is_public: boolean; active: boolean; sort: number; created_at: string };
+        Insert: { id?: string; name: string; category?: string | null; services?: string[]; blurb?: string | null; website?: string | null; contact_name?: string | null; contact_email?: string | null; phone?: string | null; logo_url?: string | null; is_public?: boolean; active?: boolean; sort?: number };
         Update: Partial<Database["public"]["Tables"]["preferred_vendors"]["Insert"]>;
       };
       client_preferred_vendors: {
@@ -503,6 +503,11 @@ export interface Database {
         Row: { id: string; referred_by: string | null; vendor_id: string | null; proposed_name: string | null; proposed_website: string | null; proposed_contact: string | null; client_id: string | null; note: string | null; status: string; created_at: string; handled_by: string | null; handled_at: string | null };
         Insert: { id?: string; referred_by?: string | null; vendor_id?: string | null; proposed_name?: string | null; proposed_website?: string | null; proposed_contact?: string | null; client_id?: string | null; note?: string | null; status?: string; handled_by?: string | null; handled_at?: string | null };
         Update: Partial<Database["public"]["Tables"]["vendor_referrals"]["Insert"]>;
+      };
+      service_upgrade_requests: {
+        Row: { id: string; client_id: string; upgrade_key: string | null; label: string; note: string | null; status: string; created_at: string; handled_by: string | null; handled_at: string | null };
+        Insert: { id?: string; client_id: string; upgrade_key?: string | null; label: string; note?: string | null; status?: string; handled_by?: string | null; handled_at?: string | null };
+        Update: Partial<Database["public"]["Tables"]["service_upgrade_requests"]["Insert"]>;
       };
       client_notes: {
         Row: { id: string; client_id: string; body: string; sender: string; author_name: string | null; created_at: string };

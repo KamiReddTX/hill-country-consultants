@@ -2034,9 +2034,28 @@ export async function savePreferredVendor(formData: FormData): Promise<ActionRes
   if (!name) return { error: "Vendor name is required." };
   const website = String(formData.get("website") || "").trim();
   if (website && !/^https?:\/\//i.test(website)) return { error: "Website must start with http:// or https://" };
-  const row = {
+  const services = formData.getAll("services").map((s) => String(s)).filter(Boolean);
+  const admin = createServiceClient();
+  const id = String(formData.get("id") || "").trim();
+
+  // Optional logo upload → public bucket → store its URL.
+  let logoUrl: string | null = null;
+  const logo = formData.get("logo");
+  if (logo instanceof File && logo.size > 0) {
+    if (!/^image\//.test(logo.type)) return { error: "Logo must be an image file." };
+    if (logo.size > 4 * 1024 * 1024) return { error: "Logo must be under 4 MB." };
+    const ext = (logo.name.split(".").pop() || "png").replace(/[^a-z0-9]/gi, "").slice(0, 5) || "png";
+    const path = `${id || "new"}-${Date.now()}.${ext}`;
+    const buf = Buffer.from(await logo.arrayBuffer());
+    const up = await admin.storage.from("vendor-logos").upload(path, buf, { contentType: logo.type, upsert: true });
+    if (up.error) return { error: `Logo upload failed: ${up.error.message}` };
+    logoUrl = admin.storage.from("vendor-logos").getPublicUrl(path).data.publicUrl;
+  }
+
+  const row: Record<string, any> = {
     name: name.slice(0, 160),
-    category: String(formData.get("category") || "").trim() || null,
+    category: services[0] || String(formData.get("category") || "").trim() || null,
+    services,
     blurb: String(formData.get("blurb") || "").trim() || null,
     website: website || null,
     contact_name: String(formData.get("contact_name") || "").trim() || null,
@@ -2045,8 +2064,8 @@ export async function savePreferredVendor(formData: FormData): Promise<ActionRes
     is_public: formData.get("is_public") === "on",
     active: formData.get("active") !== "off",
   };
-  const admin = createServiceClient();
-  const id = String(formData.get("id") || "").trim();
+  if (logoUrl) row.logo_url = logoUrl;
+
   const { error } = id
     ? await admin.from("preferred_vendors").update(row as any).eq("id", id)
     : await admin.from("preferred_vendors").insert(row as any);
@@ -2164,5 +2183,18 @@ export async function handleVendorReferral(id: string, status: "actioned" | "dis
   } as any).eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/partners");
+  return { ok: true };
+}
+
+/** Admin/BM: mark a client's service-upgrade request handled (contacted/closed). */
+export async function handleUpgradeRequest(id: string, status: "contacted" | "closed"): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isPrivileged(me)) return { error: "Admins and business managers only." };
+  const admin = createServiceClient();
+  const { error } = await admin.from("service_upgrade_requests").update({
+    status, handled_by: me!.id, handled_at: new Date().toISOString(),
+  } as any).eq("id", id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff");
   return { ok: true };
 }

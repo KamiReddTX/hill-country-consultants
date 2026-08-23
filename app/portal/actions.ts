@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
-import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert } from "@/lib/email";
+import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert, sendServiceUpgradeRequest } from "@/lib/email";
 import { uploadNoteFiles } from "@/lib/message-files";
 import type { ClientRow } from "@/lib/database.types";
 
@@ -321,5 +321,36 @@ export async function reviewDeliverable(id: string, status: "approved" | "change
     );
   }
   revalidatePath("/portal/files");
+  return { ok: true };
+}
+
+/** Client requests a service upgrade / add-on from their task board. Records it
+ *  and alerts the account owner + the sales/admin inbox. */
+export async function requestServiceUpgrade(formData: FormData): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Please sign in again." };
+  const label = String(formData.get("label") || "").trim();
+  if (!label) return { error: "Pick an upgrade." };
+  const note = String(formData.get("note") || "").trim() || null;
+  const upgradeKey = String(formData.get("upgrade_key") || "").trim() || null;
+  const admin = createServiceClient();
+  const { error } = await admin.from("service_upgrade_requests").insert({
+    client_id: client.id, upgrade_key: upgradeKey, label: label.slice(0, 160), note, status: "new",
+  } as any);
+  if (error) return { error: error.message };
+
+  // Notify the account owner and the sales/admin inbox.
+  try {
+    const recipients = new Set<string>();
+    const notify = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+    recipients.add(notify);
+    await notifyAssignedStaff(client, async (email) => { recipients.add(email); });
+    await sendServiceUpgradeRequest({
+      to: [...recipients], clientName: clientLabel(client), label, note,
+      portalUrl: siteUrl() ? `${siteUrl()}/staff` : "",
+    });
+  } catch (e) { console.warn("[requestServiceUpgrade] notify", e); }
+
+  revalidatePath("/portal/tasks"); revalidatePath("/staff");
   return { ok: true };
 }

@@ -15,6 +15,7 @@ import { renewalDate, daysUntil } from "@/lib/health";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 import { KickoffHandledButton } from "@/components/staff/kickoff-handled-button";
 import { SyncCalendarButton } from "@/components/staff/sync-calendar-button";
+import { UpgradeRequestActions } from "@/components/staff/upgrade-request-actions";
 import { gcalConfigured } from "@/lib/google-calendar";
 
 const STAGES = ["New lead", "Contacted", "Qualified", "Proposal", "Closed won", "Closed lost"];
@@ -70,15 +71,18 @@ export default async function Dashboard() {
   // pending time off, and employees who haven't signed the current IT/security ack.
   const attention = { renewalsSoon: 0, unpaidCount: 0, unpaidCents: 0, ptoPending: 0, missingAck: 0, lowRatings: 0 };
   let recentFeedback: any[] = [];
+  let upgradeReqs: any[] = [];
   if (priv) {
     const admin = createServiceClient();
-    const [{ data: unpaid }, { data: pto }, { data: acks }, { data: fb }] = await Promise.all([
+    const [{ data: unpaid }, { data: pto }, { data: acks }, { data: fb }, { data: upg }] = await Promise.all([
       admin.from("invoices").select("amount_cents,status").in("status", ["sent", "overdue"]),
       admin.from("time_off_requests").select("id").eq("status", "pending"),
       admin.from("staff_acknowledgments").select("staff_id").eq("kind", ACK_KIND).eq("version", ACK_VERSION),
       admin.from("client_feedback").select("client_id,rating,comment,created_at").order("created_at", { ascending: false }).limit(12),
+      admin.from("service_upgrade_requests").select("id,client_id,label,note,created_at").eq("status", "new").order("created_at", { ascending: false }).limit(20),
     ]);
     recentFeedback = fb ?? [];
+    upgradeReqs = upg ?? [];
     const cutoff30 = Date.now() - 30 * 86400000;
     attention.lowRatings = recentFeedback.filter((f: any) => f.rating <= 2 && new Date(f.created_at).getTime() >= cutoff30).length;
     attention.unpaidCount = (unpaid ?? []).length;
@@ -97,7 +101,9 @@ export default async function Dashboard() {
     { n: attention.ptoPending, label: "time-off requests to review", href: "/staff/capacity" },
     { n: attention.missingAck, label: "staff missing security ack", href: "/staff/directory" },
     { n: attention.lowRatings, label: "low satisfaction ratings (≤2, 30d)", href: "#recent-feedback" },
+    { n: upgradeReqs.length, label: "service upgrade requests", href: "#upgrade-requests" },
   ].filter((i) => i.n > 0);
+  const upgradeClientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
 
   // A rep's own running income + estimated commission. Invoices are biller-only
   // under RLS, so we read them with the service client and surface only this
@@ -214,6 +220,26 @@ export default async function Dashboard() {
                   {f.comment && <span className="prose-muted"> — {f.comment}</span>}
                 </span>
                 <span className="text-[12px] text-ink-faint">{f.created_at ? new Date(f.created_at).toLocaleDateString() : ""}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Service upgrade requests (managers) */}
+      {priv && upgradeReqs.length > 0 && (
+        <section id="upgrade-requests">
+          <h2 className="mb-1 font-fraunces text-[22px] font-medium text-forest">Service upgrade requests</h2>
+          <p className="mb-3 text-[14px] prose-muted">Clients who asked about an upgrade or add-on from their task board. Follow up to scope it.</p>
+          <ul className="flex flex-col gap-2">
+            {upgradeReqs.map((r: any) => (
+              <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 border border-gold/50 bg-white p-3">
+                <div className="min-w-0">
+                  <p className="text-[14px] font-medium text-charcoal">{upgradeClientName.get(r.client_id) || "Client"} — {r.label}</p>
+                  {r.note && <p className="mt-0.5 text-[13px] prose-soft">{r.note}</p>}
+                  <p className="mt-0.5 text-[12px] text-ink-faint">{r.created_at ? new Date(r.created_at).toLocaleDateString() : ""}</p>
+                </div>
+                <UpgradeRequestActions id={r.id} />
               </li>
             ))}
           </ul>

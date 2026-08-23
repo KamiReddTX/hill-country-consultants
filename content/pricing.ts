@@ -195,3 +195,36 @@ export const bookItemById = (id: string) => BOOK_ITEMS.find((b) => b.id === id);
 export const quoteItemById = (id: string) => QUOTE_ITEMS.find((q) => q.id === id);
 export const rateLinesFor = (svc: string) => RATE_LINES.filter((l) => l.svc === svc);
 export const usd = (n: number) => "$" + n.toLocaleString("en-US");
+
+/** Client-facing upgrades & add-ons shown on the portal task board. Selecting one
+ *  routes a request to the account owner + sales — it's an inquiry, not a charge. */
+export const SERVICE_UPGRADES: { key: string; label: string; blurb: string }[] = [
+  { key: "plan_tier",   label: "Upgrade my plan",            blurb: "Move up a tier (Foundation → Momentum → Enterprise) for more hours, projects, and priority." },
+  { key: "va_hours",    label: "Add virtual assistant hours", blurb: "Extra day-to-day support beyond your monthly allotment." },
+  { key: "publishing",  label: "Publishing package",          blurb: "Manuscript, eBook, or full book production and launch support." },
+  { key: "marketing",   label: "Marketing & graphics",        blurb: "A campaign, extra graphics, or a content calendar on your brand." },
+  { key: "web_app",     label: "Website or app build",        blurb: "A landing page, multi-page site, PWA, or custom app build." },
+  { key: "events",      label: "Event support",               blurb: "Run-of-show planning and on-site coordination for an event." },
+  { key: "training",    label: "Corporate training",          blurb: "A class or custom training track, virtual or on-site." },
+  { key: "automation",  label: "Systems & automation",        blurb: "Workflow buildouts and automation to save your team time." },
+  { key: "grants",      label: "Grants & funding",            blurb: "Research, applications, and funder reporting support." },
+  { key: "other",       label: "Something else",              blurb: "Tell us what you need and we'll scope it with you." },
+];
+
+/** Services a preferred vendor may provide — the dropdown on the vendor form. */
+export const VENDOR_SERVICES: string[] = [
+  "Publishing & Production",
+  "Events",
+  "Financial & Accounting",
+  "Marketing & Graphics",
+  "Web & App Development",
+  "Corporate Training",
+  "Systems & Automation",
+  "Grants & Funding",
+  "Agriculture & Land",
+  "Construction Documentation",
+  "Administrative / Virtual Assistance",
+  "Legal & Compliance",
+  "Photography & Media",
+  "Other",
+];

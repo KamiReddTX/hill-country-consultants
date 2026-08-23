@@ -66,7 +66,16 @@ export default async function PortalVendorsPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {dir.map((v) => (
               <div key={v.id} className="flex flex-col border border-line-warm bg-white p-4">
-                <p className="text-[15px] font-medium text-charcoal">{v.name}{v.category ? <span className="ml-2 text-[12px] prose-muted">{v.category}</span> : null}</p>
+                {v.logo_url && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={v.logo_url} alt={`${v.name} logo`} className="mb-2 h-12 w-auto max-w-[150px] object-contain" />
+                )}
+                <p className="text-[15px] font-medium text-charcoal">{v.name}</p>
+                {Array.isArray(v.services) && v.services.length > 0 && (
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {v.services.map((s: string) => <span key={s} className="border border-line-warm px-1.5 py-0.5 text-[10.5px] text-ink-muted">{s}</span>)}
+                  </div>
+                )}
                 {v.blurb && <p className="mt-1 flex-1 text-[13px] prose-soft">{v.blurb}</p>}
                 <div className="mt-2 flex flex-wrap items-center gap-4 text-[13px]">
                   {v.website && <a href={v.website} target="_blank" rel="noopener noreferrer" className="link-underline text-forest">Website</a>}

@@ -256,6 +256,17 @@ export async function sendVendorReferralAlert(opts: { vendorLabel: string; refer
   await send(to, `Vendor referral — ${opts.vendorLabel}`, shell("New vendor referral", body));
 }
 
+/** Alert the account owner + sales inbox that a client requested an upgrade/add-on. */
+export async function sendServiceUpgradeRequest(opts: { to: string | string[]; clientName: string; label: string; note?: string | null; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6"><strong>${esc(opts.clientName)}</strong> is interested in an upgrade.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>Requested:</strong> ${esc(opts.label)}</p>
+    ${opts.note ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38">${esc(opts.note)}</p>` : ""}
+    <p style="font-size:14px;line-height:1.6;color:#3a3f38">Follow up with them to scope it and, if it&rsquo;s a plan change, update their tier.</p>
+    ${opts.portalUrl ? `<p style="margin:20px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Open the dashboard</a></p>` : ""}`;
+  await send(opts.to, `Upgrade interest — ${opts.clientName}: ${opts.label}`, shell("Service upgrade request", body));
+}
+
 /** Onboarding check-in drip (day 3 and day 14) to a new client. Sent by the
  *  daily cron; each phase fires once per client. */
 export async function sendClientCheckin(opts: { to: string; name: string | null; phase: 3 | 14 }) {

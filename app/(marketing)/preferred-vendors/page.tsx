@@ -64,7 +64,16 @@ export default async function PreferredVendorsPage() {
                   <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
                     {list.map((v) => (
                       <div key={v.id} className="flex flex-col border border-line-warm bg-white p-6">
+                        {v.logo_url && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={v.logo_url} alt={`${v.name} logo`} className="mb-3 h-16 w-auto max-w-[180px] object-contain" />
+                        )}
                         <h3 className="font-fraunces text-[20px] font-medium text-forest">{v.name}</h3>
+                        {Array.isArray(v.services) && v.services.length > 0 && (
+                          <div className="mt-2 flex flex-wrap gap-1.5">
+                            {v.services.map((s: string) => <span key={s} className="border border-line-warm px-2 py-0.5 text-[11px] text-ink-muted">{s}</span>)}
+                          </div>
+                        )}
                         {v.blurb && <p className="mt-2 flex-1 text-[15px] prose-soft">{v.blurb}</p>}
                         <div className="mt-4 flex flex-wrap items-center gap-4 text-[13.5px]">
                           {v.website && (
