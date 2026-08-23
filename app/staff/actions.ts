@@ -42,7 +42,7 @@ export async function clockOut(): Promise<ActionResult> {
 /** Admin only: force a stuck punch closed (RLS allows admin update on any punch). */
 export async function forceClockOut(punchId: string, startedAt: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isAdmin(me)) return { error: "Admins only." };
   const db = createClient();
   const hours = (Date.now() - new Date(startedAt).getTime()) / 3600000;
   const { error } = await db.from("punches").update({ ended_at: new Date().toISOString(), hours: Math.round(hours * 100) / 100, closed_by_admin: true }).eq("id", punchId);
@@ -70,7 +70,7 @@ export async function assignClient(clientId: string, staffId: string): Promise<A
  *  plus its portal login. Built for clearing test accounts. */
 export async function deleteClient(clientId: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isAdmin(me)) return { error: "Admins only." };
   const admin = createServiceClient();
   const { data: client } = await admin.from("clients").select("user_id").eq("id", clientId).maybeSingle();
   const { error } = await admin.from("clients").delete().eq("id", clientId);
@@ -267,7 +267,7 @@ export async function requestStaffReset(email: string): Promise<ActionResult> {
 /** Admin only: approve an employee reset request — sends the recovery email. */
 export async function approveStaffReset(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isAdmin(me)) return { error: "Admins only." };
   const admin = createServiceClient();
   const { data: reqRow } = await admin.from("staff_reset_requests").select("email,status").eq("id", id).maybeSingle();
   if (!reqRow) return { error: "Request not found." };
@@ -285,7 +285,7 @@ export async function approveStaffReset(id: string): Promise<ActionResult> {
 /** Admin only: deny an employee reset request (no email sent). */
 export async function denyStaffReset(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isAdmin(me)) return { error: "Admins only." };
   await createServiceClient().from("staff_reset_requests")
     .update({ status: "denied", handled_by: me.id, handled_at: new Date().toISOString() }).eq("id", id);
   revalidatePath("/staff/admin");
@@ -479,8 +479,11 @@ export async function addClientVaultEntry(formData: FormData): Promise<ActionRes
 export async function setClientVaultResync(id: string, needs: boolean): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
-  const db = createClient();
-  const { error } = await db.from("client_vault").update({ needs_resync: needs, updated_at: new Date().toISOString() }).eq("id", id);
+  const admin = createServiceClient();
+  const { data: row } = await admin.from("client_vault").select("client_id").eq("id", id).maybeSingle();
+  if (!row) return { error: "Not found." };
+  if (!(await canReachClient(me, (row as any).client_id))) return { error: "This isn't your client." };
+  const { error } = await admin.from("client_vault").update({ needs_resync: needs, updated_at: new Date().toISOString() }).eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
   return { ok: true };
@@ -490,8 +493,11 @@ export async function setClientVaultResync(id: string, needs: boolean): Promise<
 export async function deleteClientVaultEntry(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
-  const db = createClient();
-  const { error } = await db.from("client_vault").delete().eq("id", id);
+  const admin = createServiceClient();
+  const { data: row } = await admin.from("client_vault").select("client_id").eq("id", id).maybeSingle();
+  if (!row) return { error: "Not found." };
+  if (!(await canReachClient(me, (row as any).client_id))) return { error: "This isn't your client." };
+  const { error } = await admin.from("client_vault").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/staff/vault"); revalidatePath("/portal/vault");
   return { ok: true };
@@ -788,7 +794,7 @@ export async function startDocusignSigning(docId: string): Promise<{ url?: strin
 /** Admin only: approve a two-week timesheet for a staff member. */
 export async function approveTimesheet(staffId: string, periodStart: string, periodEnd: string): Promise<ActionResult> {
   const me = await getStaffMember();
-  if (me?.role !== "Administrator") return { error: "Admins only." };
+  if (!isAdmin(me)) return { error: "Admins only." };
   const db = createClient();
   const { error } = await db.from("timesheet_approvals").upsert(
     { staff_id: staffId, period_start: periodStart, period_end: periodEnd, approved_by: me.id },
@@ -842,7 +848,7 @@ export async function acceptTask(taskId: string): Promise<ActionResult> {
   const db = createClient();
   const { data: task } = await db.from("client_tasks").select("paid,created_by").eq("id", taskId).maybeSingle();
   const isPurchase = !!task && (task as any).paid && (task as any).created_by === "staff";
-  if (isPurchase && me.role !== "Administrator") return { error: "Only an administrator can approve & assign a purchased service." };
+  if (isPurchase && !isAdmin(me)) return { error: "Only an administrator can approve & assign a purchased service." };
   const { error } = await db.from("client_tasks").update({ column_name: "In progress", needs_clarification: false }).eq("id", taskId);
   if (error) return { error: error.message };
   revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
