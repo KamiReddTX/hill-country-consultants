@@ -18,11 +18,14 @@ create table if not exists client_files (
 );
 alter table client_files enable row level security;
 
+-- Strict, idempotent policies (match strict-access.sql). Safe to re-run: the
+-- drops make this converge to the correct policy instead of a weaker one.
+drop policy if exists client_files_read on client_files;
 create policy client_files_read on client_files for select
-  using (exists (select 1 from clients c where c.id = client_files.client_id
-                 and (c.user_id = auth.uid() or is_staff())));
+  using (can_access_client(client_files.client_id));
+drop policy if exists client_files_staff_write on client_files;
 create policy client_files_staff_write on client_files for all
-  using (is_staff()) with check (is_staff());
+  using (can_access_client(client_files.client_id)) with check (can_access_client(client_files.client_id));
 
 insert into storage.buckets (id, name, public) values ('client-files','client-files', false)
   on conflict (id) do nothing;

@@ -1,3 +1,16 @@
+-- ============================================================================
+-- ⛔ DISABLED — DO NOT RUN.  (setup-all.sql)
+-- Superseded "run everything" monolith. It re-creates tables and re-applies
+-- OLDER, WEAKER row-level-security policies. Production is already set up with
+-- the current, stricter policies (strict-access.sql). Running this could
+-- downgrade security. The abort below stops the whole script if pasted into the
+-- SQL editor. For an intentional from-scratch rebuild: read supabase/README.md
+-- and delete ONLY this DO $$ ... $$ block first.
+-- ============================================================================
+DO $$ BEGIN
+  RAISE EXCEPTION 'DISABLED: setup-all.sql is superseded and must not be run. See supabase/README.md.';
+END $$;
+
 -- Hill Country Consultants — Supabase schema
 -- Paste into Supabase → SQL Editor → New query → Run.
 -- Creates every table the three apps use, plus row-level security so a client
