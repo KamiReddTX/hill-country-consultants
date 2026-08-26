@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
-import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS } from "@/content/pricing";
+import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS, DELIVERABLE_EQUIVALENTS } from "@/content/pricing";
 import { PlanInterest } from "@/components/plan-interest";
 import { PlanChooser } from "@/components/plan-chooser";
 import { getSiteContent, pick } from "@/lib/site-content";
@@ -110,6 +110,22 @@ export default async function PlansPage() {
                 <li><span className="font-medium text-charcoal">Priority on everything</span> — first scheduling priority among active clients.</li>
               </ul>
               <p className="mt-3 text-[14px] prose-muted">Turnaround still varies by service — each service page gives the detail, and deadline work can be flagged as rush.</p>
+            </div>
+          </div>
+
+          <div className="mt-12">
+            <h3 className="font-fraunces text-[20px] font-medium text-forest">&ldquo;Deliverable packages&rdquo; by industry</h3>
+            <span className="rule-gold mb-4 mt-2" />
+            <p className="mb-5 max-w-[52em] text-[15px] prose-soft">
+              Every plan includes a monthly allotment of <strong>deliverable packages</strong> — the core, spec-matched documents we produce for you. It isn&apos;t construction-only: each industry draws on the same allotment for its own equivalent. Here&apos;s what one package looks like in yours.
+            </p>
+            <div className="grid gap-x-8 gap-y-3 sm:grid-cols-2">
+              {DELIVERABLE_EQUIVALENTS.map((d) => (
+                <div key={d.industry} className="border-t border-line-soft pt-2.5">
+                  <p className="text-[15px] font-medium text-charcoal">{d.industry}</p>
+                  <p className="text-[14px] prose-muted">{d.example}</p>
+                </div>
+              ))}
             </div>
           </div>
 

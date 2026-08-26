@@ -35,7 +35,10 @@ export const ALLOTMENT_LINES: {
   key: AllotKey; label: string; unit: string; auto: boolean; f: number; m: number; e: number;
 }[] = [
   { key: "va_hours",   label: "Virtual assistant", unit: "hours",    auto: true,  f: 40, m: 100, e: 160 },
-  { key: "submittals", label: "Submittals",        unit: "packages", auto: false, f: 4,  m: 12,  e: 24 },
+  // The "submittals" key is kept stable for tracking/billing; the label is
+  // industry-neutral so every client draws on this allotment for their own core
+  // deliverable (see DELIVERABLE_EQUIVALENTS).
+  { key: "submittals", label: "Deliverable packages", unit: "packages", auto: false, f: 4,  m: 12,  e: 24 },
   { key: "compliance", label: "Compliance docs",   unit: "builds",   auto: false, f: 1,  m: 3,   e: 6 },
   { key: "marketing",  label: "Marketing graphics", unit: "graphics", auto: false, f: 4,  m: 12,  e: 24 },
 ];
@@ -50,10 +53,21 @@ export function allotmentFor(plan: string | null | undefined, key: AllotKey): nu
   return null;
 }
 
+/** What the "Deliverable packages" allotment covers in each industry — every
+ *  client uses this same monthly allotment for their own core deliverable. */
+export const DELIVERABLE_EQUIVALENTS: { industry: string; example: string }[] = [
+  { industry: "Construction & Contractors", example: "Submittal package — product data, cut sheets, spec-matched" },
+  { industry: "Authors & Personal Brands", example: "Editorial package — a chapter edit or a formatting/layout set" },
+  { industry: "Food & Hospitality", example: "Menu, SOP, or food-safety document packet" },
+  { industry: "Small & Mid-Size Business", example: "Business document package — SOP, one-sheet, or proposal" },
+  { industry: "Nonprofits & Mission-Driven", example: "Grant or funder-report packet" },
+  { industry: "Landowners & Agriculture", example: "Land or stewardship plan deliverable" },
+];
+
 export const PLAN_ROWS: { label: string; f: string; m: string; e: string }[] = [
   { label: "Best for", f: "Smaller businesses & brands", m: "Mid-size, multiple fronts", e: "Program-level coverage" },
   { label: "Virtual assistant", f: "2 hrs/day (~40/mo)", m: "5 hrs/day (~100/mo)", e: "8 hrs/day (~160/mo)" },
-  { label: "Submittals", f: "Up to 4/mo", m: "Up to 12/mo", e: "Up to 24/mo, priority" },
+  { label: "Deliverable packages", f: "Up to 4/mo", m: "Up to 12/mo", e: "Up to 24/mo, priority" },
   { label: "Compliance docs", f: "1 build or refresh/mo", m: "3/mo", e: "6/mo + full library buildout" },
   { label: "Projects", f: "1 active", m: "Up to 3 concurrent", e: "Unlimited, program-level" },
   { label: "Marketing graphics", f: "4/mo", m: "12 + 1 campaign/mo", e: "24 + 2 campaigns + calendar" },
@@ -79,7 +93,7 @@ export const PLAN_INCLUDED: string[] = [
 ];
 
 export const PLAN_BILLED: string[] = [
-  "Submittal packages beyond your allotment — a flat $450/week covering any number of additional packages that week (the standalone weekly rate for non-plan clients is $750/week)",
+  "Deliverable packages beyond your allotment are quoted in writing first. For construction submittals specifically, extra packages run a flat $450/week covering any number that week (the standalone weekly rate for non-plan clients is $750/week)",
   "Rush $550 surcharge added on top of a package, never included in any plan",
   "Additional VA hours $55 Foundation / $50 Momentum / $40 Enterprise",
   "Anything beyond allotment quoted in writing first",

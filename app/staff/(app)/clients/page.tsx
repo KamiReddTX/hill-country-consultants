@@ -197,7 +197,7 @@ export default async function ClientsPage() {
                           </tbody>
                         </table>
                       </div>
-                      <p className="text-[11px] prose-muted">VA hours count approved work-log hours this month automatically. Record other deliverables (a submittal, a compliance build, a graphic) as they&rsquo;re completed — a positive number uses allotment, a negative number credits it back. Anything over allotment should be invoiced from Billing &amp; AR.</p>
+                      <p className="text-[11px] prose-muted">VA hours count approved work-log hours this month automatically. Record other deliverables (a deliverable package, a compliance build, a graphic) as they&rsquo;re completed — a positive number uses allotment, a negative number credits it back. Anything over allotment should be invoiced from Billing &amp; AR.</p>
                       <AllotmentAdjustForm clientId={c.id} month={ym} />
                       {adjList.length > 0 && (
                         <ul className="flex flex-col gap-0.5">
