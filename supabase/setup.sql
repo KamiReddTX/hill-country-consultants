@@ -2,9 +2,11 @@
 -- Hill Country Consultants — CANONICAL DATABASE SETUP  (supabase/setup.sql)
 -- ============================================================================
 -- This ONE file builds the entire database in the correct order, with the
--- current STRICT row-level-security policies applied last. It is:
---   • validated  — runs clean on a fresh Postgres and produces the strict
---                  policies (49 tables / 91 policies / 17 functions);
+-- current STRICT row-level-security policies applied last and the team-aware
+-- access helpers asserted at the end. It is:
+--   • validated  — runs clean on a fresh Postgres, produces the strict policies,
+--                  and passes a per-role access-matrix test (owner/team/client
+--                  isolation verified);
 --   • idempotent — safe to run more than once (drop-if-exists guards);
 --   • the single source of truth for a fresh rebuild.
 --
@@ -343,32 +345,20 @@ revoke execute on function create_client_after_payment(
   text, text, text, text, text, jsonb, jsonb, integer, date, text
 ) from public, anon, authenticated;
 
--- ── consolidated-setup prelude ────────────────────────────────────────────────
--- Allow functions to reference tables/columns/other functions created later in
--- this file. Individual objects still exist by the time any query runs them.
+-- consolidated-setup prelude: allow forward references; forward-declare the
+-- interlinked access helpers so policies resolve regardless of file order.
 set check_function_bodies = off;
-
--- Forward-declare the interlinked access helpers so policies in any section
--- resolve regardless of file order. Each is redefined (identically) by its home
--- migration below; create-or-replace makes that a no-op.
-create or replace function is_privileged() returns boolean
-  language sql stable security definer set search_path = public, pg_temp as $$
+create or replace function is_privileged() returns boolean language sql stable security definer set search_path = public, pg_temp as $$
   select exists (select 1 from staff s where s.user_id = auth.uid() and s.active
-    and ('Administrator' = any(s.roles) or 'Business Manager' = any(s.roles)
-         or s.role in ('Administrator','Business Manager'))); $$;
-create or replace function manages_client(cid uuid) returns boolean
-  language sql stable security definer set search_path = public, pg_temp as $$
-  select is_privileged() or exists (select 1 from staff s
-    where s.user_id = auth.uid() and s.active
-      and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
-create or replace function can_access_client(cid uuid) returns boolean
-  language sql stable security definer set search_path = public, pg_temp as $$
+    and ('Administrator' = any(s.roles) or 'Business Manager' = any(s.roles) or s.role in ('Administrator','Business Manager'))); $$;
+create or replace function manages_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
+  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active
+    and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
+create or replace function can_access_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
   select is_privileged()
     or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
-    or exists (select 1 from staff s where s.user_id = auth.uid() and s.active
-        and s.id::text = (select assigned_to from clients c2 where c2.id = cid))
-    or exists (select 1 from client_assignments a join staff s on s.id = a.staff_id
-        where a.client_id = cid and s.user_id = auth.uid() and s.active); $$;
+    or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c2 where c2.id = cid))
+    or exists (select 1 from client_assignments a join staff s on s.id = a.staff_id where a.client_id = cid and s.user_id = auth.uid() and s.active); $$;
 
 -- ============================================================ team-model.sql
 -- Hill Country Consultants — multi-role staff + account teams + task assignees
@@ -2516,3 +2506,15 @@ select 'Carnetta Dansby — Financial Analyst',
        true, true
 where not exists (select 1 from preferred_vendors where name = 'Carnetta Dansby — Financial Analyst');
 
+-- ============================================================================
+-- Authoritative access helpers (FINAL definitions) — asserted last so account
+-- teams (client_assignments) always keep access, regardless of section order.
+-- ============================================================================
+create or replace function can_access_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
+  select is_privileged()
+    or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
+    or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c2 where c2.id = cid))
+    or exists (select 1 from client_assignments a join staff s on s.id = a.staff_id where a.client_id = cid and s.user_id = auth.uid() and s.active); $$;
+create or replace function manages_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
+  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active
+    and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
