@@ -746,7 +746,7 @@ export const JOBS: Job[] = [
   {
     slug: "business-manager",
     title: "Business Manager",
-    type: "Full-time · Salaried · Remote",
+    type: "Full-time · Salaried",
     location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$40,000/yr salaried + 10% / 5% commission + 5% quarterly retention bonus",
@@ -758,7 +758,7 @@ export const JOBS: Job[] = [
   {
     slug: "accounts-manager",
     title: "Accounts Manager",
-    type: "Full-time · Salaried · Remote",
+    type: "Full-time · Salaried",
     location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$32,564/yr base + 15% initial · 10% recurring · 5% retention + 2.5% quarterly bonus",
@@ -770,10 +770,10 @@ export const JOBS: Job[] = [
   {
     slug: "engagement-specialist",
     title: "Engagement Specialist",
-    type: "Contracted · Part-time · Remote",
+    type: "Contracted · Part-time",
     location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
-    pay: "$10–$17/hr base + 15% initial · 5% recurring · 10% standalone",
+    pay: "$10/hr base (reviewed up to $17 with results) + 15% initial · 5% recurring · 10% standalone",
     summary:
       "You bring the client in, then you're the one who takes care of them — about 75% client work, 25% sales. Assemble construction submittals, run compliance and coordination, keep the account, and sell the next one. Two years of sales experience wanted; paid training on the rest. Reports to an Accounts Manager.",
     open: true,
@@ -782,7 +782,7 @@ export const JOBS: Job[] = [
   {
     slug: "creative-specialist",
     title: "Creative Specialist",
-    type: "Contracted · Part-time · Remote",
+    type: "Contracted · Part-time",
     location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$15/hr base + 15% initial · 5% recurring · 10% standalone",
