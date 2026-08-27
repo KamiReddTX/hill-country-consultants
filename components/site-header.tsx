@@ -1,12 +1,14 @@
 import Link from "next/link";
 import Image from "next/image";
 import { NAV } from "@/content/site";
+import { MobileNav } from "@/components/mobile-nav";
 
-/** Sticky header: horizontal logo, primary nav, Client Login, Get Started. */
+/** Sticky header: horizontal logo, primary nav, Client Login, Get Started.
+ *  Full nav on md+, hamburger menu (MobileNav) below md. */
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-white">
-      <div className="shell flex items-center justify-between gap-6 py-4">
+      <div className="relative shell flex items-center justify-between gap-6 py-4">
         <Link href="/" className="shrink-0" aria-label={`${"Hill Country Consultants"} — home`}>
           <Image
             src="/assets/logo-horizontal.png"
@@ -17,7 +19,8 @@ export function SiteHeader() {
             className="h-[46px] w-auto sm:h-[54px]"
           />
         </Link>
-        <nav className="flex flex-wrap items-center justify-end gap-x-5 gap-y-2">
+        <MobileNav />
+        <nav className="hidden flex-wrap items-center justify-end gap-x-5 gap-y-2 md:flex">
           {NAV.map((item) => (
             <Link
               key={item.href}
