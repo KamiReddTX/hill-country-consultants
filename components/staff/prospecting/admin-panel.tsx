@@ -41,7 +41,7 @@ export function ProspectAdmin({ roles, staff, period, suppression }: { roles: Ro
     else setMsg("Email suppression upload failed.");
   };
 
-  const [ingSource, setIngSource] = useState("CO_SOS");
+  const [ingSource, setIngSource] = useState("TX_COMPTROLLER");
   const [ingLimit, setIngLimit] = useState(500);
   const [ingBusy, setIngBusy] = useState(false);
   const runIngest = async () => {
@@ -61,10 +61,11 @@ export function ProspectAdmin({ roles, staff, period, suppression }: { roles: Ro
 
       <section className="border border-line-warm bg-white p-4">
         <p className="text-[13px] font-semibold text-forest">Data ingest</p>
-        <p className="mt-1 text-[12px] prose-muted">Pull the newest company records from a state open-data source into the base layer (companies only — no contact data). Free states run without a vendor. Paid sources (national file, your GA/TX/AL/LA/FL/NV territory) plug into the same job once licensed.</p>
+        <p className="mt-1 text-[12px] prose-muted">Pull the newest company records from a state open-data source into the base layer (companies only — no contact data). Texas & Colorado stream real active businesses free. Florida is free but ships as an SFTP flat file (loaded separately). GA, AL, LA & NV have no free feed — they need a licensed file, which plugs into this same job.</p>
         <div className="mt-2 flex flex-wrap items-end gap-2">
           <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Source
             <select value={ingSource} onChange={(e) => setIngSource(e.target.value)} className={field}>
+              <option value="TX_COMPTROLLER">Texas — active businesses (free)</option>
               <option value="CO_SOS">Colorado SOS (free)</option>
               <option value="CT_SOS">Connecticut Registry (free)</option>
             </select>

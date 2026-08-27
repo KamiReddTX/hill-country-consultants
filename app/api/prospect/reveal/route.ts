@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getStaff } from "@/lib/auth";
+import { getContactVendor } from "@/lib/prospecting/vendors";
 
 export const runtime = "nodejs";
 
@@ -8,23 +9,12 @@ export const runtime = "nodejs";
  * Reveal one contact field (email / phone_direct / phone_mobile). All gating —
  * capability, suppression scrub, do-not-contact, cache (0 credits), and the
  * credit debit — happens atomically inside the prospect_reveal() DB function.
- * This route only supplies a candidate value from the vendor for a fresh reveal.
- *
- * ⚠ VENDOR IS STUBBED. `vendorLookup` returns a synthesized placeholder (emails
- * from name+domain; phones in the reserved fictional 555-01xx range so nothing
- * real is ever dialed). To go live, replace vendorLookup with the licensed
- * vendor's API call (PDL / Coresignal / Apollo / waterfall) and set VENDOR.
+ * This route only supplies a candidate value from the active vendor for a fresh
+ * reveal; which vendor runs is chosen by env (see lib/prospecting/vendors.ts).
+ * Default is the stub; set PROSPECT_CONTACT_VENDOR=hunter + HUNTER_API_KEY to
+ * return real verified emails. A vendor miss returns no value → no credit spent.
  */
-const VENDOR = "stub";
 const FIELDS = ["email", "phone_direct", "phone_mobile"] as const;
-
-function vendorLookup(field: string, c: { id: string; first_name?: string | null; last_name?: string | null }, domain?: string | null): string {
-  const fn = (c.first_name || "").toLowerCase().replace(/[^a-z]/g, "");
-  const ln = (c.last_name || "").toLowerCase().replace(/[^a-z]/g, "");
-  if (field === "email") return `${fn || "contact"}.${ln || "x"}@${(domain || "example.com").toLowerCase()}`;
-  const h = [...c.id].reduce((a, ch) => a + ch.charCodeAt(0), 0);
-  return `+1 (555) 01${h % 10}-${String(1000 + (h % 9000))}`; // 555-01xx: reserved/fictional
-}
 
 export async function POST(req: Request) {
   const staff = await getStaff();
@@ -39,15 +29,18 @@ export async function POST(req: Request) {
   // Fetch the contact + its account domain to synthesize a candidate value.
   const { data: c } = await db.from("prospect_contacts").select("id,first_name,last_name,account_id").eq("id", contactId).maybeSingle();
   if (!c) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  let domain: string | null = null;
+  let domain: string | null = null; let company: string | null = null;
   if ((c as any).account_id) {
-    const { data: a } = await db.from("prospect_accounts").select("domain").eq("id", (c as any).account_id).maybeSingle();
-    domain = (a as any)?.domain || null;
+    const { data: a } = await db.from("prospect_accounts").select("domain,legal_name").eq("id", (c as any).account_id).maybeSingle();
+    domain = (a as any)?.domain || null; company = (a as any)?.legal_name || null;
   }
-  const candidate = vendorLookup(field, c as any, domain);
+  const vend = getContactVendor();
+  const { value: candidate, vendor } = await vend.lookup(field as any, {
+    contact_id: contactId, first_name: (c as any).first_name, last_name: (c as any).last_name, domain, company,
+  });
 
   // Atomic meter: capability + suppression + cache + credit debit + store.
-  const { data, error } = await db.rpc("prospect_reveal", { p_contact: contactId, p_field: field, p_value: candidate, p_vendor: VENDOR });
+  const { data, error } = await db.rpc("prospect_reveal", { p_contact: contactId, p_field: field, p_value: candidate ?? "", p_vendor: vendor });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const res = (data || {}) as any;
 

@@ -50,6 +50,20 @@ const ADAPTERS: Record<string, Adapter> = {
       vendor: "CT_SOS", vendor_record_id: String(r.accountnumber || r.id),
     } : null,
   },
+  // Texas Comptroller — active franchise taxpayers (real street/city/zip + charter date).
+  // Priority state. Filter to active businesses with a real charter date, newest first.
+  TX_COMPTROLLER: {
+    key: "TX_COMPTROLLER", label: "Texas (active businesses)",
+    url: (l, o) => `https://data.texas.gov/resource/9cir-efmm.json?$where=right_to_transact_business_code%3D%27A%27%20AND%20sos_charter_date%20IS%20NOT%20NULL&$order=sos_charter_date%20DESC&$limit=${l}&$offset=${o}`,
+    map: (r) => r?.taxpayer_name && r?.taxpayer_number ? {
+      legal_name: String(r.taxpayer_name).trim(),
+      street: r.taxpayer_address || null, city: r.taxpayer_city || null,
+      state: (r.taxpayer_state || "TX"), zip: r.taxpayer_zip ? String(r.taxpayer_zip).slice(0, 5) : null,
+      formation_date: d10(r.sos_charter_date),
+      location_type: (!r.taxpayer_state || r.taxpayer_state === "TX") ? "HQ" : "branch",
+      vendor: "TX_COMPTROLLER", vendor_record_id: String(r.taxpayer_number),
+    } : null,
+  },
 };
 
 const yearsSince = (iso: string | null) => {

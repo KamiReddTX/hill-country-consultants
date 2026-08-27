@@ -20,7 +20,7 @@ const label = "flex flex-col gap-1 text-[12px] text-ink-faint";
 const usd = (n: number | null) => (n == null ? "—" : "$" + n.toLocaleString("en-US"));
 
 export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
-  const [f, setF] = useState<Record<string, any>>({ state: "CO" });
+  const [f, setF] = useState<Record<string, any>>({});
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -77,7 +77,7 @@ export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
   useEffect(() => { run(1); /* initial load */ }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const saveSearch = async () => {
-    const name = window.prompt("Name this search:", "New CO filings"); if (!name) return;
+    const name = window.prompt("Name this search:", "New prospects"); if (!name) return;
     const r = await fetch("/api/prospect/save-search", {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, filters: buildFilters(), result_count: total }),
@@ -121,7 +121,7 @@ export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
           <p className="text-[13px] font-semibold uppercase tracking-wide text-forest">Filters</p>
           <label className={label}>Company name contains<input className={field} value={f.q ?? ""} onChange={(e) => set("q", e.target.value)} /></label>
           <div className="grid grid-cols-2 gap-2">
-            <label className={label}>State<input className={field} value={f.state ?? ""} onChange={(e) => set("state", e.target.value)} placeholder="CO" /></label>
+            <label className={label}>State<input className={field} value={f.state ?? ""} onChange={(e) => set("state", e.target.value)} placeholder="e.g. TX" /></label>
             <label className={label}>City<input className={field} value={f.city ?? ""} onChange={(e) => set("city", e.target.value)} /></label>
             <label className={label}>County<input className={field} value={f.county ?? ""} onChange={(e) => set("county", e.target.value)} /></label>
             <label className={label}>ZIP<input className={field} value={f.zip ?? ""} onChange={(e) => set("zip", e.target.value)} /></label>
@@ -153,7 +153,7 @@ export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
             <span className="text-[11px]">Contact filters activate once a contact vendor is connected.</span>
           </div>
           <button onClick={() => run(1)} disabled={loading} className="btn-gold text-[14px] disabled:opacity-50">{loading ? "Searching…" : "Search"}</button>
-          <button onClick={() => { setF({ state: "CO" }); }} className="text-[12px] text-forest underline">Reset filters</button>
+          <button onClick={() => { setF({}); }} className="text-[12px] text-forest underline">Reset filters</button>
         </div>
       </aside>
 
@@ -247,8 +247,11 @@ export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
                   </td>
                 </tr>
               ))}
+              {loading && rows.length === 0 && (
+                <tr><td colSpan={8} className="p-6 text-center text-[14px] prose-muted">Searching…</td></tr>
+              )}
               {rows.length === 0 && !loading && (
-                <tr><td colSpan={8} className="p-6 text-center text-[14px] prose-muted">No companies match these filters.</td></tr>
+                <tr><td colSpan={8} className="p-6 text-center text-[14px] prose-muted">No companies match these filters. Adjust the filters on the left, or run an ingest from Admin to add companies.</td></tr>
               )}
             </tbody>
           </table>
