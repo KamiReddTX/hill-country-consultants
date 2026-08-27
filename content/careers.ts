@@ -16,7 +16,7 @@ export type Job = {
 };
 
 const ENGAGEMENT_SPECIALIST = `# Engagement Specialist
-**Hill Country Consultants · Remote — Anywhere in the United States · Part-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Part-Time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -143,7 +143,7 @@ Because we handle client data, every role meets the same baseline:
 - **5%** of every recurring payment after that, for as long as that client stays with us
 - **10%** on standalone and one-time services
 
-**Base pay grows with results.** Once you reach $14,000 in sales, your base rate is reviewed and can increase up to **$17.00 per hour**.
+**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that — and once you reach $14,000 in cumulative sales, it can increase up to **$17.00 per hour**.
 
 The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands. We're direct about this: the base is a floor, not the income. This role is built for someone who wants their effort to show up in their check.
 
@@ -162,7 +162,7 @@ Tell us about a time you had to explain something complicated to someone who did
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const CREATIVE_SPECIALIST = `# Creative Specialist
-**Hill Country Consultants · Remote — Anywhere in the United States · Part-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Part-Time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -343,7 +343,7 @@ Because we handle client data, every role meets the same baseline. **This role r
 - **5%** of every recurring payment after that, for as long as that client stays with us
 - **10%** on standalone and one-time services
 
-**Base pay grows with results.** Once you reach $14,000 in sales, your base rate is reviewed and can increase from there.
+**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that — and once you reach $14,000 in cumulative sales, it can increase from there.
 
 The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands.
 
@@ -364,7 +364,7 @@ Then tell us about a project where the client asked for something you thought wa
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const ACCOUNTS_MANAGER = `# Accounts Manager
-**Hill Country Consultants · Remote — United States · Full-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Full-Time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -511,7 +511,7 @@ Tell us about someone you coached who got measurably better — what they were d
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const BUSINESS_MANAGER = `# Business Manager
-**Hill Country Consultants · Remote — United States · Full-Time, Salaried**
+**Hill Country Consultants · Remote / Hybrid — United States · Full-Time, Salaried**
 
 ### Two positions open — one Eastern, one Pacific
 
@@ -697,7 +697,7 @@ You won't be building enterprise software. You'll be the person who makes our sy
 
 ## Compensation
 
-**$40,000 per year, salaried.** Fully remote.
+**$40,000 per year, salaried.** Remote/hybrid — primarily remote, with local and regional on-site as needed.
 
 **Commission on your own sales:**
 - **10%** of every initial sale
@@ -747,7 +747,7 @@ export const JOBS: Job[] = [
     slug: "business-manager",
     title: "Business Manager",
     type: "Full-time · Salaried",
-    location: "Remote · United States",
+    location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$40,000/yr salaried + 10% / 5% commission + 5% quarterly retention bonus",
     summary:
@@ -759,7 +759,7 @@ export const JOBS: Job[] = [
     slug: "accounts-manager",
     title: "Accounts Manager",
     type: "Full-time · Salaried",
-    location: "Remote · United States",
+    location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$32,564/yr base + 15% initial · 10% recurring · 5% retention + 2.5% quarterly bonus",
     summary:
@@ -771,7 +771,7 @@ export const JOBS: Job[] = [
     slug: "engagement-specialist",
     title: "Engagement Specialist",
     type: "Contracted · Part-time",
-    location: "Remote · United States",
+    location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$10/hr base (reviewed up to $17 with results) + 15% initial · 5% recurring · 10% standalone",
     summary:
@@ -783,7 +783,7 @@ export const JOBS: Job[] = [
     slug: "creative-specialist",
     title: "Creative Specialist",
     type: "Contracted · Part-time",
-    location: "Remote · United States",
+    location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$15/hr base + 15% initial · 5% recurring · 10% standalone",
     summary:

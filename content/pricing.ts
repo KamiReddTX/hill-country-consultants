@@ -101,7 +101,7 @@ export const PLAN_BILLED: string[] = [
 ];
 
 export const PLAN_TERMS: string[] = [
-  "12-month standard, quarterly option available",
+  "12-month standard term",
   "Plan fees billed monthly, or paid up front for the year",
   "Pay the year up front and save one month",
   "Standalone projects paid in full at booking",
@@ -171,11 +171,13 @@ export interface RateLine {
 }
 
 export const RATE_LINES: RateLine[] = [
-  { svc: "va", n: "Virtual assistant block — 10 hours", p: "$650", cart: "va-block" },
-  { svc: "va", n: "Additional hours beyond the block", p: "$65/hr" },
+  { svc: "va", n: "Virtual assistant block — 10 hours (standalone)", p: "$650", cart: "va-block" },
+  { svc: "va", n: "Additional hours beyond the block (standalone)", p: "$65/hr" },
+  { svc: "va", n: "Plan clients — hours beyond your monthly allotment", p: "$55 Foundation · $50 Momentum · $40 Enterprise, per hour" },
   { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
-  { svc: "submittals", n: "Submittal package", p: "$350 each", cart: "sub-pkg" },
-  { svc: "submittals", n: "Weekly submittal service · any volume", p: "$750/wk", cart: "sub-week" },
+  { svc: "submittals", n: "Submittal package (standalone)", p: "$350 each", cart: "sub-pkg" },
+  { svc: "submittals", n: "Weekly submittal service · any volume (standalone)", p: "$750/wk", cart: "sub-week" },
+  { svc: "submittals", n: "Plan clients — extra weekly packages beyond allotment", p: "$450/wk flat · any volume that week" },
   { svc: "submittals", n: "Rush turnaround (surcharge on a package)", p: "$550 · added on top of a package · never in a plan", cart: "rush" },
   { svc: "compliance", n: "Single document — capabilities, cert, profile, one-sheet or SOP", p: "from $450", quote: "q-doc" },
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
