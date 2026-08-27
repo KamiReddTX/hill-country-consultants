@@ -56,14 +56,28 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
   const [edu, setEdu] = useState<Edu[]>([emptyEdu()]);
   const [jobs, setJobs] = useState<Job[]>([emptyJob(), emptyJob()]);
   const [refs, setRefs] = useState<Ref[]>([emptyRef(), emptyRef()]);
+  const [zone, setZone] = useState("");
 
   const needsMac = /creative/i.test(role || "");
+  const isBM = /business manager/i.test(role || "");
+  const isCreative = /creative/i.test(role || "");
+  // Employment type is defined by the role, so we derive it rather than ask.
+  const derivedType = /business manager|accounts manager/i.test(role || "") ? "Full-time"
+    : /engagement|creative/i.test(role || "") ? "Contract / 1099" : "";
+  // The signature question from each posting, asked in the application itself.
+  const rolePrompt =
+    /engagement/i.test(role || "") ? "Tell us about a time you had to explain something complicated to someone who didn't want to hear it. Then summarize the sales experience and client-facing work you'd bring."
+    : /creative/i.test(role || "") ? "Tell us about a project where the client asked for something you thought was wrong — what you did, and how it ended. Then summarize your design, web/app, and video work."
+    : /accounts manager/i.test(role || "") ? "Tell us about someone you coached who got measurably better — what they were doing wrong, what you changed, and how you knew it worked. Then describe your own sales results and any experience training clients."
+    : isBM ? "Tell us about a system or process you built from nothing — what was broken before, what you put in place, how you got it approved, and how you knew it worked."
+    : "Roles, tools, industries, and what you'd bring to the team.";
+  const positionValue = isBM ? (zone ? `${role} — ${zone}` : role || "") : (role || "");
 
   if (done)
     return (
       <div className="border border-forest bg-white p-6">
         <p className="font-fraunces text-[22px] text-forest">Application received.</p>
-        <p className="mt-2 max-w-[46em] text-[15px] prose-soft">Thank you for applying to Hill Country Consultants. Our team reviews every application and will reach out by email if there&apos;s a fit. You&apos;ll hear from us at the address you provided.</p>
+        <p className="mt-2 max-w-[46em] text-[15px] prose-soft">Thank you for applying to Hill Country Consultants. We review every application and will be in touch by email at the address you provided — you can expect to hear from us within about two weeks if there&apos;s a fit. If you attached a résumé or portfolio file, it was received with your application.</p>
       </div>
     );
 
@@ -117,8 +131,8 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         <div className="grid gap-4 md:grid-cols-2">
           {role ? (
             <label className={labelCls}>Position you&apos;re applying for
-              <input value={role} readOnly className={`${field} bg-cream/50`} />
-              <input type="hidden" name="position" value={role} />
+              <input value={positionValue} readOnly className={`${field} bg-cream/50`} />
+              <input type="hidden" name="position" value={positionValue} />
             </label>
           ) : (
             <label className={labelCls}>Position you&apos;re applying for
@@ -128,12 +142,26 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
               </select>
             </label>
           )}
-          <label className={labelCls}>Employment type
-            <select name="employment_type" defaultValue="" className={field}>
-              <option value="" disabled>Select…</option>
-              {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
-            </select>
-          </label>
+          {isBM && (
+            <label className={labelCls}>Coverage zone *
+              <select required value={zone} onChange={(e) => setZone(e.target.value)} className={field}>
+                <option value="" disabled>Select Eastern or Pacific…</option>
+                <option value="Eastern">Eastern</option>
+                <option value="Pacific">Pacific</option>
+              </select>
+            </label>
+          )}
+          {role ? (
+            // The role defines the employment type — recorded, not asked.
+            <input type="hidden" name="employment_type" value={derivedType} />
+          ) : (
+            <label className={labelCls}>Employment type
+              <select name="employment_type" defaultValue="" className={field}>
+                <option value="" disabled>Select…</option>
+                {TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </label>
+          )}
           <label className={labelCls}>Earliest start date<input name="available_start" placeholder="e.g. Oct 1 or ASAP" className={field} /></label>
           <label className={labelCls}>Desired pay (optional)<input name="desired_pay" placeholder="e.g. $22/hr or negotiable" className={field} /></label>
           <label className={labelCls}>Hours available / week<input name="hours_available" placeholder="e.g. 20 hrs/wk" className={field} /></label>
@@ -203,6 +231,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
           <p className={legend}>Professional references</p>
           <button type="button" onClick={() => setRefs((a) => [...a, emptyRef()])} className="text-[13px] font-medium text-forest underline">+ Add reference</button>
         </div>
+        <p className={sub}>Optional at this stage — you&apos;re welcome to add them now, or we&apos;ll request them later if your application moves forward.</p>
         {refs.map((row, i) => (
           <div key={i} className="grid gap-3 border border-line-soft p-3 md:grid-cols-2">
             <label className={labelCls}>Name<input value={row.name} onChange={(e) => setRefs((a) => a.map((r, j) => j === i ? { ...r, name: e.target.value } : r))} className={field} /></label>
@@ -221,10 +250,11 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         <label className={labelCls}>Key skills / software<textarea name="skills" rows={2} placeholder="e.g. Google Workspace, Microsoft 365, Canva, Adobe, QuickBooks, HubSpot, WordPress, HTML/CSS/JS…" className={area} /></label>
         <label className={labelCls}>Certifications &amp; licenses<textarea name="certifications" rows={2} placeholder="e.g. Notary, PMP, industry certifications…" className={area} /></label>
         <div className="grid gap-4 md:grid-cols-2">
-          <label className={labelCls}>Portfolio / LinkedIn / website<input name="portfolio_url" placeholder="https://…" className={field} /></label>
+          <label className={labelCls}>Portfolio / LinkedIn / website{isCreative ? " *" : ""}<input name="portfolio_url" required={isCreative} placeholder="https://…" className={field} /></label>
           <label className={labelCls}>How did you hear about us?<input name="referral" className={field} /></label>
         </div>
-        <label className={labelCls}>Relevant experience<textarea name="experience" rows={4} placeholder="Roles, tools, industries, and what you'd bring to the team." className={area} /></label>
+        {isCreative && <p className={sub}>Please share your portfolio, links to two sites you&apos;ve built (note the platform for each), a piece of video or motion work, and anything you&apos;ve built that runs as an app — paste the links above and in your answer below.</p>}
+        <label className={labelCls}>{role ? "Your answer to the question in this posting *" : "Relevant experience"}<textarea name="experience" rows={5} required={!!role} placeholder={rolePrompt} className={area} /></label>
         <label className={labelCls}>Why Hill Country Consultants?<textarea name="why" rows={3} className={area} /></label>
       </section>
 
@@ -271,7 +301,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
       {/* 11 · Certification & signature */}
       <section className={sectionCls}>
         <p className={legend}>Certification &amp; signature</p>
-        <p className="max-w-[52em] text-[13px] prose-soft">I certify that the information I have provided is true and complete to the best of my knowledge. I understand that any false statement, omission, or misrepresentation may result in denial or termination of employment. I authorize Hill Country Consultants to verify the information provided, including contacting my references and previous employers, and to conduct a background check. I understand that, if hired, employment is on an at-will basis and may be ended by either party at any time.</p>
+        <p className="max-w-[52em] text-[13px] prose-soft">I certify that the information I have provided is true and complete to the best of my knowledge. I understand that any false statement, omission, or misrepresentation may result in denial or termination of employment. I authorize Hill Country Consultants to verify the information provided, including contacting my references and previous employers, and to conduct a background check. I understand that if I am hired as an employee, employment is on an at-will basis and may be ended by either party at any time; and that if I am engaged as an independent contractor, the engagement is governed by the terms of the contract rather than at-will employment.</p>
         <label className="flex items-start gap-2 text-[14px] text-charcoal"><input type="checkbox" name="certified" className="mt-1" /> I have read and agree to the certification above. *</label>
         <div className="grid gap-4 md:grid-cols-2">
           <label className={labelCls}>Type your full name to sign *<input name="signature" className={field} /></label>

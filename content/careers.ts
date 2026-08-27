@@ -143,7 +143,7 @@ Because we handle client data, every role meets the same baseline:
 - **5%** of every recurring payment after that, for as long as that client stays with us
 - **10%** on standalone and one-time services
 
-**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that — and once you reach $14,000 in cumulative sales, it can increase up to **$17.00 per hour**.
+**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that. Once your cumulative credited sales (every sale credited to you, across your time here) reach **$14,000**, you become eligible for an increase up to **$17.00 per hour** at your next review — it's an eligibility threshold, not an automatic bump, and the review is where it's decided.
 
 The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands. We're direct about this: the base is a floor, not the income. This role is built for someone who wants their effort to show up in their check.
 
@@ -323,7 +323,7 @@ It's a small firm. You'll know everyone.
 
 Because we handle client data, every role meets the same baseline. **This role requires both a Windows laptop and a Mac laptop**, each meeting every item below:
 
-- **A Windows laptop and a Mac laptop**, with a **dual-monitor** setup
+- **A Windows laptop and a Mac laptop** — with a **dual-monitor** setup at your primary workstation (an external monitor either machine can drive satisfies this)
 - A **wired Ethernet** connection — not Wi-Fi only
 - A **smartphone and/or tablet** that can run apps
 - Antivirus, and an updated, encrypted Windows installation
@@ -631,8 +631,8 @@ Construction is our largest industry, and this is our most technical service. Yo
 
 - **A bachelor's degree**
 - **Five or more years of sales experience.** Half this job is selling, and we need someone who has carried a number before — services, retainers, B2B, professional services, insurance, real estate, recruiting or similar.
-- **Five or more years** managing operations, a team, or a book of client accounts — including managing other managers, or being ready to
-- **Notary commission — current, or eligible and willing to become commissioned.** We offer notary services to clients, and we need it covered in both coverage zones. If you're not currently commissioned, you'll be expected to obtain it in your state shortly after starting.
+- **Five or more years** managing operations, a team, or a book of client accounts — including managing other managers, or ready to step up to managing managers as the team grows
+- **Notary commission — current, or eligible and willing to become commissioned.** We offer notary services to clients. Each Business Manager holds a commission in their own state, so that between the two zones we have notary coverage on both coasts — you're responsible only for your own state, not the other zone's. If you're not currently commissioned, you'll be expected to obtain it in your state shortly after starting.
 - **You've actually managed people** — assigned work, given hard feedback, and been accountable when someone underperformed
 - You can hold several moving projects and several people in your head at once without dropping one
 - You're comfortable telling someone no, including someone whose income depends on yes
@@ -773,7 +773,7 @@ export const JOBS: Job[] = [
     type: "Contracted · Part-time",
     location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
-    pay: "$10/hr base (reviewed up to $17 with results) + 15% initial · 5% recurring · 10% standalone",
+    pay: "$10/hr starting base (reviewed at 90 days, then quarterly; eligible up to $17/hr on results) + 15% initial · 5% recurring · 10% standalone",
     summary:
       "You bring the client in, then you're the one who takes care of them — about 75% client work, 25% sales. Assemble construction submittals, run compliance and coordination, keep the account, and sell the next one. Two years of sales experience wanted; paid training on the rest. Reports to an Accounts Manager.",
     open: true,

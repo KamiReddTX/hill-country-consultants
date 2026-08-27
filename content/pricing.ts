@@ -80,6 +80,7 @@ export const PLAN_ROWS: { label: string; f: string; m: string; e: string }[] = [
   { label: "Systems & automation", f: "1 workflow per term", m: "Quarterly buildout", e: "Continuous automation retainer" },
   { label: "Agriculture & land", f: "1 deliverable/mo", m: "1 plan/qtr", e: "Full program management" },
   { label: "Grants", f: "Research + 1 application/qtr", m: "2 applications + reporting/qtr", e: "Full grants calendar + submissions" },
+  { label: "Notary", f: "Included · RON + in-person (TX)", m: "Included · priority scheduling", e: "Included · priority + mobile" },
   { label: "Reviews", f: "Monthly review + summary", m: "Bi-weekly + KPI dashboard", e: "Weekly + executive reporting" },
   { label: "Turnaround", f: "Standard", m: "Priority in queue", e: "Priority on everything" },
 ];
@@ -98,6 +99,7 @@ export const PLAN_BILLED: string[] = [
   "Additional VA hours $55 Foundation / $50 Momentum / $40 Enterprise",
   "Anything beyond allotment quoted in writing first",
   "Hard costs at cost",
+  "State-regulated notary fees ($25 online / $10 per act in-person, TX) apply per act, whether you're on a plan or booking notary standalone",
 ];
 
 export const PLAN_TERMS: string[] = [
@@ -204,7 +206,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "ag", n: "Agriculture & land planning", p: "from $500 per deliverable", quote: "q-ag" },
   { svc: "grants", n: "Grant research report", p: "$350 each", cart: "grant-research" },
   { svc: "grants", n: "Grant application", p: "from $750 each", quote: "q-grant-app" },
-  { svc: "notary", n: "Notarization — online (RON) or in-person (Texas)", p: "$25 online · $10/act in-person (TX) + travel from $35", quote: "q-notary" },
+  { svc: "notary", n: "Notarization — Remote Online Notarization (RON) or in-person (Texas)", p: "$25 online · $10/act in-person (TX) + travel from $35", quote: "q-notary" },
 ];
 
 export const bookItemById = (id: string) => BOOK_ITEMS.find((b) => b.id === id);

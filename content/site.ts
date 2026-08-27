@@ -73,7 +73,7 @@ export const HOURS_SHORT: { d: string; h: string }[] = [
   { d: "Mon & Fri", h: "9:00 AM–5:00 PM" },
   { d: "Tue & Thu", h: "11:00 AM–7:00 PM" },
   { d: "Wed & Sun", h: "Closed" },
-  { d: "Saturday", h: "By appointment" },
+  { d: "Saturday", h: "By preapproved appointment" },
 ];
 
 /** Home — "How it works" steps (verbatim). */

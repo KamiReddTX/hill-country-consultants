@@ -51,6 +51,9 @@ export default async function HomePage() {
                 See plans and pricing
               </Link>
             </div>
+            <p className="mt-4 max-w-[34em] text-[12.5px] prose-muted">
+              Your plan is a fixed monthly fee for the allotments it includes. Work beyond your plan — overages, rush turnaround, separately quoted projects, and hard costs — is always agreed in writing before it&apos;s done.
+            </p>
           </div>
           <ImageSlot label="Modern glass-and-concrete building exterior with reflected greenery" src="/images/hero.jpg" />
         </div>

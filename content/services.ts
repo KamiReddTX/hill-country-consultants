@@ -30,7 +30,7 @@ export const SERVICE_META: Record<ServiceKey, ServiceMeta> = {
   events: { name: "Event Planning, in person", desc: "Event plan and budget outline, run-of-show, vendor coordination and on-site coordination at higher tiers." },
   ag: { name: "Agriculture & Land", desc: "Regenerative plan framework, stewardship calendar, record-keeping templates and operations coordination." },
   grants: { name: "Grants & Nonprofit Administration", desc: "Grant research and prospect lists, application preparation and submission, and compliance checklists — with post-award funder reporting available as a separate service or where your plan or scope includes it." },
-  notary: { name: "Notary Services", desc: "Professional notarizations — online (remote) and in person in Texas. Acknowledgments, jurats, oaths and signature witnessing, handled correctly and on schedule." },
+  notary: { name: "Notary Services", desc: "Professional notarizations — Remote Online Notarization (RON) and in person in Texas. Acknowledgments, jurats, oaths and signature witnessing, handled correctly and on schedule." },
 };
 
 export interface ServiceDetail {
@@ -60,7 +60,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     headline: "Book a Virtual Assistant",
     pain: "The inbox, the scheduling, the invoicing, the follow-up nobody owns — it all lands on the person least able to drop it. A dedicated assistant handles the recurring administrative work that keeps a business running, on a set number of hours each business day.",
     included: ["Inbox and calendar management; scheduling and appointment setting", "Data entry, CRM updates, and file and document organization", "Document formatting and preparation; light research", "Client, vendor and subcontractor follow-up and coordination", "Travel and logistics booking", "A weekly summary of tasks completed"],
-    expect: ["An assigned assistant and a dedicated block of hours each business day (Monday, Tuesday, Thursday, and Friday) — 2, 5, or 8 hours by tier, roughly 40, 100, or 160 hours in a typical month", "Same business day acknowledgment; tasks actioned in agreed priority", "Secure handling of logins and credentials", "A shared task board so you always see status", "A weekly work summary"],
+    expect: ["An assigned assistant and a dedicated block of hours every business day, Monday through Friday — 2, 5, or 8 hours by tier, roughly 40, 100, or 160 hours in a typical month", "Same business day acknowledgment; tasks actioned in agreed priority", "Secure handling of logins and credentials", "A shared task board so you always see status", "A weekly work summary"],
     scope: "Hours are capped by tier; overage is billed at $55 Foundation / $50 Momentum / $40 Enterprise per hour. Not a substitute for licensed bookkeeping, legal, or tax services.",
     how: HOW,
     forWho: [
@@ -109,7 +109,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     afterPurchase: "You're routed straight into onboarding: a kickoff call, your 30-day roadmap, secure credential handoff through the shared vault, and your task board and client portal go live in week one — so from day one you see every request, its status, and your weekly summary.",
     faqs: [
       { q: "How is time tracked, and what counts against my hours?", a: "Your assistant logs hours by task. All task work — inbox, scheduling, CRM, follow-up, research, document prep, and coordination — counts against your monthly allotment, and you get a weekly summary of tasks completed and hours used." },
-      { q: "Which days count as business days, and how do the daily and monthly hours relate?", a: "Your assistant works a set block on each business day — Monday, Tuesday, Thursday, and Friday. Wednesdays and weekends are off (Saturday only by prior arrangement). The monthly figures — roughly 40, 100, or 160 hours by tier — are the approximate total of that daily block across a typical month." },
+      { q: "Which days count as business days, and how do the daily and monthly hours relate?", a: "Your assistant works a set block every business day, Monday through Friday. The monthly figures — roughly 40, 100, or 160 hours by tier — are the approximate total of that daily block (2, 5, or 8 hours) across a typical month. Weekends are off; Saturday coverage is available only by prior arrangement. (Our booking calendar for consults and appointments is Mon/Tue/Thu/Fri, but ongoing assistant work runs the full business week.)" },
       { q: "Do unused hours roll over?", a: "No. Hours are allocated per business day. Unused hours from a given day don't carry to the next day, don't bank into a monthly pool, and don't roll into the next month. If you regularly need more, we'll right-size your tier." },
       { q: "Can my assistant communicate with my customers directly?", a: "Yes. With your direction, your assistant can email, schedule, and follow up with your customers on your behalf, representing your business." },
       { q: "What if I need more than my hours in a given month?", a: "Additional time is billed as overage at your tier rate ($55 Foundation / $50 Momentum / $40 Enterprise per hour), and we flag it before you cross the line so there are no surprises." },
