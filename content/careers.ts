@@ -146,7 +146,7 @@ You don't start selling on day one, and you don't start on a client account on d
 
 ## Hours
 
-A typical week runs Mon & Fri 9–5 · Tue & Thu 11–7 · Wed & Sun closed · Sat by appointment — set to your time zone and coordinated with your accounts. This is a fully remote role — you work from anywhere in the U.S. with reliable internet.
+A typical week runs Mon & Fri 9–5 · Tue & Thu 11–7 · Wed & Sun closed · Sat by appointment — set to your time zone and coordinated with your accounts. This is a remote/hybrid role — primarily remote, with local and regional on-site work when an account calls for it.
 
 **Baseline four paid hours per day.** Selling and client work both come out of that budget, so those hours have to be planned. Some accounts require more, and additional hours are approved in advance, account by account.
 
@@ -433,9 +433,9 @@ You will not be building enterprise software. You will be the person who makes o
 - You've built a process from nothing before, not just followed one
 - Bookkeeping or light financial operations experience
 
-**Work arrangement:** Remote — you work from anywhere in the U.S. with reliable internet. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
+**Work arrangement:** Remote/hybrid — primarily remote, with local and regional on-site work when a project calls for it. You can do most of this job from anywhere in the U.S. with reliable internet. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
 
-Remote does not mean loosely supervised or loosely supervising. You'll be the most visible person on this team: first on the call every morning, and the one specialists reach when something breaks. If you've worked remote before and know how to build presence without a hallway, that experience matters more here than it would in an office.
+Remote-first does not mean loosely supervised or loosely supervising. You'll be the most visible person on this team: first on the call every morning, and the one specialists reach when something breaks. If you've worked remote before and know how to build presence without a hallway, that experience matters more here than it would in an office.
 
 ## What we can't train
 
@@ -473,7 +473,7 @@ That last one is the real test. The Administrator will still approve everything 
 
 ## Compensation
 
-**$40,000 per year, salaried.** Remote — work from anywhere in the U.S.
+**$40,000 per year, salaried.** Remote/hybrid — primarily remote, with local and regional on-site as needed.
 
 **Quarterly client-retention bonus — 5% of quarterly profits.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
 
@@ -489,8 +489,8 @@ export const JOBS: Job[] = [
   {
     slug: "business-manager",
     title: "Business Manager",
-    type: "Full-time · Salaried · Remote",
-    location: "Remote · United States",
+    type: "Full-time · Salaried · Remote / Hybrid",
+    location: "Remote / Hybrid · U.S. · local & regional on-site as needed",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$40,000/yr salaried + 5% quarterly retention bonus",
     summary:
@@ -501,8 +501,8 @@ export const JOBS: Job[] = [
   {
     slug: "engagement-specialist",
     title: "Engagement Specialist",
-    type: "Contracted · Part-time · Remote",
-    location: "Remote · United States",
+    type: "Contracted · Part-time · Remote / Hybrid",
+    location: "Remote / Hybrid · U.S. · local & regional on-site as needed",
     tagline: "Clarity. Strategy. Organized Growth.",
     pay: "$10/hr base + 15% initial · 5% recurring · 10% à-la-carte",
     summary:
