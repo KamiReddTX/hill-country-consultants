@@ -41,9 +41,40 @@ export function ProspectAdmin({ roles, staff, period, suppression }: { roles: Ro
     else setMsg("Email suppression upload failed.");
   };
 
+  const [ingSource, setIngSource] = useState("CO_SOS");
+  const [ingLimit, setIngLimit] = useState(500);
+  const [ingBusy, setIngBusy] = useState(false);
+  const runIngest = async () => {
+    setIngBusy(true); setMsg("Running ingest…");
+    try {
+      const r = await fetch("/api/prospect/ingest", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ source: ingSource, limit: ingLimit }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) setMsg(`Ingest ${ingSource}: fetched ${j.fetched}, inserted ${j.inserted} new (${j.duplicates} already present).`);
+      else if (j.halted) setMsg(`Ingest halted: ${j.message}`);
+      else setMsg(`Ingest failed: ${j.detail || j.error || "error"}.`);
+    } finally { setIngBusy(false); }
+  };
+
   return (
     <div className="flex flex-col gap-6">
       {msg && <p className="text-[13px] text-forest">{msg}</p>}
+
+      <section className="border border-line-warm bg-white p-4">
+        <p className="text-[13px] font-semibold text-forest">Data ingest</p>
+        <p className="mt-1 text-[12px] prose-muted">Pull the newest company records from a state open-data source into the base layer (companies only — no contact data). Free states run without a vendor. Paid sources (national file, your GA/TX/AL/LA/FL/NV territory) plug into the same job once licensed.</p>
+        <div className="mt-2 flex flex-wrap items-end gap-2">
+          <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Source
+            <select value={ingSource} onChange={(e) => setIngSource(e.target.value)} className={field}>
+              <option value="CO_SOS">Colorado SOS (free)</option>
+              <option value="CT_SOS">Connecticut Registry (free)</option>
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-[12px] text-ink-faint">Records (max 1000)
+            <input type="number" value={ingLimit} min={1} max={1000} onChange={(e) => setIngLimit(Math.min(1000, Math.max(1, Number(e.target.value) || 1)))} className={`${field} w-28`} />
+          </label>
+          <button onClick={runIngest} disabled={ingBusy} className="btn-gold text-[13px] disabled:opacity-50">{ingBusy ? "Running…" : "Run ingest"}</button>
+        </div>
+      </section>
 
       <section>
         <h2 className="mb-2 text-[13px] font-semibold uppercase tracking-wide text-forest">Role permissions</h2>
