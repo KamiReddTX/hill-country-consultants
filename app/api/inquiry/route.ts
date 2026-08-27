@@ -3,8 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
 import { sendLeadAlert } from "@/lib/email";
 
-const NOTIFY_ROLES = ["Administrator", "Business Manager", "Sales Manager"];
-/** Emails of active Admin / Business Manager / Sales Manager staff (roles[]-aware). */
+const NOTIFY_ROLES = ["Administrator", "Business Manager", "Accounts Manager", "Sales Manager"];
+/** Emails of active Admin / Business Manager / Accounts Manager staff (roles[]-aware). */
 async function notifyRecipients(admin: ReturnType<typeof createClient<Database>>): Promise<string[]> {
   const { data } = await admin.from("staff").select("email, role, roles").eq("active", true);
   const list = (data ?? [])
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
       stage: "New lead",
     });
     if (!error) {
-      // Best-effort alert to Admin / BM / Sales Manager — the lead is already saved.
+      // Best-effort alert to Admin / BM / Accounts Manager — the lead is already saved.
       try {
         const to = await notifyRecipients(admin);
         const site = process.env.NEXT_PUBLIC_SITE_URL || "";

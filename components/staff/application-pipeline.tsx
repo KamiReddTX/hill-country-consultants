@@ -5,11 +5,23 @@ import { HireApplicant } from "@/components/staff/hire-applicant";
 import { ApplicationDecision } from "@/components/staff/application-decision";
 import { LocalTime } from "@/components/local-time";
 
+type EduRow = { school?: string; degree?: string; field?: string; location?: string; completed?: string };
+type JobRow = { employer?: string; title?: string; location?: string; start?: string; end?: string; duties?: string; reason_leaving?: string; may_contact?: boolean };
+type RefRow = { name?: string; relationship?: string; company?: string; phone?: string; email?: string };
+
 type App = {
   id: string; name: string; email: string; phone: string | null; location: string | null;
+  address: string | null; city_state_zip: string | null;
   position: string | null; employment_type: string | null; availability: string | null;
+  available_start: string | null; hours_available: string | null; days_available: string | null;
+  work_authorized: boolean | null; over_18: boolean | null; sponsorship_required: boolean | null;
   desired_pay: string | null; referral: string | null; portfolio_url: string | null;
-  skills: string | null; experience: string | null; why: string | null;
+  skills: string | null; certifications: string | null; experience: string | null; why: string | null;
+  education: EduRow[] | null; employment_history: JobRow[] | null; refs: RefRow[] | null;
+  attest_equipment: boolean | null; attest_security: boolean | null; attest_background: boolean | null;
+  attest_us_based: boolean | null; attest_confidential: boolean | null;
+  eeo_gender: string | null; eeo_race: string | null; eeo_veteran: string | null; eeo_disability: string | null;
+  certified: boolean | null; signature: string | null; signed_at: string | null;
   resume_path: string | null; credentials_path: string | null;
   status: string; rating: number | null; review_notes: string | null; created_at: string;
 };
@@ -57,18 +69,40 @@ function Card({ a, roleOptions }: { a: App; roleOptions: readonly string[] }) {
         </span>
       </summary>
       <div className="flex flex-col gap-3 border-t border-line-soft p-3 text-[13px]">
-        <div className="grid gap-x-4 gap-y-0.5">
-          <p><span className="text-ink-faint">Email:</span> <a href={`mailto:${a.email}`} className="link-underline break-all">{a.email}</a></p>
-          {a.phone && <p><span className="text-ink-faint">Phone:</span> {a.phone}</p>}
-          {a.location && <p><span className="text-ink-faint">Location:</span> {a.location}</p>}
-          {a.desired_pay && <p><span className="text-ink-faint">Desired pay:</span> {a.desired_pay}</p>}
-          {a.availability && <p><span className="text-ink-faint">Availability:</span> {a.availability}</p>}
-          {a.experience && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Experience:</span> {a.experience}</p>}
-          {a.why && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Why HCC:</span> {a.why}</p>}
-        </div>
+        {(() => {
+          const addr = [a.address, a.city_state_zip].filter(Boolean).join(", ") || a.location;
+          const avail = [a.available_start && `start ${a.available_start}`, a.hours_available, a.days_available].filter(Boolean).join(" · ");
+          const auth = [a.over_18 != null && `18+: ${a.over_18 ? "Yes" : "No"}`, a.work_authorized != null && `US-auth: ${a.work_authorized ? "Yes" : "No"}`, a.sponsorship_required != null && `sponsorship: ${a.sponsorship_required ? "Yes" : "No"}`].filter(Boolean).join(" · ");
+          const edu = a.education || []; const jobs = a.employment_history || []; const refs = a.refs || [];
+          const attest = [a.attest_equipment && "equipment", a.attest_security && "security", a.attest_us_based && "US-based", a.attest_background && "background check", a.attest_confidential && "NDA"].filter(Boolean);
+          const eeo = [a.eeo_gender, a.eeo_race, a.eeo_veteran, a.eeo_disability].filter(Boolean).join(" · ");
+          return (
+            <div className="grid gap-x-4 gap-y-0.5">
+              <p><span className="text-ink-faint">Email:</span> <a href={`mailto:${a.email}`} className="link-underline break-all">{a.email}</a></p>
+              {a.phone && <p><span className="text-ink-faint">Phone:</span> {a.phone}</p>}
+              {addr && <p><span className="text-ink-faint">Address:</span> {addr}</p>}
+              {a.employment_type && <p><span className="text-ink-faint">Type:</span> {a.employment_type}</p>}
+              {a.desired_pay && <p><span className="text-ink-faint">Desired pay:</span> {a.desired_pay}</p>}
+              {avail && <p><span className="text-ink-faint">Availability:</span> {avail}</p>}
+              {auth && <p><span className="text-ink-faint">Work auth:</span> {auth}</p>}
+              {edu.length > 0 && <p><span className="text-ink-faint">Education:</span> {edu.map((e) => [e.degree, e.field].filter(Boolean).join(" ") || e.school).filter(Boolean).join("; ")}</p>}
+              {jobs.length > 0 && <p><span className="text-ink-faint">History:</span> {jobs.map((j) => [j.title, j.employer].filter(Boolean).join(" @ ")).filter(Boolean).join("; ")}</p>}
+              {refs.length > 0 && <p><span className="text-ink-faint">References:</span> {refs.length} provided</p>}
+              {a.skills && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Skills:</span> {a.skills}</p>}
+              {a.certifications && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Certs:</span> {a.certifications}</p>}
+              {a.portfolio_url && <p><span className="text-ink-faint">Links:</span> <a href={a.portfolio_url} target="_blank" rel="noreferrer" className="link-underline break-all">{a.portfolio_url}</a></p>}
+              {a.experience && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Experience:</span> {a.experience}</p>}
+              {a.why && <p className="whitespace-pre-wrap"><span className="text-ink-faint">Why HCC:</span> {a.why}</p>}
+              {attest.length > 0 && <p><span className="text-ink-faint">Attestations:</span> {attest.join(" · ")}</p>}
+              {eeo && <p className="text-ink-faint">Self-ID (voluntary): {eeo}</p>}
+              {a.certified && <p><span className="text-ink-faint">Signed:</span> {a.signature}{a.signed_at ? ` · ${new Date(a.signed_at).toLocaleDateString()}` : ""}</p>}
+            </div>
+          );
+        })()}
 
         <div className="flex flex-wrap items-center gap-2">
-          {a.resume_path ? <a href={`/api/application-file/${a.id}`} className="btn-gold text-[12px]">Résumé</a> : <span className="text-[11px] prose-muted">No résumé</span>}
+          <a href={`/api/application-report/${a.id}`} className="btn-gold text-[12px]">Full application (PDF)</a>
+          {a.resume_path && <a href={`/api/application-file/${a.id}`} className="border border-line-warm px-2 py-1 text-[12px] text-forest">Résumé</a>}
           {a.credentials_path && <a href={`/api/application-file/${a.id}?kind=credentials`} className="border border-line-warm px-2 py-1 text-[12px] text-forest">Credentials</a>}
         </div>
 

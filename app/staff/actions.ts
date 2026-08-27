@@ -648,7 +648,7 @@ export async function setStaffCommission(staffId: string, pct: number): Promise<
   return { ok: true };
 }
 
-/** Sales lead (Sales Manager/BM/Admin): assign a lead to a sales agent (sets the
+/** Sales lead (Accounts Manager/BM/Admin): assign a lead to a sales agent (sets the
  *  rep code + name so the sale attributes to them). Empty staffId unassigns. */
 export async function assignLeadRep(leadId: string, staffId: string): Promise<ActionResult> {
   const me = await getStaffMember();

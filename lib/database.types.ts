@@ -8,20 +8,26 @@
 export type Role =
   | "Engagement Specialist"
   | "Creative Specialist"
-  | "Sales Manager"
+  | "Accounts Manager"
   | "Business Manager"
+  | "Administrator"
+  // Legacy titles kept for type-safety on records not yet migrated:
+  | "Sales Manager"
   | "Submittals specialist"
   | "Documentation specialist"
   | "Media / publishing"
   | "Grants specialist"
-  | "Administrator"
-  // Legacy titles kept for type-safety on records not yet migrated:
   | "Virtual assistant"
   | "Account manager"
   | "Sales staff"
   | "Design specialist";
 
 export type ClientStatus = "In review" | "Active" | "Paused" | "Offboarded";
+
+// Multi-entry sections on an employment application (stored as jsonb arrays).
+export interface AppEducation { school?: string; degree?: string; field?: string; location?: string; completed?: string }
+export interface AppEmployment { employer?: string; title?: string; location?: string; start?: string; end?: string; duties?: string; reason_leaving?: string; may_contact?: boolean }
+export interface AppReference { name?: string; relationship?: string; company?: string; phone?: string; email?: string }
 
 export interface Database {
   public: {
@@ -375,8 +381,8 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["client_checklist_items"]["Insert"]>;
       };
       job_applications: {
-        Row: { id: string; name: string; email: string; phone: string | null; location: string | null; position: string | null; employment_type: string | null; availability: string | null; desired_pay: string | null; experience: string | null; skills: string | null; portfolio_url: string | null; resume_path: string | null; credentials_path: string | null; why: string | null; referral: string | null; status: string; rating: number | null; review_notes: string | null; created_at: string };
-        Insert: { id?: string; name: string; email: string; phone?: string | null; location?: string | null; position?: string | null; employment_type?: string | null; availability?: string | null; desired_pay?: string | null; experience?: string | null; skills?: string | null; portfolio_url?: string | null; resume_path?: string | null; credentials_path?: string | null; why?: string | null; referral?: string | null; status?: string; rating?: number | null; review_notes?: string | null };
+        Row: { id: string; name: string; email: string; phone: string | null; location: string | null; position: string | null; employment_type: string | null; availability: string | null; desired_pay: string | null; experience: string | null; skills: string | null; portfolio_url: string | null; resume_path: string | null; credentials_path: string | null; why: string | null; referral: string | null; status: string; rating: number | null; review_notes: string | null; created_at: string; address: string | null; city_state_zip: string | null; available_start: string | null; hours_available: string | null; days_available: string | null; work_authorized: boolean | null; over_18: boolean | null; sponsorship_required: boolean | null; education: AppEducation[]; employment_history: AppEmployment[]; refs: AppReference[]; certifications: string | null; attest_equipment: boolean | null; attest_security: boolean | null; attest_background: boolean | null; attest_us_based: boolean | null; attest_confidential: boolean | null; eeo_gender: string | null; eeo_race: string | null; eeo_veteran: string | null; eeo_disability: string | null; certified: boolean | null; signature: string | null; signed_at: string | null };
+        Insert: { id?: string; name: string; email: string; phone?: string | null; location?: string | null; position?: string | null; employment_type?: string | null; availability?: string | null; desired_pay?: string | null; experience?: string | null; skills?: string | null; portfolio_url?: string | null; resume_path?: string | null; credentials_path?: string | null; why?: string | null; referral?: string | null; status?: string; rating?: number | null; review_notes?: string | null; address?: string | null; city_state_zip?: string | null; available_start?: string | null; hours_available?: string | null; days_available?: string | null; work_authorized?: boolean | null; over_18?: boolean | null; sponsorship_required?: boolean | null; education?: AppEducation[]; employment_history?: AppEmployment[]; refs?: AppReference[]; certifications?: string | null; attest_equipment?: boolean | null; attest_security?: boolean | null; attest_background?: boolean | null; attest_us_based?: boolean | null; attest_confidential?: boolean | null; eeo_gender?: string | null; eeo_race?: string | null; eeo_veteran?: string | null; eeo_disability?: string | null; certified?: boolean | null; signature?: string | null; signed_at?: string | null };
         Update: Partial<Database["public"]["Tables"]["job_applications"]["Insert"]>;
       };
       client_roadmap: {
@@ -713,6 +719,7 @@ export interface BookingQuote {
 }
 
 // Convenience row aliases
+export type JobApplicationRow = Database["public"]["Tables"]["job_applications"]["Row"];
 export type StaffRow = Database["public"]["Tables"]["staff"]["Row"];
 export type ClientRow = Database["public"]["Tables"]["clients"]["Row"];
 export type BookingRow = Database["public"]["Tables"]["bookings"]["Row"];

@@ -48,5 +48,5 @@ export function isAdminRole(staff: StaffRow | null): boolean {
 /** Sales and admins share the sales-side tabs (Intake, Pipeline, Commissions…). */
 export function isSalesOrAdmin(staff: StaffRow | null): boolean {
   const roles = staff?.roles && staff.roles.length ? staff.roles : staff?.role ? [staff.role] : [];
-  return roles.some((r) => ["Engagement Specialist", "Account manager", "Sales staff", "Sales Manager", "Administrator", "Business Manager"].includes(r));
+  return roles.some((r) => ["Engagement Specialist", "Creative Specialist", "Accounts Manager", "Account manager", "Sales staff", "Sales Manager", "Administrator", "Business Manager"].includes(r));
 }

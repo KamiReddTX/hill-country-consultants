@@ -1,6 +1,7 @@
 /** Open roles at Hill Country Consultants. Each job's `body` is markdown that
  *  renders on its /careers/[slug] page. Only the public posting lives here —
- *  never internal notes. Add a new object to JOBS to post another role. */
+ *  never internal notes. Bodies are the authoritative uploaded JD text (2026-08).
+ *  Add a new object to JOBS to post another role. */
 
 export type Job = {
   slug: string;
@@ -14,501 +15,781 @@ export type Job = {
   body: string;       // markdown posting (public only)
 };
 
-const ENGAGEMENT_SPECIALIST = `## The role in one line
+const ENGAGEMENT_SPECIALIST = `# Engagement Specialist
+**Hill Country Consultants · Remote — Anywhere in the United States · Part-Time**
 
-You find business owners who are drowning in paperwork, put them under contract with the right plan — and then you're the one who does the work. You sell it, you deliver it, you keep the client.
+*Clarity. Strategy. Organized Growth.*
 
-## About Hill Country Consultants
+---
 
-**The capability of a full staff. Without the payroll.**
+## About us
 
-One flat monthly fee puts a whole firm behind a business — admin, documentation, compliance, coordination, marketing, publishing and more. On site when it matters, virtual when it counts.
+Hill Country Consultants gives small and mid-size businesses the capability of a full staff without the payroll. For one flat monthly fee, we handle the administrative work that quietly eats a business alive: documentation, compliance, coordination, and the systems that hold it all together.
 
-Four pillars sit behind every engagement: **Documentation, Compliance, Coordination, and Systems.** Underneath them run fourteen service lines, from construction submittals to grant applications to full app builds.
+We serve six industries — construction and contractors, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and landowners and agriculture. We've been working with businesses nationwide since 2024.
 
-**Six industries served:** Construction & Contractors · Authors & Personal Brands · Food & Hospitality · Small & Mid-Size Business · Nonprofits & Mission-Driven · Landowners & Agriculture
+---
 
-## This is a dual role. Read this part carefully.
+## The role
 
-Most firms split these jobs. Someone sells, someone else delivers, and the client finds out in week three that what was promised isn't what's happening.
+**You bring the client in. Then you're the one who takes care of them.**
 
-We don't do that. **You sell the contract and you service the account.** The business owner who signs with you sees your face again on Monday.
+Most firms split those two jobs. Someone sells, someone else delivers, and the client finds out in week three that what was promised isn't what's happening. We don't work that way. The business owner who signs with you sees your face again on Monday.
 
-That means two things, and both are true:
+**About 75% client work, about 25% sales.** The majority of your week is taking care of the accounts you hold. The rest is bringing in new ones — and you won't start from a blank page. You'll be given a local leads sheet to work from on day one.
 
-**It makes you better at selling.** You will never oversell, because you'd be overselling to yourself. You'll learn fast what twenty-four submittals a month actually feels like, and your recommendations get sharper because of it.
+It's an unusual structure, and it's the reason people stay in this seat. You're never selling something you'll have to hand off and hope goes well. And you're never handed an account you had no part in shaping.
 
-**It means this is genuinely two jobs.** Sales-heavy while your book is small, delivery-heavy as it grows. If you want a role where you close and walk away, this isn't it.
+---
 
-## Side A · Bringing clients in
+## What you'll do
 
-**You sell two ways, and knowing which one fits is most of the job.**
+**Bringing clients in · about 25%**
 
-**Monthly plans** — three tiers. Every service line is available in all three; the tier sets how much of each a client gets, not which ones they're allowed to use.
+- Work the local leads sheet you're given, and build your pipeline from there
+- Meet business owners through referrals, professional networks, trade associations, chambers and industry events
+- Follow up on inbound inquiries
+- Run free 30-minute strategy sessions
+- Ask good questions and listen — you'll leave every conversation knowing what that business actually struggles with
+- Recommend the right level of service based on what you heard
+- Walk clients through terms accurately and close the agreement
 
-**Standalone scopes** — à la carte work, priced per project and published on every service page. Quoted in writing before anything begins.
+**Taking care of them · about 75%**
 
-Current rates for both live on our website and in the employee portal. You'll know them cold, and you'll quote from the rate reference rather than from memory.
+Once the agreement is signed, you're the firm to that client:
 
-### The industries you'll work in
+- **Assemble construction submittal packages** — manufacturer cut sheets, submittal index, marked project data, Bates numbering, transmittals, compliance checklists and RFIs, all on the client's letterhead. Construction is our largest industry and this is our most technical service; you'll be trained on it and it will be a real part of your week.
+- Prepare, format and proof business documents, reports, forms and packages
+- Track licenses, permits, insurance certificates and renewal deadlines — and give clients warning before a deadline, not after
+- Manage inboxes and calendars; handle scheduling, travel and appointment coordination
+- Follow up with vendors, subcontractors and stakeholders until things actually get done
+- Set up and maintain CRM records, files and organized systems
+- Track projects against milestones and deadlines
+- Support social media scheduling, email campaigns and light graphics on some accounts
+- Send each client a weekly summary of what was done, and keep a shared task board current so they never have to ask
 
-| Industry | What's usually breaking |
-|---|---|
-| **Construction & Contractors** | Submittals, closeout documents, prequalification packages, certifications and insurance expiring unnoticed |
-| **Authors & Personal Brands** | A manuscript that's been "almost done" for two years, no platform, no launch plan |
-| **Food & Hospitality** | Vendor paperwork, licensing and health documentation, scheduling chaos, no systems behind the counter |
-| **Small & Mid-Size Business** | The owner is the admin department, and everything runs out of their inbox and their head |
-| **Nonprofits & Mission-Driven** | Grant applications and funder reporting nobody has time to assemble, compliance files scattered |
-| **Landowners & Agriculture** | Land documentation, program paperwork, lease and permit tracking, recordkeeping for a business run outdoors |
+Depending on the client, that work might be submittal packages for a contractor, grant applications for a nonprofit, compliance calendars for a restaurant, or manuscript preparation for an author. We'll train you on what your accounts need.
 
-**What you'll do**
+---
 
-- **Find the conversation.** Referrals, local business networks, trade associations, job sites, chambers, events, warm follow-up on inbound leads.
-- **Book the free 30-minute strategy session.** The front door for everything. It's genuinely free and you never have to pretend otherwise.
-- **Run discovery.** A real conversation, not a pitch. Eleven to fourteen questions across the business. You listen more than you talk and you leave knowing three or four real problems.
-- **Recommend.** Plan tier or standalone scope, matched to what you heard — not to what pays you most.
-- **Run the math.** One hire gets one skill set at $5,500–$7,500/month once you count salary, benefits, PTO, equipment, software and management. For the same money or less, they get the whole firm.
-- **Handle objections honestly.** Acknowledge, explore, respond, confirm. Never skip explore.
-- **Ask for the business.** Clearly, once, in a sentence — then stop talking.
-- **Read the terms back.** Word-accurate, every time — term length, payment schedule, deposit, accepted payment methods, and our refund policy.
-- **Know our website cold.** Every plan, every service line, and every à-la-carte rate is published at hillcountryconsultants.com.
+## What we're looking for
 
-## Side B · Taking care of them
-
-Once the contract is signed, you are the firm to that client. Depending on the account and the industry, that looks like:
-
-**Documentation** — prepare, format and proof business documents; assemble construction submittal packages; build and maintain document templates; support grant applications and funder reporting; prepare manuscripts and publishing files for authors.
-
-**Compliance** — track licenses, permits, insurance certificates, registrations and renewal dates; maintain compliance calendars and warn clients *before* a deadline; organize records so an audit isn't a fire drill; keep certification and vendor documentation current.
-
-**Coordination** — inbox and calendar management; scheduling meetings, inspections, deliveries and travel; vendor and subcontractor follow-up; meeting notes and chasing action items until they're done; project tracking against milestones.
-
-**Systems** — CRM setup, data entry and ongoing hygiene; build and maintain client workflows, checklists and shared file structures; AI workflow setup and training for client teams; maintain the client's shared credential vault and file organization.
-
-**Client-facing rhythm — non-negotiable on every account**
-
-- Daily work log, reconciled against the client's hour allotment
-- Weekly report delivered every Friday
-- Shared task board kept current, so a client never has to ask what's happening
-- Onboarding tracker and 30-day roadmap executed in the first month
-
-## What you own vs. what you don't
-
-| You own | You have no authority over |
-|---|---|
-| The conversation | Pricing. **Zero exceptions, at any level.** |
-| The plan or scope recommendation | Discounts, comps, or "throwing anything in" |
-| Discovery accuracy | Specific turnaround dates on a sales call |
-| The terms readback | Scope. If it isn't published, it isn't sold. |
-| Delivery on your accounts | Work outside the client's contracted allotment |
-| Every hour logged honestly | Anything not quoted in writing first |
-
-## Who we're hiring
-
-**No sales experience required.** We train from zero. What we can't train:
-
+- **At least two years of sales experience.** Retainers, services, memberships, retail, insurance, real estate, recruiting, fundraising, event or ad sales — the product matters far less than whether you've sat in front of someone, asked for a decision, and handled being told no. Account management or client success where you carried a renewal or expansion number counts too.
 - You can hold a real conversation with a stranger and stay in it when it gets uncomfortable
-- You listen more than you talk, and can sit in a silence without filling it
-- **You are organized enough to run several client accounts at once without dropping one.**
+- You listen more than you talk
+- **You're organized enough to run several client accounts at once without dropping one.** This is the part of the job that separates people.
 - You write clearly and correctly — documents you prepare go to architects, funders, lenders and inspectors
-- You are accurate under pressure — you'd rather confirm than guess
-- You can be told no repeatedly and come back the next day
+- You'd rather say *"let me confirm that and get right back to you"* than guess
+- You can hear no and come back the next day
 - Comfortable with Google Workspace or Microsoft 365, and quick on new software
-- **Able to learn and navigate our website and employee portal independently.**
-- Reliable transportation, valid driver's license, reliable internet, and a private space for client calls
-- **Based in the United States** — this role is open to U.S.-based applicants only
-- **Your equipment:** a Windows computer with a **dual-monitor** setup, a **wired Ethernet** connection (not Wi-Fi only), and a **smartphone and/or tablet** that can run apps
-- Comfortable working from your phone — the staff portal is built mobile-first
+- Able to find your way around a website and an internal portal on your own
+- Reliable high-speed internet and a quiet, private space you can take client calls from
 
-**Security & data protection — required of everyone**
+**Helpful but not required:** experience in construction — submittals, bids, prequalification or project documentation is a strong advantage, since it's our largest industry. Also helpful: food service, agriculture, publishing, media or nonprofit work. Prior administrative, executive assistant, office manager or coordinator experience transfers directly.
 
-- **Consent to a background check**, and legal authorization to work in the United States (18 or older)
-- **A supported, auto-updating Windows** with current antivirus, full-disk encryption (BitLocker), a password login, and automatic screen-lock — on a computer not shared with anyone else
-- **A secured home network** (WPA2/WPA3 Wi-Fi with the default router password changed); you never do client work over public or unsecured Wi-Fi
-- **Two-factor authentication (2FA)** on every work account, and a password manager with strong, unique passwords
-- **Confidentiality:** sign a confidentiality/NDA agreement, keep client data only in approved company tools (never personal email, cloud, or USB drives), keep your screen private and lock your computer when you step away, shred any printed client material, and return or delete all client data if you leave
+---
 
-**Helps, doesn't gate:** you've worked inside construction, food service, agriculture, publishing, media or a nonprofit. Prior admin, executive assistant, office manager or coordinator experience transfers directly to delivery.
+## What we offer
 
-## How you get certified
+- **Paid training.** A structured two-day program covering discovery, objection handling and closing the way we do it, plus our service standards. You bring the instinct; we give you the structure.
+- **A real onboarding.** Your first weeks are supported and reviewed, with coaching after every client conversation. You won't be handed a phone list and left alone.
+- **Ongoing coaching** — not a one-time orientation that's forgotten by month three.
+- **Tools that work from your phone.** Everything you need is online and mobile-friendly.
+- **Something worth selling.** Every client gets a 30-day roadmap, a shared task board, weekly reports and a running work log. Most firms your prospects have hired before couldn't tell them what happened last week. You can show them.
 
-You don't start selling on day one, and you don't start on a client account on day one either.
+---
 
-**Phase 1 — Foundation.** What we sell, what it costs, what the terms are, and which industries buy which services. Plus our delivery standards — the work log, the weekly report, the task board, the vault.
+## Schedule
 
-**Website & employee portal orientation.** Guided walkthrough of the site — every service page, every published rate, the plans comparison, and the booking flow — followed by full orientation on the employee portal.
+**You work your own time zone.** We serve clients nationwide and we staff across all U.S. time zones, so your hours run on local time wherever you are — not on somebody else's clock.
 
-**Phase 2 — Two-day intensive, eight modules, three gates.** Product (closed book on services, tiers, rates, terms), Discovery (scored live role-play), and Close (full role-play through signature and terms readback).
+Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by appointment, applied in your zone. You'll be matched to clients where that schedule works for both of you.
 
-**Phase 3 — Supervised ramp.** Your first three contracts are reviewed before they reach the client; your first thirty days of delivery are reviewed weekly. Full authority after three clean contracts and one clean delivery month.
+Part-time: **four paid hours per day**, flexible within those windows. Additional approved hours are available on accounts that need them.
 
-**Phase 4 — Ongoing.** Twenty minutes of live role-play and one recorded call reviewed weekly; monthly overpromise drill and closed-book price check; quarterly delivery-quality review.
 
-## Hours
 
-A typical week runs Mon & Fri 9–5 · Tue & Thu 11–7 · Wed & Sun closed · Sat by appointment — set to your time zone and coordinated with your accounts. This is a remote/hybrid role — primarily remote, with local and regional on-site work when an account calls for it.
+---
 
-**Baseline four paid hours per day.** Selling and client work both come out of that budget, so those hours have to be planned. Some accounts require more, and additional hours are approved in advance, account by account.
+## Who you'll work with
+
+You report to an **Accounts Manager**, who is your day-to-day support — they approve your work, coach you, and are the person you go to when something needs a decision. Accounts Managers report to our Business Manager, who reports to the Administrator.
+
+It's a small firm. You'll know everyone.
+
+---
+
+## Equipment and security
+
+Because we handle client data, every role meets the same baseline:
+
+- **A Windows computer** with a **dual-monitor** setup
+- A **wired Ethernet** connection — not Wi-Fi only
+- A **smartphone and/or tablet** that can run apps
+- Antivirus, and an updated, encrypted Windows installation
+- Two-factor authentication on all work accounts
+- A secured home network
+- A signed confidentiality agreement
+- Consent to a background check
+
+---
 
 ## Compensation
 
-**Contracted, part-time. Baseline four paid hours per day, with additional approved hours available on accounts that require them.**
+**$10.00 per hour** base, for all hours — selling and client work alike.
 
-- **$10.00 per hour** base — sales activity, client work, and approved additional hours alike
-- **15%** of the initial package or plan sale
-- **5%** of every recurring payment after that, for as long as the client keeps paying
-- **10%** on à-la-carte and standalone services
+**Commission on top of base:**
+- **15%** of every initial sale
+- **5%** of every recurring payment after that, for as long as that client stays with us
+- **10%** on standalone and one-time services
 
-**Base pay review at $14,000+ in collected package and plan sales.** Once your plan and package sales reach that threshold, your base rate is reviewed and may be increased up to **$17.00 per hour**, based on delivery quality and retention. À-la-carte and standalone sales earn commission but do not count toward this threshold.
+**Base pay grows with results.** Once you reach $14,000 in sales, your base rate is reviewed and can increase up to **$17.00 per hour**.
 
-### What a plan is worth to you
+The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands. We're direct about this: the base is a floor, not the income. This role is built for someone who wants their effort to show up in their check.
 
-| Plan | 15% initial | 5% monthly | First 12 months |
-|---|---|---|---|
-| Foundation · $1,500/mo | $225 | $75 × 11 | **$1,050** |
-| Momentum · $4,250/mo | $637.50 | $212.50 × 11 | **$2,975** |
-| Enterprise · $7,000/mo | $1,050 | $350 × 11 | **$4,900** |
-
-The residual is the point. One client who stays is worth more than four who sign and leave — and since you're the one servicing them, keeping them is largely in your hands.
-
-Commission is paid on collected funds, not on signature. Full terms are stated in your contract.
+---
 
 ## To apply
 
-Use the application below. Tell us about a time you had to explain something complicated to someone who didn't want to hear it — there's a place for it in the form.`;
+**info@hillcountryconsultants.com · 470-478-1590**
 
-const BUSINESS_MANAGER = `## The role in one line
+Tell us about a time you had to explain something complicated to someone who didn't want to hear it.
 
-You run the firm day to day so the owner can build it — approving the work that goes out, holding the standard on what gets delivered, keeping clients with us, growing the accounts we already have, and making sure we never sell more than we can actually do.
+*Must be legally authorized to work in the United States and working from within the U.S.*
 
-## About Hill Country Consultants
+---
 
-**The capability of a full staff. Without the payroll.**
+*Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
-One flat monthly fee puts a whole firm behind a business — admin, documentation, compliance, coordination, marketing, publishing and more. On site when it matters, virtual when it counts.
+const CREATIVE_SPECIALIST = `# Creative Specialist
+**Hill Country Consultants · Remote — Anywhere in the United States · Part-Time**
 
-Four pillars sit behind every engagement: **Documentation, Compliance, Coordination, and Systems**, across six industries: Construction & Contractors · Authors & Personal Brands · Food & Hospitality · Small & Mid-Size Business · Nonprofits & Mission-Driven · Landowners & Agriculture.
+*Clarity. Strategy. Organized Growth.*
 
-## Why this role exists
+---
 
-We're honest about where we are. Every proposal, every exception, every delivery handoff, every new specialist's first three contracts, every collections question and every capacity call currently lands on one desk. That works until it doesn't, and we're at the point where it doesn't.
+## About us
 
-**This is the firm's first management hire.** You're not inheriting a machine — you're helping assemble one that's still being built. You'll manage the staff, run the day, catch what's breaking, and bring the Administrator decisions that are ready to make instead of problems that aren't.
+Hill Country Consultants gives small and mid-size businesses the capability of a full staff without the payroll. For one flat monthly fee, we handle the work that keeps a business running and looking like it means business — documentation, compliance, coordination, systems, brand and marketing.
 
-If you need a role where the systems already work and you maintain them, this isn't that. If you've ever looked at a growing business and thought *"I could organize this,"* it is exactly that.
+We serve six industries — construction and contractors, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and landowners and agriculture. We've been working with businesses nationwide since 2024.
+
+---
+
+## The role
+
+**You make the work. About a quarter of the time, you're also the one who brings it in.**
+
+Our clients have a common problem: what they've built is better than what it looks like. A contractor who wins real work and submits a capability statement made in Word. A nonprofit doing serious work with materials that undercut it in front of funders. A restaurant with a great product and a different look on every menu, sign and post.
+
+You fix that. Graphics, websites, apps, brand systems, print, video — if it's creative or it's built, it's yours.
+
+**About 75% creative work, about 25% sales.** You were hired to design and build; that's most of your week. But you'll also sit with prospective clients, because the person who explains creative work best is the person who does it — and a client who meets you in the first conversation trusts the first draft more.
+
+If you want a seat where a brief lands in your inbox and you never speak to the person it came from, this isn't it. If you'd rather understand a business before designing for it, it is.
+
+---
+
+## The creative work
+
+**Brand and graphics**
+- Brand systems — logo or wordmark, palette, typography, usage rules, and a guide a client's team can actually follow
+- Social graphics, flyers, ad and email creative, sized correctly per platform
+- Multi-asset campaigns and content calendars
+- Business documents that have to look serious — capability statements, one-sheets, proposals, reports, decks
+- Reusable templates so a client's team can produce on-brand work without you
+
+**Web and app development**
+- Design and build client websites — landing pages, multi-page sites, online stores
+- **Build progressive web apps (PWAs) and custom app products** — devotional apps, guided journals, trackers, course delivery, client tools
+- Scope a build with a client, wireframe it, build it, test it across devices, and deploy it
+- Work on whatever platform a client is already on, or recommend the right one when they're starting fresh
+- Responsive design that holds up on a phone, not just a desktop preview
+- Forms, email capture and integrations that deliver where they're supposed to
+- Basic SEO, image optimization and page speed
+- Hosting, deployment and content integration
+- Ongoing site and app maintenance — content changes, new pages, updates, seasonal work
+
+**Print and production**
+- Print-ready files to specification: bleed, trim, margins, color profile, resolution
+- Publishing design where the account calls for it — covers, interiors, companion products
+- Event and environmental collateral — signage, banners, programs
+- Merchandise and promotional product design
+
+**Media**
+- Short-form video for social — cut, captioned, sized per platform
+- Audiograms and clips pulled from longer recordings
+- Motion graphics, animated assets and trailers
+- Audio cleanup and leveling
+- Show art, cover art and channel assets
+
+Every piece is on the client's brand, not yours. Consistency is the product.
+
+---
+
+## The sales side
+
+You're not a full-time salesperson, and we won't train you to sound like one. You're a creative professional who can sit with a business owner, understand what they're trying to build, and explain what it would take.
+
+- Work the local leads sheet you're given, and build your pipeline from there
+- Referrals, professional networks, trade associations, chambers and events
+- Follow-up on inbound inquiries
+- Growth on accounts you already serve — a client who trusts your work is the easiest next conversation you'll have
+- Run free 30-minute strategy sessions
+- Scope honestly. You know what the work takes, because you'll be doing it.
+
+---
+
+## What we're looking for
+
+**Design**
+- **A portfolio.** Real work, for real people, with the brief behind it. We'd rather see three projects you can explain than twenty you can't.
+- Working command of layout, typography, color and hierarchy — enough to know *why* something isn't working, not just that it isn't
+- Print production knowledge — bleed, trim, margins, CMYK vs. RGB, resolution, and what a printer will reject
+- Able to design in a brand that isn't yours and keep your own taste out of it
+- Organized with files, versions and handoffs
+
+**Equipment — specific to this role**
+
+You'll need **both a Windows laptop and a Mac laptop**, each meeting our full security baseline (see below). Clients work on both, files behave differently across them, and we test what we ship.
+
+**Software**
+- **Adobe Illustrator** — logos, wordmarks, vector work that scales from a business card to a banner
+- **Adobe InDesign** — multi-page layout: proposals, reports, book interiors, print collateral
+- **Adobe Photoshop** — image editing, retouching, prepping photography for print and web
+- **Adobe Express** (formerly Adobe Spark) — fast-turn social and marketing assets
+- **Canva** — many clients work in it, and you'll build so they can maintain what you hand over
+
+**Video and audio**
+- Short-form video editing — cuts, captions, titles, correct aspect ratios
+- Motion graphics at a working level
+- Audio cleanup, leveling and assembly
+- Premiere Pro, After Effects, DaVinci Resolve, CapCut, Audition, Descript or equivalents. We care that you can cut a clean piece, not which tool you use.
+
+**Web and app development**
+- **Wix**, **WordPress** and **Shopify** — storefront and site design, theme customization, page structure, and the settings that break things
+- Squarespace, Webflow or Framer are a plus
+- **HTML, CSS and JavaScript.** Web and app development is part of this role, not an occasional extra. When a platform won't do what the design needs, you open the code and fix it.
+- **Able to build a progressive web app** — installable on iOS and Android, working offline, deployed and hosted. If you haven't built one, you should be able to show us something close and convince us you'll get there fast.
+- Comfortable with device testing, debugging and reading a console
+- Hosting, domain, DNS and deployment
+
+**AI tools**
+- Comfortable and current with AI tools in a creative and production workflow
+- Able to set up AI workflows for client teams and train them to use them — this is a service we sell, and you'll help deliver it
+- Sound judgment about licensing and rights on anything AI-generated
+
+**The rest**
+- **At least two years of sales experience.** You've sold work before — freelance projects, studio new business, retail, services, fundraising. If you've spent two years finding your own clients, scoping the work and setting your own rates, that's exactly what we mean. Say so in your application.
+- You're organized enough to run several client accounts at once without dropping one
+- You can take a revision request without taking it personally, and a no without disappearing
+- Comfortable with Google Workspace or Microsoft 365, and quick on new software
+- Reliable high-speed internet and a quiet, private space you can take client calls from
+
+**Helpful but not required:** Figma · React or a modern JS framework · backend, database or API experience · app store submission · e-commerce merchandising · photography or art direction · illustration · prior agency, in-house, print shop or freelance client work
+
+---
+
+## What we offer
+
+- **Paid training** on our services and our sales process. You bring the creative ability; we give you the structure.
+- **A real onboarding.** Your first weeks are supported and reviewed, with coaching along the way.
+- **Variety.** Six industries, and no two accounts alike. If you're tired of designing the same thing for the same kind of client, this isn't that.
+- **Ongoing coaching**, including regular review of the work you ship.
+
+---
+
+## Schedule
+
+**You work your own time zone.** We serve clients nationwide and we staff across all U.S. time zones, so your hours run on local time wherever you are — not on somebody else's clock.
+
+Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by appointment, applied in your zone. You'll be matched to clients where that schedule works for both of you.
+
+Part-time: **four paid hours per day**, flexible within those windows. Additional approved hours are available on accounts that need them.
+
+
+
+---
+
+## Who you'll work with
+
+You report to an **Accounts Manager**, who is your day-to-day support — they approve your work, coach you, and are the person you go to when something needs a decision. Accounts Managers report to our Business Manager, who reports to the Administrator.
+
+It's a small firm. You'll know everyone.
+
+---
+
+## Equipment and security
+
+Because we handle client data, every role meets the same baseline. **This role requires both a Windows laptop and a Mac laptop**, each meeting every item below:
+
+- **A Windows laptop and a Mac laptop**, with a **dual-monitor** setup
+- A **wired Ethernet** connection — not Wi-Fi only
+- A **smartphone and/or tablet** that can run apps
+- Antivirus, and an updated, encrypted Windows installation
+- Two-factor authentication on all work accounts
+- A secured home network
+- A signed confidentiality agreement
+- Consent to a background check
+
+---
+
+## Compensation
+
+**$15.00 per hour** base, for all hours — creative work and sales alike.
+
+**Commission on top of base:**
+- **15%** of every initial sale
+- **5%** of every recurring payment after that, for as long as that client stays with us
+- **10%** on standalone and one-time services
+
+**Base pay grows with results.** Once you reach $14,000 in sales, your base rate is reviewed and can increase from there.
+
+The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands.
+
+---
+
+## To apply
+
+**info@hillcountryconsultants.com · 470-478-1590**
+
+**Send your portfolio, links to two sites you've built (tell us which platform each is on), one piece of video or motion work, and anything you've built that runs as an app.**
+
+Then tell us about a project where the client asked for something you thought was wrong — what you did, and how it ended.
+
+*Must be legally authorized to work in the United States and working from within the U.S.*
+
+---
+
+*Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
+
+const ACCOUNTS_MANAGER = `# Accounts Manager
+**Hill Country Consultants · Remote — United States · Full-Time**
+
+*Clarity. Strategy. Organized Growth.*
+
+---
+
+## About us
+
+Hill Country Consultants gives small and mid-size businesses the capability of a full staff without the payroll. For one flat monthly fee, we handle documentation, compliance, coordination, systems, brand and marketing — the work that quietly eats a growing business alive.
+
+We serve six industries — construction and contractors, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and landowners and agriculture. We've been working with businesses nationwide since 2024.
+
+---
+
+## The role
+
+**Most firms would call this a Sales Manager. We call it an Accounts Manager, because the job doesn't stop at the signature.**
+
+You lead our Engagement Specialists and Creative Specialists — the people who bring clients in and then do the work for them. You set their targets, coach them every week, run the training that makes them good, and carry your own book alongside theirs.
+
+You report to a Business Manager. The specialists report to you.
+
+This is a hands-on seat, not a spreadsheet seat. At our size you'll own the playbook, help recruit, coach live, and close deals yourself. If you want to manage from a dashboard, this isn't it.
+
+---
 
 ## What you'll own
 
-### 1 · The daily management meeting
+### Leading the team
 
-**You host it, every business day.** It's the heartbeat of the firm — where the day gets set, blockers surface before they cost a client, and nobody works a whole day in the wrong direction.
+- Set individual and team targets, and review attainment weekly
+- Coach through deal reviews, call reviews and live sessions — the single highest-value thing you'll do
+- Run one-on-ones that people actually look forward to
+- Recruit, interview and onboard new specialists alongside your Business Manager
+- Ramp new hires: get them from certified to producing without letting them flounder
+- Hold people accountable kindly and clearly, and know when someone isn't going to make it
 
-- Set the agenda and run it on time, start and finish
-- Confirm what each specialist is doing that day: sales activity, client deliverables, deadlines in play
-- Surface blockers and resolve them in the room, or assign the resolution before it ends
-- Review yesterday against commitments — what shipped, what didn't, why
-- Flag capacity strain and approaching deadlines early
-- Publish notes and action items to the team afterward, so decisions are documented and not just spoken
+### Weekly sales training — staff and clients
 
-Running the same meeting well every day, especially on days when nothing seems to be happening, is a real skill. It's also the discipline this role is built on.
+This is a distinctive part of the job, and it's two audiences.
 
-### 2 · Sales operations and quality control
+**Your team, every week.** Live role-play, call review, objection handling, discovery practice, and a drill on our services and rates. Most of what anyone learns in an onboarding is gone in ninety days without this — you're the reason it sticks.
 
-- **Review every proposal before it goes up for approval.** Every exception request routes to you first. You're the filter between what a specialist wants to promise and what the firm can actually deliver — you work it up, mark what's wrong, and forward it with a recommendation. The Administrator releases it.
-- **Review the first three contracts** for every new Engagement Specialist during their supervised ramp before they go for approval, with a debrief inside 48 hours — one behavior coached at a time.
-- **Run weekly coaching:** twenty minutes of live role-play and one recorded call reviewed, per specialist, permanently.
-- **Run the monthly drills:** the overpromise drill and the closed-book price check. Nobody quotes from memory, including you.
-- **Maintain the rate reference** in the employee portal so it is never wrong. A stale rate sheet is how a specialist quotes a price we can't honor.
+**Our clients, every week.** We teach sales to the businesses we serve. You'll deliver that training: discovery, follow-up, closing, pipeline discipline — adapted for a contractor, a nonprofit, an author, a restaurant owner. It's a real service line, and you're the one delivering it.
 
-### 3 · Capacity and intake control
+Being good in front of a room matters here as much as being good in a deal.
 
-This may be the most consequential thing you do.
+### Pipeline and forecasting
 
-Sales can outrun delivery, and when it does the damage lands on clients who already paid us. You build and defend the monthly intake ceiling — how much new work the firm can accept, matched against the hours we actually have. You bring the number and the math to the Administrator, who sets it. Then you're the one who holds the line day to day, telling a specialist *not this month* when their commission depends on hearing yes. That takes spine.
+- Own the pipeline across your team — stage discipline, next steps current, nothing sitting untouched
+- Forecast honestly. Call the number, flag the risk early, and don't let optimism into the sheet.
+- Review proposals before they go up, so nothing reaches a client that we can't deliver
+- Make sure every specialist is working their leads sheet and building beyond it
 
-- Track committed delivery hours against available hours, continuously
-- Recommend the monthly intake ceiling, then enforce the approved number
-- Flag when an account exceeds what one specialist can service, and route it
-- Forecast when the next hire is needed — before the strain shows up in client work
+### Your own book
 
-### 4 · Delivery standards
+You carry your own accounts. You'll be given a leads sheet to start, and you're expected to build from there.
 
-- Review every **Delivery Handoff** within 24 hours of signature: what was sold, what was promised, first-30-day deadlines, kickoff date
-- Audit **daily work logs** against client hour allotments — clients pay for hours and we account for every one
-- Spot-check outbound deliverables for quality. Submittals go to architects. Grant applications go to funders. Compliance files go to inspectors. Our name is on all of it.
-- Confirm the **Friday weekly report** goes out on every account, every week, without exception
-- Own client escalations before they become cancellations
+- Run strategy sessions and close agreements yourself
+- Take the accounts that need someone senior in the room
+- Stay close enough to the work that your coaching is credible — a manager who hasn't closed in a year stops being listened to
 
-### 5 · Client retention
+### Client retention
 
-**This is the number you're paid on, and it's the number the firm lives on.** A client who stays two years is worth more than three who leave at month four — and far cheaper than replacing them. Keeping people happy is not a soft duty here. It's an owned outcome with your name on it.
+- Know where every account in your book stands, and step in before a client goes quiet
+- Own renewals early, never in the final week
+- Handle escalations personally
+- Make the value visible — clients renew because they can *see* what they got
+- Turn good relationships into referrals
 
-**Know where every client stands, before they tell you**
+---
 
-- Own the renewal calendar. Every contract end date, tracked, with the conversation started well before it arrives — never in the final week.
-- Watch the early warning signs: a client going quiet, unused hours piling up month after month, skipped check-ins, slower payments, a tone shift in email. Churn almost always announces itself before it happens.
-- Review work logs and weekly reports for accounts that are *technically* fine but where nothing meaningful is getting done.
-
-**Make the value visible**
-
-- Clients don't renew because we worked hard. They renew because they can *see* what they got. Make sure they can.
-- Run periodic account reviews: here's what we delivered, here's what it saved you, here's what's next.
-- Make sure every client is actually using what they're paying for. A Momentum client using Foundation-level service is a cancellation waiting for a slow month — find the unused service lines in their tier and put them to work.
-- Confirm onboarding lands right. The first 30 days set whether a client ever trusts us, and it's the cheapest place to prevent a loss.
-
-**Handle the hard conversations**
-
-- Own client escalations personally before they become cancellations
-- Take the save conversation when a client signals they're leaving — find out what actually went wrong and, where we can fix it, fix it
-- When a client does leave, find out why and write it down. A loss you don't understand is a loss you'll repeat.
-- Track retention as a real number, reported quarterly
-
-**Turn good relationships into growth**
-
-- Ask satisfied clients for referrals and testimonials. Nobody sells this firm better than a client who's had a good year with us.
-- Spot genuine expansion opportunities — a client who's outgrown their tier — and route them to the specialist. Never sell a client something that doesn't help them; that's the fastest way to lose the ones you have.
-
-### 6 · Sales — about 10% of the role
-
-You are not primarily a salesperson, but you do sell. Roughly four hours of a forty-hour week, and it comes from three places:
-
-**Expansion on accounts you already know.** This is the natural one. You're the person who sees a client outgrowing their tier, or paying for a plan while their real problem sits in a service line they've never used. You already know the account better than anyone. Have the conversation.
-
-**Referrals from happy clients.** Retention and referral are the same muscle. A client who's had a good year with us is our best source of the next one, and asking is your job.
-
-**Coverage.** When a lead comes in and no specialist is free, or a prospect needs someone senior in the room, you take it. You'll be certified through the same three gates every specialist passes, so you can run a discovery call and close a contract properly.
-
-**The rules that apply to everyone apply to you.**
-
-- Zero pricing exceptions. You review other people's exception requests; your own go straight to the Administrator with no exceptions and no shortcuts.
-- Every hard line in this document applies to your sales too
-- You quote from the rate reference, not from memory
-- Every deal you close gets a delivery handoff like anyone else's
-
-**And one rule that applies only to you:** your own deals never move the intake ceiling. If the firm is at capacity, it's at capacity — including for work you sold. You will be the only person in a position to quietly bend that, which is exactly why it's written down.
-
-### 7 · Money
-
-- Invoicing, payment schedules, and the five-business-day grace period
-- Collections follow-up — firmly, early, and without apology
-- Calculate and verify commissions, residuals and any clawbacks, and submit them for release
-- Track revenue against capacity so we know which service lines actually earn
-- Expense tracking, vendor and contractor payments
-- Coordinate with the firm's bookkeeper and CPA
-
-### 8 · People
-
-**Every employee in this firm reports to you.** You're their manager — the person they come to, and the person accountable for whether they succeed.
-
-- Recruit, screen and interview Engagement Specialists, and bring finalists forward with a recommendation
-- Run Phase 1 foundation training and administer the three certification gates
-- Manage schedules, and submit additional-hour requests on accounts that need them
-- Hold performance conversations — the encouraging ones and the hard ones. Corrective action goes up for approval before it's taken.
-- Maintain personnel records and onboarding documentation
-- Be reachable. A remote team with an unreachable manager isn't managed.
-
-### 9 · Systems, build and design
-
-We're a firm that sells documentation, systems and brand work. We're expected to look like it and run like it. You're the person who makes that true internally.
-
-**Systems and process**
-
-- Own the employee portal: lead intake, discovery notes, proposal requests, delivery handoff, rate reference, and resources
-- Build the process documentation this firm still needs, so the next hire onboards from a document instead of a conversation
-- Identify what's breaking, bring a fix with the reasoning attached, and implement it once approved
-
-**Coding and technical build**
-
-- Maintain and update the public website — pages, copy, service and rate changes, forms, links — working directly in the code where the builder won't do it
-- Build and maintain the employee portal: pages, gated access, forms, and where each submission lands
-- Connect our platforms to each other so information stops being retyped — forms into trackers, intake into the CRM, notifications where they're needed
-- Read, modify and troubleshoot existing code rather than waiting on a developer for every small change
-- Build internal tools when buying one doesn't make sense — trackers, calculators, dashboards
-- Support the Systems & Automation service line, including AI workflow setup for client teams
-
-**Graphic design**
-
-- Design internal and client-facing materials: one-sheets, proposals, capability documents, reports, presentations
-- Produce marketing and social graphics, and support brand work on client accounts
-- Hold brand consistency across everything the firm puts out — colors, type, logo usage, layout. A proposal that looks thrown together undercuts a firm that sells organization.
-- Build reusable templates so specialists produce on-brand work without designing from scratch every time
-
-## Where this role sits
-
-**The Administrator has authority over managers. You have authority over everyone else.**
-
-> **Administrator** → **Business Manager** → **Engagement Specialists · all staff**
-
-**You are the firm's line of authority over its people.** Every employee reports to you, takes direction from you, and answers to you. Specialists bring you their questions, their problems, and their exceptions — not to the Administrator. You assign the work, set the schedules, run the coaching, hold the standard, and handle it when someone isn't meeting it.
-
-Nobody on this team goes around you, and you don't go around anybody. If a specialist has a concern about you, it goes to the Administrator — that's the one exception, and it's how it should work.
-
-**You report to the Administrator, and the Administrator approves your decisions before they take effect.**
-
-That distinction matters, so here it is plainly:
-
-| You direct — no approval needed | The Administrator approves before it takes effect |
-|---|---|
-| Who does what work, and when | Anything that binds the firm to a client |
-| Daily priorities and assignments | Every proposal, quote and exception |
-| Schedules and coverage | Hires, terminations and corrective action |
-| How a problem gets solved internally | Money going out — payroll, commissions, vendors |
-| Coaching, feedback and standards | The monthly intake ceiling |
-| Who runs which account | Pricing, policy and process changes |
-| The daily meeting and its agenda | Your own sales proposals — never self-approved |
-
-**In short: you run the people and the day. The Administrator approves anything that commits the firm's money, its clients, or its policy.**
-
-**What that means in practice**
-
-- Your job is to make approval fast. Bring complete work-ups with a clear recommendation and reasoning attached — not open questions, not raw problems.
-- If it's a close call, say which way you'd go and why. A recommendation you're willing to defend beats a neutral summary every time.
-- Nothing is said to a client, vendor, or applicant as settled until it's approved. *"Let me confirm that and come right back to you"* is a professional answer and you'll use it often.
-- When something is genuinely urgent, escalate immediately rather than acting first and reporting after.
-
-**This is real management authority inside a firm that keeps final approval at the top.** If you need to commit the company without checking, this isn't the seat. If you're strong at running people and handing over decisions that are ready to make, you'll do well here — and what you carry grows as the firm does.
-
-## Who we're hiring
-
-**Required**
+## What we're looking for
 
 - **A bachelor's degree**
-- **Five or more years** managing operations, a team, or a book of client accounts
-- You can hold several moving projects and several people in your head at once without dropping one
-- You are comfortable telling someone no, including someone whose income depends on yes
-- **You've actually managed people**, not just projects — assigned work, given hard feedback, and been the one accountable when someone underperformed
-- **You can work inside an approval structure without stalling or resenting it.** You'll prepare a great deal you don't get the final say on, and you'll do it again the next day.
-- **You can hold a client relationship.** You've kept accounts, handled unhappy customers, and turned a complaint into a longer relationship rather than an exit.
-- **You can ask for business without flinching.** Not a career closer — but able to name a price, ask a client to expand, and request a referral without apologizing for it.
-- Strong written communication — you'll write process documents, coaching notes, meeting summaries, and client escalation responses
-- Numbers literacy: invoicing, commission math, hours against allotments, revenue against capacity
-- A dedicated, quiet workspace, reliable high-speed internet, and a setup you can host a video meeting from every morning
-- **Based in the United States.** This role is open to U.S.-based applicants only.
-- **Your equipment.** A Windows computer with a **dual-monitor** setup, a **wired Ethernet** connection (not Wi-Fi only), and a **smartphone and/or tablet** that can run apps.
+- **Ten or more years of sales experience**, with a verifiable record of hitting a number
+- **Five or more years** managing a team or a book of client accounts
+- **You've coached people, not just supervised them.** You can take an average performer and make them better, and you can explain how.
+- Comfortable in front of a room — you'll train staff and clients weekly
+- You're comfortable telling someone no, including someone whose income depends on yes
+- You can hold several people and several deals in your head at once without dropping one
+- Strong written communication — coaching notes, training materials, client responses
+- Numbers literacy: pipeline math, commission math, forecasting, hours against capacity
+- Fluent in Google Workspace or Microsoft 365, a CRM, and quick on new software
 
-**Security & data protection — required of everyone, held to a higher bar for this seat**
+**Preferred:** experience in a service business where hours are sold and delivered — agency, consulting, staffing, professional services. Experience building a sales playbook or training program from scratch. Any exposure to construction, food service, agriculture, publishing, media or nonprofit work.
 
-- **Consent to a background check** — this role handles money and client accounts — and legal authorization to work in the United States (18 or older)
-- **A supported, auto-updating Windows** with current antivirus, full-disk encryption (BitLocker), a password login, and automatic screen-lock — on a computer not shared with anyone else
-- **A secured home network** (WPA2/WPA3 Wi-Fi with the default router password changed); you never do client work over public or unsecured Wi-Fi
-- **Two-factor authentication (2FA)** on every work account, and a password manager with strong, unique passwords
-- **Confidentiality:** sign a confidentiality/NDA agreement, keep client data only in approved company tools (never personal email, cloud, or USB drives), keep your screen private and lock your computer when you step away, shred any printed client material, and return or delete all client data if you leave
-
-**Technology — this one is not negotiable**
-
-You will live in software all day, across several platforms at once, and you'll be the person others come to when something won't work.
-
-- **Strong general computer skills.** Comfortable troubleshooting your own problems before asking anyone.
-- **Fluent in a full productivity suite** — Google Workspace or Microsoft 365: documents, spreadsheets, shared drives, calendars, video meetings.
-- **Comfortable running several platforms simultaneously** — our employee portal, our website, a CRM, project and task tracking, video conferencing, e-signature, invoicing and payment tools, cloud storage, and a shared credential vault.
-- **Quick to learn new software without hand-holding.** You'll be asked to evaluate and roll out tools, not just use the ones already here.
-- **Spreadsheet capable.** Formulas, sorting, filtering, and building a simple tracker from scratch — the capacity model is a spreadsheet before it's anything else.
-- Able to teach a tool to someone else once you've learned it, since you'll be onboarding every new specialist.
-
-**Coding and programming — required**
-
-- **Working knowledge of HTML, CSS and JavaScript.** You should be able to open a page, find what's wrong, fix it, and know you didn't break something else.
-- Comfortable inside a website builder *and* in the underlying code when the builder won't do what's needed
-- Understand how APIs, integrations and webhooks connect one platform to another — and able to set them up
-- Experience with automation tools — Zapier, Make, or the equivalent
-- Able to read documentation and work out an unfamiliar system without being walked through it
-- Version control and basic debugging habits: change one thing, test it, keep a record of what you changed
-
-You will not be building enterprise software. You will be the person who makes our website, our portals and our platforms work together — and who fixes it Tuesday morning instead of waiting a week for a contractor.
-
-**Graphic design — required**
-
-- **Fluent in a professional design tool** — Canva at minimum; Adobe Creative Suite or Figma preferred
-- Able to design a clean, professional business document from a blank page: proposals, one-sheets, reports, decks
-- Working understanding of layout, typography, color and hierarchy — enough to know *why* something looks unprofessional, not just that it does
-- Can build and maintain brand templates others can use without breaking them
-- Comfortable producing social and marketing graphics at the sizes each platform actually needs
-- A portfolio or work samples. We'll ask.
-
-**Strongly preferred**
-
-- Experience in a service business where hours are sold and delivered — agency, consulting, staffing, professional services
-- Account management, client success, or retention experience in a recurring-revenue business
-- Any exposure to construction, food service, agriculture, publishing, media or nonprofit work
-- You've built a process from nothing before, not just followed one
-- Bookkeeping or light financial operations experience
-
-**Work arrangement:** Remote/hybrid — primarily remote, with local and regional on-site work when a project calls for it. You can do most of this job from anywhere in the U.S. with reliable internet. The daily management meeting runs by video, and everything you need — the employee portal, the rate reference, client files, the forms — is online and available to you wherever you are.
-
-Remote-first does not mean loosely supervised or loosely supervising. You'll be the most visible person on this team: first on the call every morning, and the one specialists reach when something breaks. If you've worked remote before and know how to build presence without a hallway, that experience matters more here than it would in an office.
+---
 
 ## What we can't train
 
-- **Judgment.** Half this job is working out the right answer quickly with incomplete information — then making the case for it well enough that a decision can be made on the spot.
-- **Follow-through.** A Friday report that goes out 47 weeks out of 52 is a broken system.
-- **Directness delivered with respect.** You'll tell a specialist their proposal is wrong, a client their expectation isn't in the contract, and the owner that we're at capacity.
-- **Reading a room you can't see.** Much of retention is noticing that a client who used to reply in an hour now takes three days, and picking up the phone about it before anyone asks you to.
+- **Coaching instinct.** Knowing which one thing to correct today, and leaving the other four alone.
+- **Follow-through.** Weekly training that happens 47 weeks out of 52 is a broken system.
+- **Credibility.** Your team will know within a month whether you can actually do what you're teaching.
+- **Reading a room you can't see.** Much of retention is noticing a client who used to reply in an hour now takes three days, and picking up the phone before anyone asks you to.
 
-## Your first 90 days
+---
 
-**Days 1–30 · Learn the machine.** Every service line, every rate, every term. Sit in on discovery calls. Read every active client file. Shadow delivery on real accounts. Meet every person on the team one on one. Ask why about everything — this is the only window where you get to.
+## Schedule
 
-**Days 31–60 · Take the controls.** Assume the daily management meeting as host. Take first-line proposal review and delivery handoff review. Build the capacity model and bring the first intake ceiling recommendation forward. Start weekly coaching.
+Full-time, aligned to your Business Manager's coverage zone — Eastern or Pacific. Your team may be spread across time zones, and part of the job is being reachable when they need you.
 
-**Certification runs alongside all of this.** You'll pass the same three gates every specialist does — Product, Discovery, and Close — before selling anything on your own.
+---
 
-**Days 61–90 · Fix something.** Identify the three worst operational bottlenecks and resolve at least one completely. Document two processes that currently live only in someone's head. Audit the website and portal, and build one template set specialists can actually use. Own collections end to end. Establish the renewal calendar and complete a first account review with every active client.
+## Equipment and security
 
-## How you'll be measured
+Because we handle client data, every role meets the same baseline:
 
-| Area | What good looks like |
-|---|---|
-| **Delivery** | Weekly reports out on every account, every week. Work logs reconciled. Zero missed contract commitments. |
-| **Quality** | Nothing reaches a client without approval. Work-ups complete enough to be decided on the first pass. Deliverables that don't come back. |
-| **Capacity** | The firm never sells more than it can service, including work you sold. |
-| **Retention** | Clients still with us at month twelve. Renewals started early, not in the final week. Every loss understood and written up. |
-| **Money** | Receivables current. Commissions accurate and on time. |
-| **Team** | Specialists certified, coached, and producing. Problems reaching you before they reach the Administrator. |
-| **Sales** | Expansion and referral conversations happening on existing accounts — never at the expense of capacity discipline. |
-| **Systems & brand** | Website and portals current and working. Everything the firm sends out looks like it came from the same firm. |
-| **The daily meeting** | Held every business day, on time, with notes published. |
-| **The Administrator's day** | Decisions arriving ready to make — complete, recommended, and not needing to be sent back for more. |
+- **A Windows computer** with a **dual-monitor** setup
+- A **wired Ethernet** connection — not Wi-Fi only
+- A **smartphone and/or tablet** that can run apps
+- Antivirus, and an updated, encrypted Windows installation
+- Two-factor authentication on all work accounts
+- A secured home network
+- A signed confidentiality agreement
+- Consent to a background check
 
-That last one is the real test. The Administrator will still approve everything in month six — that's the structure. What should change is *how much work approval takes*. If items come back for rework, or arrive without a recommendation, or surface as problems instead of decisions, the hire isn't landing.
+---
 
 ## Compensation
 
-**$40,000 per year, salaried.** Remote/hybrid — primarily remote, with local and regional on-site as needed.
+**$32,564 per year** starting base.
 
-**Quarterly client-retention bonus — 5% of quarterly profits.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
+**Commission:**
+- **15%** of every initial sale
+- **10%** of every recurring payment after that, for as long as that client stays with us
+- **5%** on retained accounts — paid on the accounts you keep
 
-Schedule is set with the owner; the daily management meeting anchors every business morning.
+**Quarterly bonus — 2.5% of quarterly profits.**
+
+This is a commission-weighted seat by design. The base is a floor; the earnings come from what you and your team build and keep. Three of the four components pay on retention rather than on signatures, which is deliberate — we'd rather you keep twenty clients than sign forty and lose half.
+
+---
 
 ## To apply
 
-Use the application below. Tell us about a system or process you built from nothing — what was broken before, what you put in place, how you got it approved, and how you knew it worked.
+**info@hillcountryconsultants.com · 470-478-1590**
 
-**Please include work samples:** something you designed, and something you built or coded.`;
+Tell us about someone you coached who got measurably better — what they were doing wrong, what you changed, and how you knew it worked.
+
+*Must be legally authorized to work in the United States and working from within the U.S.*
+
+---
+
+*Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
+
+const BUSINESS_MANAGER = `# Business Manager
+**Hill Country Consultants · Remote — United States · Full-Time, Salaried**
+
+### Two positions open — one Eastern, one Pacific
+
+*Clarity. Strategy. Organized Growth.*
+
+---
+
+## About us
+
+Hill Country Consultants gives small and mid-size businesses the capability of a full staff without the payroll. For one flat monthly fee, we handle documentation, compliance, coordination, systems, brand and marketing — the work that quietly eats a growing business alive.
+
+We serve six industries — construction and contractors, authors and personal brands, food and hospitality, small and mid-size business, nonprofits, and landowners and agriculture. We've been working with businesses nationwide since 2024.
+
+---
+
+## The role
+
+**You run the entire business day to day, reporting only to the Administrator.**
+
+We're hiring two Business Managers — **one covering Eastern hours, one covering Pacific.** We serve clients and staff across every U.S. time zone, and a firm that operates coast to coast needs management awake at both ends of the day. You'll cover your window, host your own morning meeting, and lead the Accounts Managers — and through them, the specialists — in your coverage area.
+
+**This role splits roughly in half: 50% sales, 50% running the firm.** You're not a manager who occasionally sells. You carry real new business alongside real management responsibility, and you'll be expected to be good at both. You won't start from a blank page — you'll be given a local leads sheet to work from on day one.
+
+These are our first management hires. You're not inheriting a finished machine — you're helping assemble one, and you'll have a real hand in how it ends up working.
+
+**Where you sit:** you report to the Administrator. Our Accounts Managers report to you, and our Engagement Specialists and Creative Specialists report to them. You're the top of the operating structure — everything below the owner runs through you.
+
+You'll build and lead that team, keep our clients, manage our vendors, hold the quality standard on everything that goes out the door, and make sure we never sell more work than we can actually deliver. It's a broad seat with genuine influence, and it suits someone who has looked at a growing business and thought *I could organize this.*
+
+---
+
+## What you'll own
+
+**The daily management meeting**
+
+You host it every business day by video, at the start of your coverage window, with your Accounts Managers. It's the heartbeat of the firm — where the day gets set, blockers surface before they cost a client, and nobody works a whole day in the wrong direction. You set the agenda, run it on time, resolve what can be resolved in the room, and publish notes afterward.
+
+You'll also hand off cleanly to your counterpart in the other zone, so nothing falls into the gap between coverage windows.
+
+**Client retention**
+
+This is the number the firm lives on, and it's yours.
+
+- Know where every client stands before they tell you — watch for the quiet ones, the unused hours, the slower replies
+- Own renewals early, never in the final week
+- Make the value visible. Clients don't renew because we worked hard; they renew because they can *see* what they got.
+- Handle escalations personally, before they become cancellations
+- When a client does leave, find out why and make sure it doesn't happen twice
+- Turn good relationships into referrals and testimonials
+
+**The team**
+
+Accounts Managers in your coverage zone report directly to you. Through them, you're responsible for every Engagement Specialist and Creative Specialist in your zone.
+
+- Recruit, screen and interview across all roles
+- Develop your Accounts Managers into people who can run their own books well
+- Set the standard for onboarding, training and coaching, and make sure it actually happens
+- Manage schedules, coverage and capacity across the zone
+- Hold performance conversations, the encouraging ones and the hard ones
+- Step in directly when an account or a specialist needs it
+
+**Quality and capacity**
+
+- Review proposals and quotes before they reach a client
+- Confirm what was sold matches what gets delivered
+- Spot-check work going out the door. Our documents go to architects, funders and inspectors — our name is on all of it.
+- Track committed work against the hours we actually have, and flag when we're approaching the line
+
+**Construction submittals**
+
+Construction is our largest industry, and this is our most technical service. You'll carry submittal work directly — not just supervise it.
+
+- Assemble submittal packages: manufacturer cut sheets, index, marked project data, Bates numbering, transmittals, compliance checklists and RFIs on the client's letterhead
+- Review packages before they go to a contractor of record for signature
+- Set the standard for how specialists produce them, and train against it
+- Step in on high-stakes or high-volume packages
+
+*(We prepare and organize. We don't stamp or certify engineering — the client's contractor of record reviews and signs.)*
+
+**Vendor relations**
+
+- Source, vet and negotiate with vendors, contractors and specialty providers
+- Manage our preferred vendor relationships and keep that bench current
+- Hold vendors to scope, timeline and quality — the same standard we hold ourselves to
+- Own contracts, renewals and pricing with every outside provider
+- Bring in outside help when a client need falls outside what our team covers — for example, in-person event planning and on-site event coordination are delivered through our event vendor, and you own that relationship
+
+**Money**
+
+- Invoicing, payment schedules and collections follow-up
+- Commission calculation and verification
+- Expense tracking, vendor and contractor payments
+- Coordinate with our bookkeeper and CPA
+
+**Systems, build and design**
+
+- Maintain our website — pages, copy, service updates, forms
+- Build and maintain our internal staff portal
+- Connect our platforms so information stops getting retyped
+- Build internal tools when buying one doesn't make sense
+- Design internal and client-facing materials — one-sheets, proposals, reports, presentations
+- Hold brand consistency across everything the firm puts out
+- Write the process documentation this firm still needs
+
+**Sales — about half the role**
+
+- Work the local leads sheet you're given, and build your own pipeline from there
+- Meet business owners through referrals, professional networks, trade associations, chambers and industry events
+- Run free 30-minute strategy sessions
+- Recommend the right level of service based on what you heard, and close the agreement
+- Grow existing accounts — you'll know them better than anyone, since you're also the one keeping them
+- Step in when a prospect needs someone senior in the room
+
+---
+
+## What we're looking for
+
+- **A bachelor's degree**
+- **Five or more years of sales experience.** Half this job is selling, and we need someone who has carried a number before — services, retainers, B2B, professional services, insurance, real estate, recruiting or similar.
+- **Five or more years** managing operations, a team, or a book of client accounts — including managing other managers, or being ready to
+- **Notary commission — current, or eligible and willing to become commissioned.** We offer notary services to clients, and we need it covered in both coverage zones. If you're not currently commissioned, you'll be expected to obtain it in your state shortly after starting.
+- **You've actually managed people** — assigned work, given hard feedback, and been accountable when someone underperformed
+- You can hold several moving projects and several people in your head at once without dropping one
+- You're comfortable telling someone no, including someone whose income depends on yes
+- **You can hold a client relationship.** You've kept accounts, handled unhappy customers, and turned a complaint into a longer relationship rather than an exit.
+- Strong written communication — process documents, coaching notes, meeting summaries, client responses
+- Numbers literacy: invoicing, commission math, hours against budgets, revenue against capacity
+- **Construction document experience is a strong advantage** — submittals, bids, prequalification or project documentation. If you haven't done it, you'll be trained, but you'll be expected to become genuinely good at it.
+- A dedicated, quiet workspace, reliable high-speed internet, and a setup you can host a video meeting from every morning
+
+**Technology — not negotiable**
+
+You'll live in software all day, across several platforms at once, and you'll be who others come to when something won't work.
+
+- Strong general computer skills — you troubleshoot your own problems before asking anyone
+- Fluent in Google Workspace or Microsoft 365
+- Comfortable running several platforms at once — our portal, our website, a CRM, project tracking, video conferencing, e-signature, invoicing, cloud storage
+- Quick to learn new software without hand-holding
+- Spreadsheet capable — formulas, filtering, and building a tracker from scratch
+- Able to teach a tool to someone else once you've learned it
+
+**Coding and programming**
+
+- Working knowledge of HTML, CSS and JavaScript — able to open a page, find what's wrong, fix it, and know you didn't break something else
+- Comfortable inside a website builder *and* in the underlying code when the builder won't cooperate
+- Understand how APIs, integrations and webhooks connect platforms — and able to set them up
+- Experience with automation tools such as Zapier or Make
+- Able to read documentation and work out an unfamiliar system on your own
+
+You won't be building enterprise software. You'll be the person who makes our systems work together, and who fixes it Tuesday morning instead of waiting a week for a contractor.
+
+**Graphic design**
+
+- Fluent in a professional design tool — Canva at minimum; Adobe Creative Suite or Figma preferred
+- Able to design a clean, professional business document from a blank page
+- Working understanding of layout, typography, color and hierarchy
+- Can build and maintain brand templates others can use without breaking them
+- A portfolio or work samples. We'll ask.
+
+**Preferred:** experience in a service business where hours are sold and delivered — agency, consulting, staffing, professional services. Account management or client retention experience in a recurring-revenue business. Bookkeeping or light financial operations. Any exposure to construction, food service, agriculture, publishing, media or nonprofit work.
+
+---
+
+## What we can't train
+
+- **The ability to switch gears.** You'll close a deal in the morning and handle a client escalation and a payroll question in the afternoon. Both halves of this job have to get done.
+- **Judgment.** Half this job is working out the right answer quickly with incomplete information, then making the case for it well.
+- **Follow-through.** A report that goes out 47 weeks out of 52 is a broken system.
+- **Directness delivered with respect.** You'll tell a specialist their proposal is wrong and a client their expectation isn't in the agreement.
+- **Reading a room you can't see.** Much of retention is noticing a client who used to reply in an hour now takes three days, and picking up the phone before anyone asks you to.
+
+---
+
+## Your first 90 days
+
+**Days 1–30.** Learn the business — every service, every rate, every term. Sit in on client conversations. Read every active client file. Meet everyone one on one.
+
+**Days 31–60.** Take the controls. Host the daily meeting. Take on proposal review and quality checks. Build the capacity picture. Start weekly coaching. Begin working your leads sheet and running your own strategy sessions.
+
+**Days 61–90.** Fix something. Build out your Accounts Manager bench, or develop the one you have. Find the three worst bottlenecks and resolve at least one. Document two processes that currently live only in someone's head. Own collections end to end. Establish the renewal calendar and complete a first review with every active client.
+
+---
+
+## Compensation
+
+**$40,000 per year, salaried.** Fully remote.
+
+**Commission on your own sales:**
+- **10%** of every initial sale
+- **5%** of every recurring payment after that, for as long as that client stays with us
+
+**Quarterly client-retention bonus — 5% of quarterly profits.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
+
+Half this job is selling, so the commission isn't a rounding error — it's a real part of what you take home, and the recurring piece keeps paying as long as your clients stay.
+
+**Specify which position you're applying for — Eastern or Pacific.** You'll work standard business hours in that zone, and the daily management meeting anchors every business morning.
+
+---
+
+## Equipment and security
+
+Because we handle client data, every role meets the same baseline:
+
+- **A Windows computer** with a **dual-monitor** setup
+- A **wired Ethernet** connection — not Wi-Fi only
+- A **smartphone and/or tablet** that can run apps
+- Antivirus, and an updated, encrypted Windows installation
+- Two-factor authentication on all work accounts
+- A secured home network
+- A signed confidentiality agreement
+- Consent to a background check
+
+---
+
+## To apply
+
+**info@hillcountryconsultants.com · 470-478-1590**
+
+**Tell us which position you're applying for — Eastern or Pacific.**
+
+Then tell us about a system or process you built from nothing — what was broken before, what you put in place, how you got it approved, and how you knew it worked.
+
+**Please include work samples:** something you designed, and something you built or coded.
+
+*Must be legally authorized to work in the United States and working from within the U.S.*
+
+---
+
+*Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 export const JOBS: Job[] = [
   {
     slug: "business-manager",
     title: "Business Manager",
-    type: "Full-time · Salaried · Remote / Hybrid",
-    location: "Remote / Hybrid · U.S. · local & regional on-site as needed",
+    type: "Full-time · Salaried · Remote",
+    location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
-    pay: "$40,000/yr salaried + 5% quarterly retention bonus",
+    pay: "$40,000/yr salaried + 10% / 5% commission + 5% quarterly retention bonus",
     summary:
-      "The firm's first management hire — run the firm day to day so the owner can build it. Approve the work that goes out, hold the delivery standard, keep and grow client accounts, manage the team, and defend the capacity line. Real management authority under an approval structure.",
+      "Two positions open — one Eastern, one Pacific. The firm's top operating seat below the owner: run the business day to day, lead the Accounts Managers (and through them the specialists), keep and grow clients, own vendors and quality, and carry real new business — roughly 50% sales, 50% running the firm.",
     open: true,
     body: BUSINESS_MANAGER,
   },
   {
+    slug: "accounts-manager",
+    title: "Accounts Manager",
+    type: "Full-time · Salaried · Remote",
+    location: "Remote · United States",
+    tagline: "Clarity. Strategy. Organized Growth.",
+    pay: "$32,564/yr base + 15% initial · 10% recurring · 5% retention + 2.5% quarterly bonus",
+    summary:
+      "Most firms would call this a Sales Manager — we don't, because the job doesn't stop at the signature. Lead our Engagement and Creative Specialists: set targets, coach weekly, run staff and client sales training, own the pipeline and forecast, and carry your own book alongside theirs. Reports to a Business Manager.",
+    open: true,
+    body: ACCOUNTS_MANAGER,
+  },
+  {
     slug: "engagement-specialist",
     title: "Engagement Specialist",
-    type: "Contracted · Part-time · Remote / Hybrid",
-    location: "Remote / Hybrid · U.S. · local & regional on-site as needed",
+    type: "Contracted · Part-time · Remote",
+    location: "Remote · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
-    pay: "$10/hr base + 15% initial · 5% recurring · 10% à-la-carte",
+    pay: "$10–$17/hr base + 15% initial · 5% recurring · 10% standalone",
     summary:
-      "Find business owners drowning in paperwork, put them under contract with the right plan — then be the one who does the work. You sell it, deliver it, and keep the client. No sales experience required; we train from zero.",
+      "You bring the client in, then you're the one who takes care of them — about 75% client work, 25% sales. Assemble construction submittals, run compliance and coordination, keep the account, and sell the next one. Two years of sales experience wanted; paid training on the rest. Reports to an Accounts Manager.",
     open: true,
     body: ENGAGEMENT_SPECIALIST,
+  },
+  {
+    slug: "creative-specialist",
+    title: "Creative Specialist",
+    type: "Contracted · Part-time · Remote",
+    location: "Remote · United States",
+    tagline: "Clarity. Strategy. Organized Growth.",
+    pay: "$15/hr base + 15% initial · 5% recurring · 10% standalone",
+    summary:
+      "You make the work — graphics, brand systems, websites, PWAs and custom apps, print, video — and about a quarter of the time you're the one who brings it in. Roughly 75% creative, 25% sales. Requires a portfolio, both a Windows and a Mac laptop, and two years of sales experience. Reports to an Accounts Manager.",
+    open: true,
+    body: CREATIVE_SPECIALIST,
   },
 ];
 

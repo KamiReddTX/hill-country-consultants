@@ -1397,6 +1397,64 @@ update job_applications set status = 'new' where status is null or status = '';
 -- storage bucket, alongside resume_path). SAFE / idempotent. Run once.
 alter table job_applications add column if not exists credentials_path text;
 
+-- ============================================================ application-overhaul.sql
+-- Hill Country Consultants — in-depth employment application
+-- =============================================================================
+-- Expands job_applications from a short intake into a full employment
+-- application: address, work authorization, education, employment history,
+-- references, certifications, HCC equipment/security attestations, voluntary
+-- EEO self-identification, and a signed applicant certification. Multi-entry
+-- sections (education / employment history / references) are stored as jsonb
+-- arrays. Everything is nullable so older rows keep working, and inserts still
+-- flow through the service role (no public policy change needed).
+--
+-- Idempotent + safe to re-run. SQL Editor -> Run.  (Run after job-applications.sql
+-- and careers-credentials.sql.)
+-- =============================================================================
+
+-- Personal / contact
+alter table job_applications add column if not exists address        text;   -- street
+alter table job_applications add column if not exists city_state_zip text;
+
+-- Position & availability
+alter table job_applications add column if not exists available_start text;   -- earliest start date (free text/date)
+alter table job_applications add column if not exists hours_available text;
+alter table job_applications add column if not exists days_available  text;
+
+-- Work authorization (US)
+alter table job_applications add column if not exists work_authorized     boolean;
+alter table job_applications add column if not exists over_18             boolean;
+alter table job_applications add column if not exists sponsorship_required boolean;
+
+-- Multi-entry sections (arrays of objects)
+--   education:          [{ school, degree, field, location, completed }]
+--   employment_history: [{ employer, title, location, start, end, duties, reason_leaving, may_contact }]
+--   references:         [{ name, relationship, company, phone, email }]
+alter table job_applications add column if not exists education          jsonb not null default '[]'::jsonb;
+alter table job_applications add column if not exists employment_history jsonb not null default '[]'::jsonb;
+alter table job_applications add column if not exists refs               jsonb not null default '[]'::jsonb;
+
+-- Skills / certifications
+alter table job_applications add column if not exists certifications text;
+
+-- HCC equipment & security attestations (from the role postings)
+alter table job_applications add column if not exists attest_equipment  boolean;  -- Windows dual-monitor, wired Ethernet, phone/tablet (+ Mac for Creative)
+alter table job_applications add column if not exists attest_security   boolean;  -- secured network, 2FA, antivirus, encryption
+alter table job_applications add column if not exists attest_background boolean;  -- consents to background check
+alter table job_applications add column if not exists attest_us_based   boolean;  -- US-based + authorized to work in the US
+alter table job_applications add column if not exists attest_confidential boolean; -- willing to sign confidentiality/NDA
+
+-- Voluntary EEO self-identification (confidential; never used to make decisions)
+alter table job_applications add column if not exists eeo_gender     text;
+alter table job_applications add column if not exists eeo_race       text;
+alter table job_applications add column if not exists eeo_veteran    text;
+alter table job_applications add column if not exists eeo_disability text;
+
+-- Applicant certification & signature
+alter table job_applications add column if not exists certified   boolean;
+alter table job_applications add column if not exists signature   text;         -- typed legal name
+alter table job_applications add column if not exists signed_at    timestamptz;
+
 -- ============================================================ reset-requests.sql
 -- Hill Country Consultants — employee password-reset requests
 -- =============================================================================
@@ -2416,6 +2474,54 @@ create or replace function is_sales() returns boolean
       and (
         s.roles && array['Administrator','Business Manager','Sales Manager','Engagement Specialist','Account manager','Sales staff']::text[]
         or s.role in ('Administrator','Business Manager','Sales Manager','Engagement Specialist','Account manager','Sales staff')
+      )
+  );
+$$;
+
+-- ============================================================ role-rename-2.sql
+-- Hill Country Consultants — role collapse to 5 core roles
+-- =============================================================================
+-- Final role set: Administrator, Business Manager, Accounts Manager,
+-- Engagement Specialist, Creative Specialist.
+--   • Sales Manager        -> Accounts Manager
+--   • Submittals / Documentation / Grants specialist -> Engagement Specialist
+--   • Media / publishing   -> Creative Specialist
+--   • (also folds any remaining legacy VA / Account manager / Sales staff ->
+--      Engagement Specialist, and Design specialist -> Creative Specialist)
+-- Idempotent + safe to re-run. SQL Editor -> Run.
+-- =============================================================================
+
+-- 1) Scalar role column
+update staff set role = 'Accounts Manager'      where role = 'Sales Manager';
+update staff set role = 'Engagement Specialist' where role in ('Submittals specialist','Documentation specialist','Grants specialist','Virtual assistant','Account manager','Sales staff');
+update staff set role = 'Creative Specialist'   where role in ('Media / publishing','Design specialist');
+
+-- 2) roles[] array — replace every legacy value, then de-duplicate
+update staff set roles = (
+  select array(select distinct v from unnest(
+    array_replace(array_replace(array_replace(array_replace(array_replace(array_replace(array_replace(array_replace(array_replace(
+      roles, 'Sales Manager',          'Accounts Manager'),
+             'Submittals specialist',  'Engagement Specialist'),
+             'Documentation specialist','Engagement Specialist'),
+             'Grants specialist',      'Engagement Specialist'),
+             'Virtual assistant',      'Engagement Specialist'),
+             'Account manager',        'Engagement Specialist'),
+             'Sales staff',            'Engagement Specialist'),
+             'Media / publishing',     'Creative Specialist'),
+             'Design specialist',      'Creative Specialist')
+  ) as v)
+)
+where roles && array['Sales Manager','Submittals specialist','Documentation specialist','Grants specialist','Virtual assistant','Account manager','Sales staff','Media / publishing','Design specialist']::text[];
+
+-- 3) is_sales() recognizes Accounts Manager (legacy titles kept as a safety net)
+create or replace function is_sales() returns boolean
+  language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from staff s
+    where s.user_id = auth.uid() and s.active
+      and (
+        s.roles && array['Administrator','Business Manager','Accounts Manager','Engagement Specialist','Creative Specialist','Sales Manager','Account manager','Sales staff']::text[]
+        or s.role in ('Administrator','Business Manager','Accounts Manager','Engagement Specialist','Creative Specialist','Sales Manager','Account manager','Sales staff')
       )
   );
 $$;

@@ -5,7 +5,7 @@ import { sendLeadAlert } from "@/lib/email";
 
 export const runtime = "nodejs";
 
-const NOTIFY_ROLES = ["Administrator", "Business Manager", "Sales Manager"];
+const NOTIFY_ROLES = ["Administrator", "Business Manager", "Accounts Manager", "Sales Manager"];
 async function notifyRecipients(admin: ReturnType<typeof createClient<Database>>): Promise<string[]> {
   const { data } = await admin.from("staff").select("email, role, roles").eq("active", true);
   const list = (data ?? [])

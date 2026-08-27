@@ -29,9 +29,10 @@ export const isAdmin = (s: StaffRow | null) => hasRole(s, "Administrator");
 /** Admin or Business Manager — full visibility across every client. */
 export const isPrivileged = (s: StaffRow | null) => hasRole(s, "Administrator") || hasRole(s, "Business Manager");
 export const isSalesOrAdmin = (s: StaffRow | null) =>
-  hasRole(s, "Engagement Specialist") || hasRole(s, "Account manager") || hasRole(s, "Sales staff") || hasRole(s, "Sales Manager") || isPrivileged(s);
-/** Sales leadership — the manager-level Sales console (Sales Manager, BM, Admin). */
-export const isSalesLead = (s: StaffRow | null) => hasRole(s, "Sales Manager") || isPrivileged(s);
+  hasRole(s, "Engagement Specialist") || hasRole(s, "Creative Specialist") || hasRole(s, "Accounts Manager")
+  || hasRole(s, "Account manager") || hasRole(s, "Sales staff") || hasRole(s, "Sales Manager") || isPrivileged(s);
+/** Sales/account leadership — the manager-level console (Accounts Manager, BM, Admin). */
+export const isSalesLead = (s: StaffRow | null) => hasRole(s, "Accounts Manager") || hasRole(s, "Sales Manager") || isPrivileged(s);
 
 /** All clients (RLS lets any staff read). */
 export async function getClients(): Promise<ClientRow[]> {

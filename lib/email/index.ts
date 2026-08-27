@@ -346,7 +346,7 @@ export async function sendPlanInterestAlert(opts: { plan: string; email: string;
   await send(to, `New ${opts.plan} plan interest · ${opts.name || opts.email}`, shell("New plan interest", body), opts.email || undefined);
 }
 
-/** Internal alert to Admin/BM/Sales Manager when a new customer request comes in
+/** Internal alert to Admin/BM/Accounts Manager when a new customer request comes in
  *  from the website (Get Started inquiry or a quote request). Reply-To is the
  *  prospect so a reply reaches them directly. */
 export async function sendLeadAlert(opts: {
