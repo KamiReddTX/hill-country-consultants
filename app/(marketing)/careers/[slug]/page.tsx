@@ -15,6 +15,7 @@ export function generateMetadata({ params }: { params: { slug: string } }): Meta
   return {
     title: `${job.title} — Careers · Hill Country Consultants`,
     description: job.summary,
+    alternates: { canonical: `/careers/${job.slug}` },
   };
 }
 

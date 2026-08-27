@@ -6,6 +6,7 @@ import { openJobs } from "@/content/careers";
 export const metadata: Metadata = {
   title: "Careers — Open Roles · Hill Country Consultants",
   description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Remote / Hybrid, U.S.-based roles — primarily remote, with local and regional on-site as needed, serving clients nationwide.",
+  alternates: { canonical: "/careers" },
 };
 
 const WHY = [
