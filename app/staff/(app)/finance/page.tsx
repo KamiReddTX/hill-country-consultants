@@ -215,7 +215,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
         <p className="mb-3 text-[13px] prose-muted">Revenue collected (paid invoices + bookings) against expenses each month. <span className="text-forest">Forest</span> = revenue, <span className="text-gold-hover">gold</span> = expenses.</p>
         <div className="border border-line-warm bg-white p-4">
           <svg viewBox="0 0 600 210" className="w-full" role="img" aria-label="Revenue versus expenses, last six months">
-            <line x1="40" y1="170" x2="590" y2="170" stroke="#e4ddcd" />
+            <line x1="40" y1="170" x2="590" y2="170" stroke="#e8e0cd" />
             {chart.map((c, idx) => {
               const groupW = 550 / chart.length;
               const gx = 40 + idx * groupW + groupW / 2;
@@ -224,7 +224,7 @@ export default async function FinancePage({ searchParams }: { searchParams: { m?
               const expH = Math.round((c.exp / chartMax) * 150);
               return (
                 <g key={c.label}>
-                  <rect x={gx - bw - 2} y={170 - revH} width={bw} height={revH} fill="#23482f" />
+                  <rect x={gx - bw - 2} y={170 - revH} width={bw} height={revH} fill="#234b34" />
                   <rect x={gx + 2} y={170 - expH} width={bw} height={expH} fill="#c2a24a" />
                   <text x={gx} y={186} textAnchor="middle" fontSize="11" fill="#6b6552">{c.label}</text>
                 </g>

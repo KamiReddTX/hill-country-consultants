@@ -45,7 +45,7 @@ export async function SiteFooter() {
             <Link
               key={it.href}
               href={it.href}
-              className="whitespace-nowrap font-inter text-[13.5px] text-white transition-colors hover:text-[#c2a24a]"
+              className="whitespace-nowrap font-inter text-[13.5px] text-white transition-colors hover:text-gold"
             >
               {it.label}
             </Link>
@@ -57,8 +57,8 @@ export async function SiteFooter() {
       <div className="border-t border-white/15">
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-baseline justify-between gap-x-9 gap-y-3 px-6 py-5 font-inter text-[13.5px]">
           <div className="flex flex-wrap items-baseline gap-x-[18px] gap-y-2">
-            <a href={`mailto:${email}`} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{email}</a>
-            <a href={phoneHref} className="whitespace-nowrap text-white transition-colors hover:text-[#c2a24a]">{phone}</a>
+            <a href={`mailto:${email}`} className="whitespace-nowrap text-white transition-colors hover:text-gold">{email}</a>
+            <a href={phoneHref} className="whitespace-nowrap text-white transition-colors hover:text-gold">{phone}</a>
             <span className="whitespace-nowrap text-white/85">{locations}</span>
             <span className="whitespace-nowrap text-white/85">Nationwide since 2024</span>
           </div>
@@ -77,18 +77,18 @@ export async function SiteFooter() {
         <div className="mx-auto flex max-w-[1180px] flex-wrap items-center justify-between gap-x-[22px] gap-y-2.5 px-6 pb-[26px] pt-4 font-inter text-[12.5px]">
           <p className="text-white/80">© {new Date().getFullYear()} {SITE.name}. All rights reserved.</p>
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2.5 text-white/80">
-            <Link href="/terms" className="whitespace-nowrap transition-colors hover:text-[#c2a24a]">Terms of Service</Link>
-            <Link href="/refund-policy" className="whitespace-nowrap transition-colors hover:text-[#c2a24a]">Refund &amp; Cancellation</Link>
-            <Link href="/privacy" className="whitespace-nowrap transition-colors hover:text-[#c2a24a]">Privacy Policy</Link>
+            <Link href="/terms" className="whitespace-nowrap transition-colors hover:text-gold">Terms of Service</Link>
+            <Link href="/refund-policy" className="whitespace-nowrap transition-colors hover:text-gold">Refund &amp; Cancellation</Link>
+            <Link href="/privacy" className="whitespace-nowrap transition-colors hover:text-gold">Privacy Policy</Link>
             <Link
               href="/portal/login"
-              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-[#c2a24a] hover:text-[#c2a24a]"
+              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-gold hover:text-gold"
             >
               Client Portal
             </Link>
             <Link
               href="/staff/login"
-              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-[#c2a24a] hover:text-[#c2a24a]"
+              className="whitespace-nowrap border-b border-white/50 pb-0.5 font-medium text-white transition-colors hover:border-gold hover:text-gold"
             >
               Employee Portal
             </Link>

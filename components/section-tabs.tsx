@@ -26,7 +26,7 @@ export function SectionTabs() {
   return (
     <nav
       aria-label="Services, plans and booking"
-      className="border-b border-[#e0d6bf] bg-cream"
+      className="border-b border-line-warm bg-cream"
     >
       <div className="mx-auto flex max-w-[1180px] flex-wrap items-center gap-1 px-6">
         <span className="py-4 pr-4 font-inter text-[11px] font-normal uppercase tracking-[0.18em] text-ink-faint">

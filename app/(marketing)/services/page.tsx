@@ -34,7 +34,7 @@ export default async function ServicesPage() {
             title={pick(c, "services.title", "Every service line, in one firm.")}
             intro={pick(c, "services.intro", "Buy a plan and use all of them at your tier's volume, or book any one à la carte. Scoped work is quoted in writing before it begins.")}
           />
-          <div className="mt-8 border-t border-[#e8e0cd] pt-6">
+          <div className="mt-8 border-t border-line pt-6">
             <p className="mb-3.5 font-inter text-[11.5px] font-medium uppercase tracking-[0.14em] text-ink-faint">
               Or see services by industry
             </p>
@@ -43,7 +43,7 @@ export default async function ServicesPage() {
                 <Link
                   key={ind.slug}
                   href={`/industries/${ind.slug}`}
-                  className="border border-[#d8cdb3] bg-cream px-4 py-3 font-inter text-[14px] font-semibold text-charcoal transition-colors hover:bg-[#ede5d2]"
+                  className="border border-line-soft bg-cream px-4 py-3 font-inter text-[14px] font-semibold text-charcoal transition-colors hover:bg-line"
                 >
                   {ind.name}
                 </Link>

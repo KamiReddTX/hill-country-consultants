@@ -297,7 +297,7 @@ export function BookingFlow({
             className={
               mode === "pay"
                 ? "bg-forest px-[22px] py-4 font-inter text-[15px] font-semibold text-white"
-                : "border border-[#d8cdb3] px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-[#6b6552]"
+                : "border border-line-soft px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-ink-faint"
             }
           >
             Book &amp; pay for services
@@ -308,7 +308,7 @@ export function BookingFlow({
             className={
               mode === "call"
                 ? "bg-forest px-[22px] py-4 font-inter text-[15px] font-semibold text-white"
-                : "border border-[#d8cdb3] px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-[#6b6552]"
+                : "border border-line-soft px-[22px] py-4 font-inter text-[15px] font-medium text-charcoal transition-colors hover:border-ink-faint"
             }
           >
             Schedule a call

@@ -17,7 +17,7 @@ export default function OpengraphImage() {
           justifyContent: "center",
           padding: "80px",
           background: "#20241f",
-          color: "#f5f1e8",
+          color: "#f6f1e6",
         }}
       >
         <div style={{ display: "flex", height: 8, width: 130, background: "#c2a24a", marginBottom: 44 }} />
