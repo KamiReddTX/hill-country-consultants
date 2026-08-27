@@ -35,3 +35,17 @@ export async function POST(req: Request) {
   if (mErr) return NextResponse.json({ error: mErr.message }, { status: 400 });
   return NextResponse.json({ ok: true, list_id: listId, added: accountIds.length });
 }
+
+/** Delete a list the caller owns/manages (RLS enforces). Members cascade. */
+export async function DELETE(req: Request) {
+  const staff = await getStaff();
+  if (!staff) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  let body: any = {};
+  try { body = await req.json(); } catch {}
+  const listId = typeof body.list_id === "string" ? body.list_id : "";
+  if (!listId) return NextResponse.json({ error: "no_list" }, { status: 400 });
+  const db = createClient();
+  const { error } = await db.from("lead_lists").delete().eq("id", listId);
+  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  return NextResponse.json({ ok: true });
+}

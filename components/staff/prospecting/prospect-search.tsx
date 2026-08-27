@@ -2,19 +2,24 @@
 import { useEffect, useState, useCallback } from "react";
 import { ruleForState, FEDERAL_BASELINE } from "@/content/prospecting-compliance";
 
+type Contact = {
+  id: string; first_name: string | null; last_name: string | null; title: string | null; seniority: string | null;
+  do_not_contact: boolean; has_email: boolean; has_phone_direct: boolean; has_phone_mobile: boolean;
+};
 type Row = {
   id: string; legal_name: string; dba_name: string | null; domain: string | null;
   industry: string | null; naics_code: string | null; city: string | null; state: string | null;
   county: string | null; zip: string | null; employee_est: number | null; revenue_est: number | null;
   years_in_business: number | null; location_type: string | null; formation_date: string | null;
   icp_score: number | null; status: string; contact_count: number; has_email: boolean; has_phone: boolean;
+  contacts: Contact[];
 };
 
 const field = "min-h-touch w-full border border-line-warm bg-white px-3 text-[14px] outline-none focus:border-forest";
 const label = "flex flex-col gap-1 text-[12px] text-ink-faint";
 const usd = (n: number | null) => (n == null ? "—" : "$" + n.toLocaleString("en-US"));
 
-export function ProspectSearch() {
+export function ProspectSearch({ canReveal = false }: { canReveal?: boolean }) {
   const [f, setF] = useState<Record<string, any>>({ state: "CO" });
   const [rows, setRows] = useState<Row[]>([]);
   const [total, setTotal] = useState(0);
@@ -24,6 +29,21 @@ export function ProspectSearch() {
   const [err, setErr] = useState("");
   const [msg, setMsg] = useState("");
   const [sel, setSel] = useState<Set<string>>(new Set());
+  const [revealed, setRevealed] = useState<Record<string, string>>({});
+  const [revealing, setRevealing] = useState<string>("");
+
+  const reveal = async (contactId: string, field: "email" | "phone_direct" | "phone_mobile") => {
+    const key = `${contactId}:${field}`;
+    setRevealing(key); setMsg("");
+    try {
+      const r = await fetch("/api/prospect/reveal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ contact_id: contactId, field }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.value) {
+        setRevealed((s) => ({ ...s, [key]: j.value }));
+        setMsg(j.cache ? "Served from cache · 0 credits." : `Revealed · ${j.remaining ?? ""} credits left.`);
+      } else setMsg(j.message || "Reveal failed.");
+    } finally { setRevealing(""); }
+  };
 
   const set = (k: string, v: any) => setF((s) => ({ ...s, [k]: v }));
 
@@ -204,8 +224,26 @@ export function ProspectSearch() {
                   <td className="p-2 prose-soft">{r.years_in_business ?? "—"}</td>
                   <td className="p-2 prose-soft">{r.formation_date || "—"}</td>
                   <td className="p-2">
-                    <span className="font-mono text-ink-faint">•••••</span>
-                    <button disabled title="Contact reveal activates once a vendor is connected" className="ml-2 border border-line-warm px-2 py-0.5 text-[11px] text-ink-faint opacity-60">Reveal</button>
+                    {r.contacts.length === 0 ? <span className="text-[11px] text-ink-faint">No contacts</span> : (
+                      <div className="flex flex-col gap-1.5">
+                        {r.contacts.map((c) => (
+                          <div key={c.id}>
+                            <span className="text-[12px] text-charcoal">{[c.first_name, c.last_name].filter(Boolean).join(" ") || "Contact"}{c.title ? ` · ${c.title}` : ""}</span>
+                            {c.do_not_contact ? <span className="ml-1 rounded bg-red-100 px-1 text-[10px] text-red-700">DNC</span> : (
+                              <div className="mt-0.5 flex flex-wrap gap-1">
+                                {(["email", "phone_direct", "phone_mobile"] as const).map((fld) => {
+                                  const key = `${c.id}:${fld}`; const val = revealed[key];
+                                  const label = fld === "email" ? "email" : fld === "phone_direct" ? "direct" : "mobile";
+                                  if (val) return <span key={fld} className="rounded bg-cream px-1.5 py-0.5 font-mono text-[11px] text-forest">{val}</span>;
+                                  if (!canReveal) return <span key={fld} className="text-[11px] text-ink-faint">{label} •••</span>;
+                                  return <button key={fld} disabled={revealing === key} onClick={() => reveal(c.id, fld)} className="border border-gold px-1.5 py-0.5 text-[11px] text-charcoal hover:bg-cream disabled:opacity-50">{revealing === key ? "…" : `Reveal ${label}`}</button>;
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

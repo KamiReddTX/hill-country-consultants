@@ -74,9 +74,29 @@ export async function POST(req: Request) {
   const { data, count, error } = await q;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Contact rows arrive with Track B (licensed vendor). Until then the masked
-  // summary is empty. When contacts exist this is where has_email/has_phone/
-  // contact_count get aggregated — still never returning the raw values.
-  const rows = (data || []).map((a: any) => ({ ...a, contact_count: 0, has_email: false, has_phone: false }));
+  // Attach each company's contacts — MASKED. We return only whether a field has
+  // been revealed (a boolean), never the raw email/phone. The reveal endpoint is
+  // the sole path that returns a value.
+  const accountIds = (data || []).map((a: any) => a.id);
+  const byAccount = new Map<string, any[]>();
+  if (accountIds.length) {
+    const { data: contacts } = await db
+      .from("prospect_contacts")
+      .select("id,account_id,first_name,last_name,title,seniority,do_not_contact,email,phone_direct,phone_mobile")
+      .in("account_id", accountIds);
+    (contacts || []).forEach((c: any) => {
+      const masked = {
+        id: c.id, first_name: c.first_name, last_name: c.last_name, title: c.title, seniority: c.seniority,
+        do_not_contact: c.do_not_contact,
+        has_email: !!c.email, has_phone_direct: !!c.phone_direct, has_phone_mobile: !!c.phone_mobile,
+      };
+      const arr = byAccount.get(c.account_id) || []; arr.push(masked); byAccount.set(c.account_id, arr);
+    });
+  }
+  const rows = (data || []).map((a: any) => {
+    const cs = byAccount.get(a.id) || [];
+    return { ...a, contacts: cs, contact_count: cs.length,
+      has_email: cs.some((c) => c.has_email), has_phone: cs.some((c) => c.has_phone_direct || c.has_phone_mobile) };
+  });
   return NextResponse.json({ rows, total: count ?? 0, page, pageSize });
 }
