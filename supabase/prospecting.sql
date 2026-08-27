@@ -114,7 +114,7 @@ create index if not exists prospect_accounts_geo_idx on prospect_accounts using 
 
 -- keep updated_at fresh
 create or replace function prospect_touch_updated_at() returns trigger
-  language plpgsql as $$ begin new.updated_at = now(); return new; end $$;
+  language plpgsql set search_path = public, pg_temp as $$ begin new.updated_at = now(); return new; end $$;
 drop trigger if exists prospect_accounts_touch on prospect_accounts;
 create trigger prospect_accounts_touch before update on prospect_accounts
   for each row execute function prospect_touch_updated_at();

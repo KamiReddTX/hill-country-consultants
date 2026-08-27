@@ -12,3 +12,6 @@ next-env.d.ts
 
 # FUSE mount temp artifacts
 .fuse_hidden*
+
+# stray empty route group (mount blocks unlink; ignore)
+app/(staff)/

@@ -39,6 +39,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   // Sales tabs
   if (sales) tabs.push(
     { href: "/staff/intake", label: "Intake" }, { href: "/staff/pipeline", label: "Pipeline" },
+    { href: "/staff/prospecting", label: "Prospecting" },
     { href: "/staff/accounts", label: "Accounts" }, { href: "/staff/commissions", label: "Commissions" },
     { href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
   // Manager operations
