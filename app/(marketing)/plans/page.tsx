@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
-import { PLANS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS, DELIVERABLE_EQUIVALENTS } from "@/content/pricing";
+import { PLANS, PLAN_FEE_CENTS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS, DELIVERABLE_EQUIVALENTS } from "@/content/pricing";
 import { PlanInterest } from "@/components/plan-interest";
 import { PlanChooser } from "@/components/plan-chooser";
 import { getSiteContent, pick } from "@/lib/site-content";
@@ -46,6 +46,15 @@ export default async function PlansPage() {
                 <h2 className="font-fraunces text-[24px] font-medium text-forest">{pl.name}</h2>
                 <span className="rule-gold" />
                 <p className="font-fraunces text-[32px] leading-none text-charcoal tabular-nums">{pl.price}</p>
+                {(() => {
+                  const monthly = PLAN_FEE_CENTS[pl.name] / 100;
+                  const money = (n: number) => "$" + n.toLocaleString("en-US");
+                  return (
+                    <p className="text-[12.5px] prose-muted">
+                      12-month term · {money(monthly * 12)}/yr billed monthly, or {money(monthly * 11)} paid up front for the year (save one month — {money(monthly)}).
+                    </p>
+                  );
+                })()}
                 <p className="flex-1 text-[16px] prose-muted">{pl.best}</p>
                 <PlanInterest plan={pl.name} />
               </div>
