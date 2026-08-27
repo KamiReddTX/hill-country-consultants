@@ -77,6 +77,18 @@ export function ProspectSearch() {
     setMsg(r.ok ? `Added ${j.added} to “${name}”.` : "Couldn't add to a list.");
   };
 
+  const promote = async () => {
+    const ids = sel.size ? [...sel] : rows.map((r) => r.id);
+    if (ids.length === 0) return;
+    if (!window.confirm(`Promote ${ids.length} compan${ids.length === 1 ? "y" : "ies"} into your pipeline as new leads?`)) return;
+    const r = await fetch("/api/prospect/promote", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ account_ids: ids }),
+    });
+    const j = await r.json().catch(() => ({}));
+    setMsg(r.ok ? `Promoted ${j.inserted} to Pipeline${j.skipped ? ` · ${j.skipped} already there` : ""}.` : "Couldn't promote to leads.");
+  };
+
   const toggle = (id: string) => setSel((s) => { const n = new Set(s); n.has(id) ? n.delete(id) : n.add(id); return n; });
   const pages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -130,7 +142,8 @@ export function ProspectSearch() {
           <p className="text-[15px] text-charcoal"><span className="font-semibold text-forest">{total.toLocaleString()}</span> companies{sel.size ? ` · ${sel.size} selected` : ""}</p>
           <div className="flex flex-wrap items-center gap-2">
             <button onClick={saveSearch} className="border border-forest px-3 py-1.5 text-[13px] font-medium text-forest">Save search</button>
-            <button onClick={addToList} disabled={rows.length === 0} className="btn-gold text-[13px] disabled:opacity-50">Add {sel.size ? "selected" : "page"} to list</button>
+            <button onClick={addToList} disabled={rows.length === 0} className="border border-forest px-3 py-1.5 text-[13px] font-medium text-forest disabled:opacity-50">Add {sel.size ? "selected" : "page"} to list</button>
+            <button onClick={promote} disabled={rows.length === 0} className="btn-gold text-[13px] disabled:opacity-50">Promote {sel.size ? "selected" : "page"} to Leads</button>
           </div>
         </div>
         {err && <p className="mb-2 border border-red-200 bg-red-50 p-2 text-[13px] text-red-700">{err}</p>}
