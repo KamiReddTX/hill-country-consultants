@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { ruleForState, FEDERAL_BASELINE } from "@/content/prospecting-compliance";
 
 type Row = {
   id: string; legal_name: string; dba_name: string | null; domain: string | null;
@@ -148,6 +149,31 @@ export function ProspectSearch() {
         </div>
         {err && <p className="mb-2 border border-red-200 bg-red-50 p-2 text-[13px] text-red-700">{err}</p>}
         {msg && <p className="mb-2 text-[13px] text-forest">{msg}</p>}
+
+        {(() => {
+          const rule = ruleForState(f.state);
+          const tone = rule?.risk === "high" ? "border-red-300 bg-red-50" : rule?.risk === "elevated" ? "border-gold bg-cream" : "border-line-warm bg-white";
+          return (
+            <div className={`mb-3 border ${tone} p-3 text-[12.5px] prose-soft`}>
+              <p className="font-semibold text-forest">
+                Compliance {rule ? `· ${rule.name}` : ""}
+                {rule?.risk === "high" && <span className="ml-2 rounded bg-red-600 px-1.5 py-0.5 text-[10px] font-bold text-white">HIGH RISK</span>}
+              </p>
+              {rule ? (
+                <>
+                  <p className="mt-1">{rule.summary}</p>
+                  <p className="mt-1 text-[11.5px] text-ink-faint">
+                    Calling hours (called party&apos;s local time): {rule.callingHours}
+                    {rule.stateDnc ? " · has a state Do-Not-Call list" : ""}{rule.registration ? " · telemarketer registration generally required" : ""}
+                  </p>
+                </>
+              ) : (
+                <p className="mt-1">{FEDERAL_BASELINE}</p>
+              )}
+              <p className="mt-1 text-[11px] text-ink-faint">General information, not legal advice. Confirm with counsel before a campaign — especially Florida.</p>
+            </div>
+          );
+        })()}
 
         <div className="overflow-x-auto border border-line-warm">
           <table className="w-full min-w-[720px] border-collapse bg-white text-left text-[13.5px]">
