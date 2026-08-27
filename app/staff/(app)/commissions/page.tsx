@@ -24,7 +24,7 @@ export default async function CommissionsPage() {
   const myClientIds = new Set(mine.map((c) => c.id));
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
 
-  // À-la-carte commission estimate: standalone bookings attributed to this rep's clients.
+  // À la carte commission estimate: standalone bookings attributed to this rep's clients.
   const myBookings = bookings.filter((b) => myClientIds.has((b as any).client_id));
   const aLaCarteCents = myBookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0);
   const aLaCarteCommission = Math.round(aLaCarteCents * (COMMISSION.aLaCartePct / 100));
@@ -54,7 +54,7 @@ export default async function CommissionsPage() {
           <div className="border border-line-warm bg-white p-5"><p className="kicker">Income collected</p><p className="mt-1 font-fraunces text-[28px] text-charcoal tabular-nums">{money(earnings.incomeCents)}</p><p className="mt-1 text-[12px] prose-muted">Across {earnings.clientCount} attributed account{earnings.clientCount === 1 ? "" : "s"}</p></div>
           <div className="border border-line-warm bg-white p-5"><p className="kicker">Commission (est.)</p><p className="mt-1 font-fraunces text-[28px] text-forest tabular-nums">{money(earnings.commissionCents)}</p><p className="mt-1 text-[12px] prose-muted">Blended {COMMISSION.initialPct}/{COMMISSION.recurringPct}/{COMMISSION.aLaCartePct}%</p></div>
           <div className="border border-line-warm bg-white p-5"><p className="kicker">Initial &amp; recurring</p><p className="mt-1 font-fraunces text-[22px] text-charcoal tabular-nums">{money(earnings.initialCents + earnings.recurringCents)}</p><p className="mt-1 text-[12px] prose-muted">{money(earnings.initialCents)} initial · {money(earnings.recurringCents)} recurring</p></div>
-          <div className="border border-line-warm bg-white p-5"><p className="kicker">À-la-carte</p><p className="mt-1 font-fraunces text-[22px] text-charcoal tabular-nums">{money(earnings.aLaCarteCents)}</p><p className="mt-1 text-[12px] prose-muted">Bookings + one-off invoices</p></div>
+          <div className="border border-line-warm bg-white p-5"><p className="kicker">À la carte</p><p className="mt-1 font-fraunces text-[22px] text-charcoal tabular-nums">{money(earnings.aLaCarteCents)}</p><p className="mt-1 text-[12px] prose-muted">Bookings + one-off invoices</p></div>
         </div>
         <p className="mt-3 text-[12px] prose-muted">A running estimate on money actually collected to date. Commission is released by an administrator after a client has been retained three months.</p>
       </section>
@@ -77,11 +77,11 @@ export default async function CommissionsPage() {
         </p>
       </section>
 
-      {/* À-la-carte commission from attributed bookings */}
+      {/* À la carte commission from attributed bookings */}
       <section>
-        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">À-la-carte sales ({COMMISSION.aLaCartePct}%)</h2>
+        <h2 className="mb-1 font-fraunces text-[20px] font-medium text-forest">À la carte sales ({COMMISSION.aLaCartePct}%)</h2>
         <p className="mb-3 text-[13px] prose-muted">Standalone bookings on your attributed clients. Commission shown is an estimate at {COMMISSION.aLaCartePct}%, released after the retention period.</p>
-        {myBookings.length === 0 ? <p className="text-[15px] prose-muted">No attributed à-la-carte bookings yet.</p> : (
+        {myBookings.length === 0 ? <p className="text-[15px] prose-muted">No attributed à la carte bookings yet.</p> : (
           <div className="overflow-x-auto border border-line-warm">
             <table className="w-full min-w-[560px] border-collapse bg-white text-left text-[14px]">
               <thead><tr className="border-b border-line-soft text-ink-faint"><th className="p-3 font-medium">Client</th><th className="p-3 font-medium">Ref</th><th className="p-3 font-medium text-right">Sale</th><th className="p-3 font-medium text-right">Commission ({COMMISSION.aLaCartePct}%)</th></tr></thead>

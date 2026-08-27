@@ -12,7 +12,7 @@ export function PlanSelect({ clientId, current }: { clientId: string; current: s
       onChange={(e) => start(() => setClientPlan(clientId, e.target.value).then(() => {}))}
       className="min-h-touch w-full border border-line-warm bg-white px-2 text-[13px] outline-none focus:border-forest"
     >
-      <option value="">No plan (à-la-carte)</option>
+      <option value="">No plan (à la carte)</option>
       <option value="Foundation">Foundation</option>
       <option value="Momentum">Momentum</option>
       <option value="Enterprise">Enterprise</option>

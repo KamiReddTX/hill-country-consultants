@@ -5,7 +5,7 @@ import { getStaffMember, isAdmin, isPrivileged, isSalesOrAdmin, isSalesLead, get
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
 
-export const metadata: Metadata = { title: "Staff Portal", robots: { index: false } };
+export const metadata: Metadata = { title: "Employee Portal", robots: { index: false } };
 
 export default async function StaffLayout({ children }: { children: ReactNode }) {
   const me = await getStaffMember();

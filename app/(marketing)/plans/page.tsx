@@ -161,7 +161,7 @@ export default async function PlansPage() {
       <section className="section-cream">
         <div className="shell flex flex-col items-start gap-5 py-14">
           <p className="max-w-[44em] text-[18px] prose-soft">
-            Prefer to buy one thing? À-la-carte rates are published on each service page. Standalone
+            Prefer to buy one thing? À la carte rates are published on each service page. Standalone
             projects are paid in full at booking, or as set out in your written quote.
           </p>
           <div className="flex flex-wrap gap-4">

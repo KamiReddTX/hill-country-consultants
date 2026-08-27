@@ -40,7 +40,7 @@ export default function PortalPreviewPage() {
             no chasing status, no wondering who to call. Here&apos;s what&apos;s waiting inside.
           </p>
           <div className="mt-8 flex flex-wrap gap-4">
-            <Link href="/get-started" className="btn-gold">Get started</Link>
+            <Link href="/get-started" className="btn-gold">Get Started</Link>
             <Link href="/portal/login" className="btn-outline">Existing client — log in</Link>
           </div>
         </div>
@@ -141,7 +141,7 @@ export default function PortalPreviewPage() {
         <div className="shell flex flex-col items-start gap-4 py-14">
           <h2 className="font-fraunces text-[26px] text-forest">Ready for your own portal?</h2>
           <div className="flex flex-wrap gap-4">
-            <Link href="/get-started" className="btn-gold">Get started</Link>
+            <Link href="/get-started" className="btn-gold">Get Started</Link>
             <Link href="/portal/login" className="btn-outline">Existing client — log in</Link>
             <Link href="/plans" className="link-underline self-center text-[15px]">See plans &amp; pricing</Link>
           </div>

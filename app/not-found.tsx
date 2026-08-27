@@ -10,7 +10,7 @@ export default function NotFound() {
       <div className="mt-2 flex flex-wrap items-center justify-center gap-3">
         <Link href="/" className="btn-gold text-[15px]">Back to home</Link>
         <Link href="/services" className="link-underline text-[15px] text-forest">Browse services</Link>
-        <Link href="/get-started" className="link-underline text-[15px] text-forest">Get started</Link>
+        <Link href="/get-started" className="link-underline text-[15px] text-forest">Get Started</Link>
       </div>
       <p className="mt-6 text-[13px] prose-muted">{SITE.name} · {SITE.email} · {SITE.phone}</p>
     </main>

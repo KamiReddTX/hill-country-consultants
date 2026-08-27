@@ -37,7 +37,7 @@ export function StaffLoginForm() {
     <section className="section-cream min-h-screen">
       <div className="shell flex max-w-md flex-col gap-5 py-20">
         <Link href="/" className="kicker hover:text-forest">← Hill Country Consultants</Link>
-        <h1 className="font-fraunces text-[32px] font-normal text-forest">Staff Login</h1>
+        <h1 className="font-fraunces text-[32px] font-normal text-forest">Employee Login</h1>
         <span className="rule-gold" />
         <form onSubmit={submit} className="flex flex-col gap-4 border border-line-warm bg-white p-6">
           <label className="flex flex-col gap-1.5"><span className="text-[13px] font-medium text-ink-faint">Work email</span>

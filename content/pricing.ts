@@ -1,5 +1,5 @@
 /**
- * Plans, the plan-comparison table, and the à-la-carte booking model.
+ * Plans, the plan-comparison table, and the à la carte booking model.
  * Copy is verbatim from the prototype (Hill Country Consultants.dc.html).
  *
  * Two kinds of line item:
@@ -165,7 +165,7 @@ export interface RateLine {
   svc: string;
   n: string;
   p: string;
-  cart?: string; // BOOK_ITEMS id  → "Book & pay"
+  cart?: string; // BOOK_ITEMS id  → "Book & Pay"
   quote?: string; // QUOTE_ITEMS id → "Request a quote"
   // Neither cart nor quote → an informational line: name + price as text, no button.
 }

@@ -419,7 +419,7 @@ export default function ServiceDetailPage({ params }: { params: { slug: string }
         <div className="shell flex flex-col items-start gap-4 py-14">
           <h2 className="font-fraunces text-[26px] text-forest">Ready to hand this off?</h2>
           <div className="flex flex-wrap gap-4">
-            <Link href="/get-started" className="btn-gold">Get started</Link>
+            <Link href="/get-started" className="btn-gold">Get Started</Link>
             <Link href="/book" className="btn-outline">Book &amp; pay</Link>
             <Link href="/plans" className="btn-outline">See plans</Link>
           </div>

@@ -60,7 +60,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     headline: "Book a Virtual Assistant",
     pain: "The inbox, the scheduling, the invoicing, the follow-up nobody owns — it all lands on the person least able to drop it. A dedicated assistant handles the recurring administrative work that keeps a business running, on a set number of hours each business day.",
     included: ["Inbox and calendar management; scheduling and appointment setting", "Data entry, CRM updates, and file and document organization", "Document formatting and preparation; light research", "Client, vendor and subcontractor follow-up and coordination", "Travel and logistics booking", "A weekly summary of tasks completed"],
-    expect: ["An assigned assistant and a dedicated block of hours each business day (Monday, Tuesday, Thursday, and Friday) — 2, 5, or 8 hours by tier, roughly 40, 100, or 160 hours in a typical month", "Same-business-day acknowledgment; tasks actioned in agreed priority", "Secure handling of logins and credentials", "A shared task board so you always see status", "A weekly work summary"],
+    expect: ["An assigned assistant and a dedicated block of hours each business day (Monday, Tuesday, Thursday, and Friday) — 2, 5, or 8 hours by tier, roughly 40, 100, or 160 hours in a typical month", "Same business day acknowledgment; tasks actioned in agreed priority", "Secure handling of logins and credentials", "A shared task board so you always see status", "A weekly work summary"],
     scope: "Hours are capped by tier; overage is billed at $55 Foundation / $50 Momentum / $40 Enterprise per hour. Not a substitute for licensed bookkeeping, legal, or tax services.",
     how: HOW,
     forWho: [
@@ -121,7 +121,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     headline: "Project Management & Coordination",
     pain: "We drive projects and initiatives to completion — tracking tasks, deadlines, dependencies, and the people involved, so there is one place to see where things stand.",
     included: ["A project plan and timeline", "A live task and status board — a single source of truth", "Regular status updates, meeting coordination and notes", "Vendor and subcontractor coordination", "Proactive risk and blocker flags"],
-    expect: ["A named coordinator and a regular status cadence", "One active project at Foundation, up to three concurrent at Momentum, program-level at Enterprise", "Weekly status at minimum; same-day on blockers", "Scope and milestones approved in writing before work starts", "A close-out wrap summary at the end"],
+    expect: ["A named coordinator and a regular status cadence", "One active project at Foundation, up to three concurrent at Momentum, program-level at Enterprise", "Weekly status at minimum; same day on blockers", "Scope and milestones approved in writing before work starts", "A close-out wrap summary at the end"],
     scope: "We coordinate — we do not provide stamped or licensed construction management or engineering.",
     how: HOW,
     forWho: [

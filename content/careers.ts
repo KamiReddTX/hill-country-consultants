@@ -16,7 +16,7 @@ export type Job = {
 };
 
 const ENGAGEMENT_SPECIALIST = `# Engagement Specialist
-**Hill Country Consultants · Remote / Hybrid — United States · Part-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Part-time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -162,7 +162,7 @@ Tell us about a time you had to explain something complicated to someone who did
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const CREATIVE_SPECIALIST = `# Creative Specialist
-**Hill Country Consultants · Remote / Hybrid — United States · Part-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Part-time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -364,7 +364,7 @@ Then tell us about a project where the client asked for something you thought wa
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const ACCOUNTS_MANAGER = `# Accounts Manager
-**Hill Country Consultants · Remote / Hybrid — United States · Full-Time**
+**Hill Country Consultants · Remote / Hybrid — United States · Full-time**
 
 *Clarity. Strategy. Organized Growth.*
 
@@ -511,7 +511,7 @@ Tell us about someone you coached who got measurably better — what they were d
 *Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590 · Serving businesses nationwide since 2024*`;
 
 const BUSINESS_MANAGER = `# Business Manager
-**Hill Country Consultants · Remote / Hybrid — United States · Full-Time, Salaried**
+**Hill Country Consultants · Remote / Hybrid — United States · Full-time, Salaried**
 
 ### Two positions open — one Eastern, one Pacific
 
@@ -697,7 +697,7 @@ You won't be building enterprise software. You'll be the person who makes our sy
 
 ## Compensation
 
-**$40,000 per year, salaried.** Remote/hybrid — primarily remote, with local and regional on-site as needed.
+**$40,000 per year, salaried.** Remote / Hybrid — primarily remote, with local and regional on-site as needed.
 
 **Commission on your own sales:**
 - **10%** of every initial sale

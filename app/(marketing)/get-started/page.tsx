@@ -36,7 +36,7 @@ export default function GetStartedPage({
         <div className="shell py-16">
           <SectionHeading
             as="h1"
-            kicker="Get started"
+            kicker="Get Started"
             title="Start with a free 30-minute strategy session."
             intro="We map the work, recommend a plan tier or a standalone scope, and put it in writing before anything begins. No obligation."
           />

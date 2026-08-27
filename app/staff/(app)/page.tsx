@@ -157,7 +157,7 @@ export default async function Dashboard() {
           <p className="mt-3 max-w-[60em] border-l-2 border-gold bg-white px-3 py-2 text-[13px] text-charcoal">
             Your running tally on the {repEarnings.clientCount} account{repEarnings.clientCount === 1 ? "" : "s"} credited to <span className="font-semibold">{me.employee_code}</span>:
             income collected <span className="font-semibold tabular-nums">{money(repEarnings.incomeCents)}</span>, estimated commission
-            {" "}<span className="font-semibold tabular-nums text-forest">{money(repEarnings.commissionCents)}</span> at {COMMISSION.initialPct}% initial · {COMMISSION.recurringPct}% recurring · {COMMISSION.aLaCartePct}% à-la-carte.{" "}
+            {" "}<span className="font-semibold tabular-nums text-forest">{money(repEarnings.commissionCents)}</span> at {COMMISSION.initialPct}% initial · {COMMISSION.recurringPct}% recurring · {COMMISSION.aLaCartePct}% à la carte.{" "}
             <Link href="/staff/commissions" className="link-underline">See your statement →</Link>
             <span className="block text-[12px] prose-muted">Estimate on money collected to date. Commission is released by an admin after a client is retained three months.</span>
           </p>

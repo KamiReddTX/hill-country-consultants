@@ -5,7 +5,7 @@ import { openJobs } from "@/content/careers";
 
 export const metadata: Metadata = {
   title: "Careers — Open Roles · Hill Country Consultants",
-  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Remote/hybrid, U.S.-based roles — primarily remote, with local and regional on-site as needed, serving clients nationwide.",
+  description: "Join Hill Country Consultants. See open roles and apply online — a coordinated business-support firm across operations, creative, production, and specialty services. Remote / Hybrid, U.S.-based roles — primarily remote, with local and regional on-site as needed, serving clients nationwide.",
 };
 
 const WHY = [
@@ -39,7 +39,7 @@ export default function CareersPage() {
       </div>
 
       <p className="mt-6 max-w-[52em] border-l-2 border-gold pl-4 text-[14px] leading-relaxed prose-muted">
-        <strong className="text-charcoal">Every role is remote/hybrid and U.S.-based</strong> — primarily remote, with local and regional on-site work when a project calls for it. You&apos;ll need a <strong>Windows computer</strong> with a <strong>dual-monitor</strong> setup, a <strong>wired Ethernet</strong> connection (not Wi-Fi only), and a <strong>smartphone and/or tablet</strong> that can run apps. Because we handle client data, every role also meets standard security basics &mdash; antivirus and an updated, encrypted Windows, 2FA on work accounts, a secured home network, and a signed confidentiality agreement &mdash; and consents to a background check.
+        <strong className="text-charcoal">Every role is remote / hybrid and U.S.-based</strong> — primarily remote, with local and regional on-site work when a project calls for it. You&apos;ll need a <strong>Windows computer</strong> with a <strong>dual-monitor</strong> setup, a <strong>wired Ethernet</strong> connection (not Wi-Fi only), and a <strong>smartphone and/or tablet</strong> that can run apps. Because we handle client data, every role also meets standard security basics &mdash; antivirus and an updated, encrypted Windows, 2FA on work accounts, a secured home network, and a signed confidentiality agreement &mdash; and consents to a background check.
       </p>
 
       {/* Open roles */}

@@ -98,7 +98,7 @@ export default async function PreferredVendorsPage() {
         <div className="shell py-16 text-center">
           <h2 className="font-fraunces text-[26px] font-medium text-forest">Want us to bring the right partner to your project?</h2>
           <p className="mx-auto mt-3 max-w-[46em] text-[15.5px] prose-soft">Become a client and we&apos;ll coordinate the specialists your work needs — you stay with one point of contact.</p>
-          <Link href="/get-started" className="btn-gold mt-6 inline-block px-6 text-[14px]">Get started</Link>
+          <Link href="/get-started" className="btn-gold mt-6 inline-block px-6 text-[14px]">Get Started</Link>
         </div>
       </section>
     </>

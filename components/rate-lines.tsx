@@ -4,7 +4,7 @@ import type { ServiceKey } from "@/content/services";
 
 /**
  * Per-service pricing lines. Fixed-rate lines link to /book with the item
- * preselected ("Book & pay"); scoped lines link to a quote request; lines with
+ * preselected ("Book & Pay"); scoped lines link to a quote request; lines with
  * neither are informational — name + price as text, no button.
  */
 export function RateLines({ svc }: { svc: ServiceKey }) {
@@ -27,7 +27,7 @@ export function RateLines({ svc }: { svc: ServiceKey }) {
                 href={href}
                 className={isBook ? "btn-gold px-4 text-[13.5px]" : "btn-outline px-4 text-[13.5px]"}
               >
-                {isBook ? "Book & pay" : "Request a quote"}
+                {isBook ? "Book & Pay" : "Request a quote"}
               </Link>
             )}
           </li>

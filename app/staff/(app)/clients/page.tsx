@@ -210,7 +210,7 @@ export default async function ClientsPage() {
                       )}
                     </div>
                   ) : (
-                    <p className="mt-2 text-[13px] prose-muted">Off-plan (à-la-carte). Set a retainer tier to track monthly allotments.</p>
+                    <p className="mt-2 text-[13px] prose-muted">Off-plan (à la carte). Set a retainer tier to track monthly allotments.</p>
                   )}
                 </div>
 

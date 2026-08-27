@@ -11,7 +11,7 @@ import { usePathname } from "next/navigation";
 const ITEMS = [
   { label: "All services", href: "/services" },
   { label: "Plans & Pricing", href: "/plans" },
-  { label: "Book & pay", href: "/book" },
+  { label: "Book & Pay", href: "/book" },
 ];
 
 export function SectionTabs() {

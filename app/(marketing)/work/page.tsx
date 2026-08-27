@@ -53,7 +53,7 @@ export default function WorkPage() {
         <div className="shell flex flex-col items-start gap-4 py-14">
           <p className="text-[13px] prose-muted">Portfolio samples are being added — redacted client work and case studies will populate each category. No confidential client information is ever shown.</p>
           <div className="flex flex-wrap gap-4">
-            <Link href="/get-started" className="btn-gold">Get started</Link>
+            <Link href="/get-started" className="btn-gold">Get Started</Link>
             <Link href="/services" className="btn-outline">Browse services</Link>
           </div>
         </div>
