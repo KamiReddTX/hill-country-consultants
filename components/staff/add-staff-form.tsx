@@ -13,7 +13,7 @@ export function AddStaffForm() {
       action={(fd) => start(async () => { setError(""); setDone(false); const r = await addStaff(fd); if (r?.error) setError(r.error); else { setDone(true); (document.getElementById("staff-form") as HTMLFormElement)?.reset(); } })}>
       <input name="name" placeholder="Name" className={field} />
       <input name="email" type="email" required placeholder="Work email" className={field} />
-      <select name="role" className={field} defaultValue="Virtual assistant">{ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}</select>
+      <select name="role" className={field} defaultValue="Engagement Specialist">{ROLE_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}</select>
       <input name="employee_code" placeholder="Employee code (e.g. HCC-VA-01)" className={field} />
       <input name="rate" type="number" step="0.01" placeholder="Hourly rate" className={field} />
       <label className="flex items-center gap-2 text-[14px] prose-soft"><input type="checkbox" name="hourly" defaultChecked className="h-5 w-5" /> Hourly (uses the time clock)</label>

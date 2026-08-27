@@ -1,23 +1,13 @@
 -- ============================================================================
 -- Hill Country Consultants — CANONICAL DATABASE SETUP  (supabase/setup.sql)
 -- ============================================================================
--- This ONE file builds the entire database in the correct order, with the
--- current STRICT row-level-security policies applied last and the team-aware
--- access helpers asserted at the end. It is:
---   • validated  — runs clean on a fresh Postgres, produces the strict policies,
---                  and passes a per-role access-matrix test (owner/team/client
---                  isolation verified);
---   • idempotent — safe to run more than once (drop-if-exists guards);
---   • the single source of truth for a fresh rebuild.
---
--- NORMAL USE: do NOT run this against your live database — it is already set up.
--- Use it only to stand up a brand-new Supabase project, or to read the whole
--- schema in one place. The individual supabase/*.sql files are the historical
--- migrations, kept for reference; you no longer run them one at a time.
---
--- How to run on a fresh project: Supabase → SQL Editor → New query → paste this
--- whole file → Run. (pgcrypto + the auth/storage schemas are provided by
--- Supabase automatically.)
+-- Builds the entire database in dependency-safe order, strict RLS applied last,
+-- team-aware access helpers asserted at the end, and the current role names
+-- (Engagement Specialist / Creative Specialist). Validated on a fresh Postgres:
+-- runs clean, idempotent, passes the per-role access matrix, and the role-rename
+-- converts legacy titles. Do NOT run against the live DB (already set up); use
+-- for a fresh Supabase project or to read the whole schema. Individual *.sql
+-- files are historical migrations. Supabase provides pgcrypto + auth/storage.
 -- ============================================================================
 
 -- ============================================================ schema.sql
@@ -37,7 +27,7 @@ create table if not exists staff (
   user_id      uuid unique references auth.users(id) on delete cascade,
   email        text unique not null,
   name         text,
-  role         text not null default 'Virtual assistant',
+  role         text not null default 'Engagement Specialist',
   rate         numeric(8,2) default 0,
   employee_code text,
   hourly       boolean not null default true,
@@ -345,18 +335,14 @@ revoke execute on function create_client_after_payment(
   text, text, text, text, text, jsonb, jsonb, integer, date, text
 ) from public, anon, authenticated;
 
--- consolidated-setup prelude: allow forward references; forward-declare the
--- interlinked access helpers so policies resolve regardless of file order.
 set check_function_bodies = off;
 create or replace function is_privileged() returns boolean language sql stable security definer set search_path = public, pg_temp as $$
   select exists (select 1 from staff s where s.user_id = auth.uid() and s.active
     and ('Administrator' = any(s.roles) or 'Business Manager' = any(s.roles) or s.role in ('Administrator','Business Manager'))); $$;
 create or replace function manages_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
-  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active
-    and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
+  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
 create or replace function can_access_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
-  select is_privileged()
-    or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
+  select is_privileged() or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
     or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c2 where c2.id = cid))
     or exists (select 1 from client_assignments a join staff s on s.id = a.staff_id where a.client_id = cid and s.user_id = auth.uid() and s.active); $$;
 
@@ -2390,6 +2376,50 @@ revoke execute on function create_client_after_payment(
 create unique index if not exists bookings_stripe_pi_unique
   on bookings (stripe_payment_intent) where stripe_payment_intent is not null;
 
+-- ============================================================ role-rename.sql
+-- Hill Country Consultants — role rename: Engagement Specialist / Creative Specialist
+-- =============================================================================
+-- Merges "Virtual assistant" + "Account manager" + "Sales staff" into a single
+-- "Engagement Specialist" title, and renames "Design specialist" to
+-- "Creative Specialist". Engagement Specialists keep sales/pipeline access.
+-- "Sales Manager", "Business Manager", and "Administrator" are unchanged.
+--
+-- Updates existing staff records (scalar role + roles[] array) and teaches
+-- is_sales() the new title. Idempotent + safe to re-run. SQL Editor -> Run.
+-- =============================================================================
+
+-- 1) Scalar role column
+update staff set role = 'Engagement Specialist'
+  where role in ('Virtual assistant', 'Account manager', 'Sales staff');
+update staff set role = 'Creative Specialist'
+  where role = 'Design specialist';
+
+-- 2) roles[] array — replace each legacy value, then de-duplicate
+update staff set roles = (
+  select array(select distinct v from unnest(
+    array_replace(array_replace(array_replace(array_replace(
+      roles, 'Virtual assistant', 'Engagement Specialist'),
+             'Account manager',   'Engagement Specialist'),
+             'Sales staff',        'Engagement Specialist'),
+             'Design specialist',  'Creative Specialist')
+  ) as v)
+)
+where roles && array['Virtual assistant','Account manager','Sales staff','Design specialist']::text[];
+
+-- 3) Sales visibility now includes Engagement Specialist (legacy titles kept as a
+--    safety net in case any record wasn't migrated).
+create or replace function is_sales() returns boolean
+  language sql stable security definer set search_path = public, pg_temp as $$
+  select exists (
+    select 1 from staff s
+    where s.user_id = auth.uid() and s.active
+      and (
+        s.roles && array['Administrator','Business Manager','Sales Manager','Engagement Specialist','Account manager','Sales staff']::text[]
+        or s.role in ('Administrator','Business Manager','Sales Manager','Engagement Specialist','Account manager','Sales staff')
+      )
+  );
+$$;
+
 -- ============================================================ kb-seed.sql
 -- Hill Country Consultants — Knowledge base seed (Team playbook)
 -- =============================================================================
@@ -2506,15 +2536,10 @@ select 'Carnetta Dansby — Financial Analyst',
        true, true
 where not exists (select 1 from preferred_vendors where name = 'Carnetta Dansby — Financial Analyst');
 
--- ============================================================================
--- Authoritative access helpers (FINAL definitions) — asserted last so account
--- teams (client_assignments) always keep access, regardless of section order.
--- ============================================================================
+-- Authoritative access helpers asserted last (team-aware).
 create or replace function can_access_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
-  select is_privileged()
-    or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
+  select is_privileged() or exists (select 1 from clients c where c.id = cid and c.user_id = auth.uid())
     or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c2 where c2.id = cid))
     or exists (select 1 from client_assignments a join staff s on s.id = a.staff_id where a.client_id = cid and s.user_id = auth.uid() and s.active); $$;
 create or replace function manages_client(cid uuid) returns boolean language sql stable security definer set search_path = public, pg_temp as $$
-  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active
-    and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;
+  select is_privileged() or exists (select 1 from staff s where s.user_id = auth.uid() and s.active and s.id::text = (select assigned_to from clients c where c.id = cid)); $$;

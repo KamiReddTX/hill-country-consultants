@@ -6,17 +6,20 @@
  */
 
 export type Role =
-  | "Virtual assistant"
-  | "Account manager"
-  | "Sales staff"
+  | "Engagement Specialist"
+  | "Creative Specialist"
   | "Sales Manager"
   | "Business Manager"
   | "Submittals specialist"
   | "Documentation specialist"
-  | "Design specialist"
   | "Media / publishing"
   | "Grants specialist"
-  | "Administrator";
+  | "Administrator"
+  // Legacy titles kept for type-safety on records not yet migrated:
+  | "Virtual assistant"
+  | "Account manager"
+  | "Sales staff"
+  | "Design specialist";
 
 export type ClientStatus = "In review" | "Active" | "Paused" | "Offboarded";
 

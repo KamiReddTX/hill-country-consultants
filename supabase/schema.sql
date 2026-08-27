@@ -25,7 +25,7 @@ create table if not exists staff (
   user_id      uuid unique references auth.users(id) on delete cascade,
   email        text unique not null,
   name         text,
-  role         text not null default 'Virtual assistant',
+  role         text not null default 'Engagement Specialist',
   rate         numeric(8,2) default 0,
   employee_code text,
   hourly       boolean not null default true,

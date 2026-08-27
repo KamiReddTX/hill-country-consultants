@@ -169,7 +169,7 @@ export async function addStaff(formData: FormData): Promise<ActionResult> {
   if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const email = String(formData.get("email") || "").trim().toLowerCase();
   const db = createClient();
-  const role = String(formData.get("role") || "Virtual assistant");
+  const role = String(formData.get("role") || "Engagement Specialist");
   const { error } = await db.from("staff").insert({
     email,
     name: String(formData.get("name") || "") || null,
