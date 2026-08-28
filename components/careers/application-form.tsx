@@ -95,6 +95,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
 
   return (
     <form
+      noValidate
       className="flex flex-col gap-6"
       onSubmit={(e) => {
         e.preventDefault();
