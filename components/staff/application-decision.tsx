@@ -50,7 +50,7 @@ export function ApplicationDecision({ applicationId }: { applicationId: string }
             <button type="button" onClick={() => setArmed(null)} className="text-[12px] prose-muted underline">Cancel</button>
           </span>
         ) : (
-          <button type="button" disabled={pending} onClick={() => setArmed("decline")} className="text-[12px] text-red-700 underline disabled:opacity-50">Decline</button>
+          <button type="button" disabled={pending} onClick={() => setArmed("decline")} className="border border-red-700 px-3 py-1 text-[13px] font-medium text-red-700 disabled:opacity-50">Send decline letter</button>
         )}
 
         {msg && <span className="text-[12px] font-medium text-forest">{msg}</span>}
