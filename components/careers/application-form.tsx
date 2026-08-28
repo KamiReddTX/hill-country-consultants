@@ -57,6 +57,17 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
   const [jobs, setJobs] = useState<Job[]>([emptyJob(), emptyJob()]);
   const [refs, setRefs] = useState<Ref[]>([emptyRef(), emptyRef()]);
   const [zone, setZone] = useState("");
+  // Lightweight human check (bot deterrent) — a randomized sum computed once.
+  const [human] = useState(() => ({ a: 2 + Math.floor(Math.random() * 7), b: 2 + Math.floor(Math.random() * 7) }));
+  const [humanAns, setHumanAns] = useState("");
+  // Show an error and bring it into view.
+  const fail = (msg: string, scrollToId?: string) => {
+    setErr(msg);
+    setTimeout(() => {
+      const t = scrollToId ? document.getElementById(scrollToId) : document.getElementById("apply-error");
+      t?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 0);
+  };
 
   const needsMac = /creative/i.test(role || "");
   const isBM = /business manager/i.test(role || "");
@@ -88,6 +99,24 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
       onSubmit={(e) => {
         e.preventDefault();
         const el = e.currentTarget as HTMLFormElement;
+        // 1) Human check — must answer the sum correctly.
+        if (Number(String(humanAns).trim()) !== human.a + human.b) {
+          fail(`Please answer the verification question ("What is ${human.a} + ${human.b}?") so we know you're a person.`, "human-check");
+          return;
+        }
+        // 2) Required fields — show a clear, persistent list of what's missing and halt.
+        if (!el.checkValidity()) {
+          const invalid = Array.from(el.querySelectorAll<HTMLElement>(":invalid"));
+          const names = Array.from(new Set(invalid.map((x) => {
+            const lbl = x.closest("label")?.textContent?.replace(/\*/g, "").trim();
+            return lbl && lbl.length > 0 && lbl.length < 70 ? lbl : ((x as HTMLInputElement).name || "a required field");
+          })));
+          fail("Please complete the required field" + (names.length > 1 ? "s" : "") + " before submitting: " + names.join("; ") + ".");
+          invalid[0]?.scrollIntoView({ behavior: "smooth", block: "center" });
+          setTimeout(() => { try { invalid[0]?.focus(); } catch {} }, 300);
+          return;
+        }
+        setErr("");
         const fd = new FormData(el);
         // Serialize multi-entry sections as JSON (drop fully-empty rows).
         fd.set("education", JSON.stringify(edu.filter((r) => r.school || r.degree || r.field)));
@@ -111,13 +140,13 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
             const r = await fetch("/api/apply", { method: "POST", body: fd });
             const j = await r.json().catch(() => ({}));
             if (j?.persisted) { setDone(true); window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-            setErr(
+            fail(
               j?.error === "invalid_email" ? "Please enter a valid email address."
               : j?.error === "certify_required" ? "Please read and check the certification box, and type your name to sign."
-              : "We couldn't submit that. Please email your résumé to info@hillcountryconsultants.com.",
+              : "We couldn't submit your application. Please try again, or email your résumé to info@hillcountryconsultants.com.",
             );
           } catch {
-            setErr("We couldn't submit that. Please email your résumé to info@hillcountryconsultants.com.");
+            fail("We couldn't submit your application. Please check your connection and try again, or email your résumé to info@hillcountryconsultants.com.");
           }
         });
       }}
@@ -347,9 +376,19 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         </div>
       </section>
 
+      {/* 12 · Human verification */}
+      <section id="human-check" className={sectionCls}>
+        <p className={legend}>Verify you&apos;re a person</p>
+        <p className={sub}>A quick check to keep out spam.</p>
+        <label className={labelCls}>What is {human.a} + {human.b}? *
+          <input value={humanAns} onChange={(e) => setHumanAns(e.target.value)} inputMode="numeric" placeholder="Type the number" className={`${field} max-w-[200px]`} />
+        </label>
+      </section>
+
+      {err && <p id="apply-error" role="alert" className="border border-red-300 bg-red-50 p-3 text-[14px] font-medium text-red-800">{err}</p>}
       <div className="flex flex-wrap items-center gap-4 border-t border-line-soft pt-6">
         <button type="submit" disabled={pending} className="btn-gold text-[15px] disabled:opacity-50">{pending ? "Submitting…" : "Submit application"}</button>
-        {err && <span className="text-[13px] text-red-700">{err}</span>}
+        <span className="text-[12px] prose-muted">Fields marked * are required.</span>
       </div>
       <p className="text-[12px] prose-muted">By submitting, you consent to Hill Country Consultants storing this information — including your résumé, portfolio, references, education, employment history, background-check consent, and any voluntary demographic answers — to evaluate your application. See our <a href="/privacy" className="underline">Privacy Policy</a> for how applicant information is handled.</p>
     </form>
