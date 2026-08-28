@@ -108,7 +108,11 @@ export async function getStaffMember(): Promise<StaffRow | null> {
     // TEMPORARY login bypass: act as a real admin so the employee portal is
     // testable without signing in. Remove by setting AUTH_BYPASS = false.
     if (AUTH_BYPASS) {
-      const byEmail = await db.from("staff").select("*").eq("email", BYPASS_STAFF_EMAIL).eq("active", true).maybeSingle();
+      // Optional identity switch for testing: an `hcc_as` cookie picks which
+      // active employee to act as (else the default admin).
+      let asEmail = BYPASS_STAFF_EMAIL;
+      try { asEmail = (await import("next/headers")).cookies().get("hcc_as")?.value || BYPASS_STAFF_EMAIL; } catch {}
+      const byEmail = await db.from("staff").select("*").eq("email", asEmail).eq("active", true).maybeSingle();
       if (byEmail.data) return byEmail.data;
       const anyAdmin = await db.from("staff").select("*").eq("role", "Administrator").eq("active", true).limit(1).maybeSingle();
       if (anyAdmin.data) return anyAdmin.data;

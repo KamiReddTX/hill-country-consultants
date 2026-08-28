@@ -19,7 +19,9 @@ export async function getStaff(): Promise<StaffRow | null> {
   } = await supabase.auth.getUser();
   if (!user) {
     if (AUTH_BYPASS) {
-      const byEmail = await supabase.from("staff").select("*").eq("email", BYPASS_STAFF_EMAIL).eq("active", true).maybeSingle();
+      let asEmail = BYPASS_STAFF_EMAIL;
+      try { asEmail = (await import("next/headers")).cookies().get("hcc_as")?.value || BYPASS_STAFF_EMAIL; } catch {}
+      const byEmail = await supabase.from("staff").select("*").eq("email", asEmail).eq("active", true).maybeSingle();
       if (byEmail.data) return byEmail.data;
       const anyAdmin = await supabase.from("staff").select("*").eq("role", "Administrator").eq("active", true).limit(1).maybeSingle();
       if (anyAdmin.data) return anyAdmin.data;
