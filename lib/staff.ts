@@ -27,8 +27,10 @@ export const rolesOf = (s: StaffRow | null): string[] =>
 export const hasRole = (s: StaffRow | null, r: string) => rolesOf(s).includes(r);
 
 export const isAdmin = (s: StaffRow | null) => hasRole(s, "Administrator");
-/** Admin or Business Manager — full visibility across every client. */
-export const isPrivileged = (s: StaffRow | null) => hasRole(s, "Administrator") || hasRole(s, "Business Manager");
+/** Manager-level visibility across every client — Admin, Business Manager, and
+ *  Accounts Manager (a sales-leaning manager who also handles client intake,
+ *  commissions, and client billing/payment info). */
+export const isPrivileged = (s: StaffRow | null) => hasRole(s, "Administrator") || hasRole(s, "Business Manager") || hasRole(s, "Accounts Manager");
 export const isSalesOrAdmin = (s: StaffRow | null) =>
   hasRole(s, "Engagement Specialist") || hasRole(s, "Creative Specialist") || hasRole(s, "Accounts Manager")
   || hasRole(s, "Account manager") || hasRole(s, "Sales staff") || hasRole(s, "Sales Manager") || isPrivileged(s);
