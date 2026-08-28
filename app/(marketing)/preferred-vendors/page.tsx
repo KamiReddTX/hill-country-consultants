@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
 import { createServiceClient } from "@/lib/supabase/server";
+import { unstable_noStore as noStore } from "next/cache";
 
 export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "Preferred Vendors",
@@ -18,6 +20,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PreferredVendorsPage() {
+  noStore();
   const admin = createServiceClient();
   const { data } = await admin
     .from("preferred_vendors")
