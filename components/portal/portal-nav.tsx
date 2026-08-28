@@ -1,33 +1,25 @@
-"use client";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { StaffNav, type NavGroup } from "@/components/staff/staff-nav";
 
-const TABS = [
-  { href: "/portal", label: "Onboarding" },
-  { href: "/portal/roadmap", label: "Roadmap" },
-  { href: "/portal/tasks", label: "Task board" },
-  { href: "/portal/calendar", label: "Calendar" },
-  { href: "/portal/vault", label: "Shared vault" },
-  { href: "/portal/work-log", label: "Work log" },
-  { href: "/portal/weekly", label: "Weekly report" },
-  { href: "/portal/files", label: "Files" },
-  { href: "/portal/vendors", label: "Preferred vendors" },
-  { href: "/portal/messages", label: "Messages" },
+/** Client portal navigation. Uses the same grouped nav component as the employee
+ *  portal so the two feel consistent. Ten destinations collapse into three short
+ *  menus plus two one-click links; every label is unique. */
+const GROUPS: NavGroup[] = [
+  { label: "Your onboarding", href: "/portal" },
+  { label: "My project", items: [
+    { href: "/portal/roadmap", label: "Roadmap" },
+    { href: "/portal/tasks", label: "Task board" },
+    { href: "/portal/calendar", label: "Calendar" },
+    { href: "/portal/work-log", label: "Work log" },
+    { href: "/portal/weekly", label: "Weekly report" },
+  ]},
+  { label: "Files & vendors", items: [
+    { href: "/portal/files", label: "Files" },
+    { href: "/portal/vault", label: "Shared vault" },
+    { href: "/portal/vendors", label: "Preferred vendors" },
+  ]},
+  { label: "Messages", href: "/portal/messages" },
 ];
 
 export function PortalNav() {
-  const path = usePathname();
-  return (
-    <nav className="flex flex-wrap gap-x-1 gap-y-1 border-b border-line">
-      {TABS.map((t) => {
-        const active = path === t.href;
-        return (
-          <Link key={t.href} href={t.href}
-            className={`min-h-touch px-4 py-3 text-[14px] font-medium ${active ? "border-b-2 border-gold text-forest" : "text-ink-muted hover:text-forest"}`}>
-            {t.label}
-          </Link>
-        );
-      })}
-    </nav>
-  );
+  return <StaffNav groups={GROUPS} />;
 }

@@ -13,7 +13,8 @@ export function StaffNav({ groups }: { groups: NavGroup[] }) {
   const path = usePathname();
   const [open, setOpen] = useState<string | null>(null);
 
-  const isActive = (href: string) => (href === "/staff" ? path === "/staff" : path.startsWith(href));
+  // Root landing routes (/staff, /portal) match exactly; deeper routes match by prefix.
+  const isActive = (href: string) => (href === "/staff" || href === "/portal" ? path === href : path.startsWith(href));
   const groupActive = (g: NavGroup) => (g.href ? isActive(g.href) : (g.items || []).some((i) => isActive(i.href)));
 
   const tabCls = (active: boolean) =>
