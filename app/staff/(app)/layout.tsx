@@ -23,7 +23,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   const myWork: NavItem[] = [
     { href: "/staff/tasks", label: "Task board" },
     { href: "/staff/calendar", label: "Calendar" },
-    { href: "/staff/onboarding", label: "Onboarding" },
+    { href: "/staff/onboarding", label: "Client onboarding" },
     { href: "/staff/checklists", label: "Checklists" },
     { href: "/staff/work-log", label: "Work log" },
     { href: "/staff/weekly", label: "Weekly report" },
@@ -35,10 +35,10 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   // Clients — delivery + client-facing work, for anyone who carries accounts.
   if (priv || sales) groups.push({ label: "Clients", items: [
-    { href: "/staff/clients", label: "Clients" },
-    { href: "/staff/daily", label: "Daily tasks" },
+    { href: "/staff/clients", label: "All clients" },
+    { href: "/staff/daily", label: "Client requests" },
     { href: "/staff/delivery", label: "Delivery" },
-    { href: "/staff/reports", label: "Reports" },
+    { href: "/staff/reports", label: "Analytics" },
   ]});
 
   // Sales — pipeline and revenue tools.
@@ -49,7 +49,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
       { href: "/staff/pipeline", label: "Pipeline" },
       { href: "/staff/intake", label: "Intake" },
       { href: "/staff/follow-ups", label: "Follow-ups" },
-      { href: "/staff/accounts", label: "Accounts" },
+      { href: "/staff/accounts", label: "My accounts" },
       { href: "/staff/prospecting", label: "Prospecting" },
       { href: "/staff/commissions", label: "Commissions" },
       { href: "/staff/playbook", label: "Playbook" },
@@ -60,7 +60,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   // Team — hiring + people, for managers/admins.
   if (salesLead || admin) {
     const team: NavItem[] = [];
-    if (salesLead) team.push({ href: "/staff/directory", label: "Directory & hiring" });
+    if (salesLead) team.push({ href: "/staff/directory", label: "Employees & hiring" });
     if (admin) team.push({ href: "/staff/payroll", label: "Payroll" });
     if (team.length) groups.push({ label: "Team", items: team });
   }
@@ -73,14 +73,14 @@ export default async function StaffLayout({ children }: { children: ReactNode })
       { href: "/staff/contracts", label: "Contracts" },
       { href: "/staff/capacity", label: "Capacity" },
     ];
-    if (admin) finance.push({ href: "/staff/finance", label: "Finance" });
+    if (admin) finance.push({ href: "/staff/finance", label: "Data exports" });
     groups.push({ label: "Finance", items: finance });
   }
 
   // Admin — firm settings, admins only.
   if (admin) groups.push({ label: "Admin", items: [
     { href: "/staff/site-content", label: "Edit website" },
-    { href: "/staff/vendors", label: "Vendors" },
+    { href: "/staff/vendors", label: "Vendors & 1099s" },
     { href: "/staff/audit", label: "Audit log" },
   ]});
 
