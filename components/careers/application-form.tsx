@@ -61,6 +61,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
   const needsMac = /creative/i.test(role || "");
   const isBM = /business manager/i.test(role || "");
   const isCreative = /creative/i.test(role || "");
+  const isSalaried = /business manager|accounts manager/i.test(role || "");
   // Employment type is defined by the role, so we derive it rather than ask.
   const derivedType = /business manager|accounts manager/i.test(role || "") ? "Full-time"
     : /engagement|creative/i.test(role || "") ? "Contract / 1099" : "";
@@ -92,6 +93,14 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         fd.set("education", JSON.stringify(edu.filter((r) => r.school || r.degree || r.field)));
         fd.set("employment_history", JSON.stringify(jobs.filter((r) => r.employer || r.title)));
         fd.set("refs", JSON.stringify(refs.filter((r) => r.name || r.phone || r.email)));
+        // Creative role: fold the discrete work-sample links into one stored field.
+        if (isCreative) {
+          const labels: Record<string, string> = { cs_site1: "Site 1", cs_site2: "Site 2", cs_video: "Video/motion", cs_appbuild: "App/build" };
+          const parts = Object.keys(labels)
+            .map((k) => { const v = (fd.get(k) || "").toString().trim(); return v ? `${labels[k]}: ${v}` : ""; })
+            .filter(Boolean);
+          if (parts.length) fd.set("work_samples", parts.join(" | "));
+        }
         start(async () => {
           setErr("");
           try {
@@ -163,9 +172,13 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
             </label>
           )}
           <label className={labelCls}>Earliest start date<input name="available_start" placeholder="e.g. Oct 1 or ASAP" className={field} /></label>
-          <label className={labelCls}>Desired pay (optional)<input name="desired_pay" placeholder="e.g. $22/hr or negotiable" className={field} /></label>
-          <label className={labelCls}>Hours available / week<input name="hours_available" placeholder="e.g. 20 hrs/wk" className={field} /></label>
-          <label className={labelCls}>Days / times available<input name="days_available" placeholder="e.g. Mon–Fri, some evenings" className={field} /></label>
+          {/* Desired pay: compensation is published for each role, so only ask on the general application. */}
+          {role
+            ? <label className={labelCls}>Expected compensation (only if different from the posted rate)<input name="desired_pay" placeholder="Leave blank to accept the posted rate" className={field} /></label>
+            : <label className={labelCls}>Desired pay (optional)<input name="desired_pay" placeholder="e.g. $22/hr or negotiable" className={field} /></label>}
+          {/* Hours/days availability is only relevant to the part-time contract roles. */}
+          {!isSalaried && <label className={labelCls}>Hours available / week<input name="hours_available" placeholder="e.g. 20 hrs/wk" className={field} /></label>}
+          {!isSalaried && <label className={labelCls}>Days / times available<input name="days_available" placeholder="e.g. Mon–Fri, some evenings" className={field} /></label>}
         </div>
       </section>
 
@@ -253,7 +266,18 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
           <label className={labelCls}>Portfolio / LinkedIn / website{isCreative ? " *" : ""}<input name="portfolio_url" required={isCreative} placeholder="https://…" className={field} /></label>
           <label className={labelCls}>How did you hear about us?<input name="referral" className={field} /></label>
         </div>
-        {isCreative && <p className={sub}>Please share your portfolio, links to two sites you&apos;ve built (note the platform for each), a piece of video or motion work, and anything you&apos;ve built that runs as an app — paste the links above and in your answer below.</p>}
+        {isCreative && (
+          <div className="flex flex-col gap-3 border border-line-soft p-3">
+            <p className="text-[13px] font-medium text-forest">Work samples (required for this role)</p>
+            <p className={sub}>Two sites you&apos;ve built (note the platform), one piece of video or motion work, and something you&apos;ve built that runs as an app.</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className={labelCls}>Site 1 (URL + platform) *<input name="cs_site1" required placeholder="https://… — e.g. WordPress" className={field} /></label>
+              <label className={labelCls}>Site 2 (URL + platform) *<input name="cs_site2" required placeholder="https://… — e.g. Shopify" className={field} /></label>
+              <label className={labelCls}>Video / motion work (URL) *<input name="cs_video" required placeholder="https://…" className={field} /></label>
+              <label className={labelCls}>App / build you&apos;ve made (URL) *<input name="cs_appbuild" required placeholder="https://… (or note in your answer)" className={field} /></label>
+            </div>
+          </div>
+        )}
         <label className={labelCls}>{role ? "Your answer to the question in this posting *" : "Relevant experience"}<textarea name="experience" rows={5} required={!!role} placeholder={rolePrompt} className={area} /></label>
         <label className={labelCls}>Why Hill Country Consultants?<textarea name="why" rows={3} className={area} /></label>
       </section>
@@ -313,7 +337,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         <button type="submit" disabled={pending} className="btn-gold text-[15px] disabled:opacity-50">{pending ? "Submitting…" : "Submit application"}</button>
         {err && <span className="text-[13px] text-red-700">{err}</span>}
       </div>
-      <p className="text-[12px] prose-muted">By submitting, you consent to Hill Country Consultants storing this information to evaluate your application.</p>
+      <p className="text-[12px] prose-muted">By submitting, you consent to Hill Country Consultants storing this information — including your résumé, portfolio, references, education, employment history, background-check consent, and any voluntary demographic answers — to evaluate your application. See our <a href="/privacy" className="underline">Privacy Policy</a> for how applicant information is handled.</p>
     </form>
   );
 }

@@ -22,7 +22,7 @@ export const SERVICE_META: Record<ServiceKey, ServiceMeta> = {
   compliance: { name: "Compliance & Documentation", desc: "Capabilities statements, certification and registration support, prequalification packages and SOPs that keep you bid-ready and audit-ready." },
   marketing: { name: "Marketing Services & Graphics", desc: "Social graphics, flyers, ad and email creative, campaign concepts and a content calendar at higher tiers." },
   brand: { name: "Brand Systems", desc: "Palette, type and logo-usage rules, reusable templates, and governance so the brand stays consistent." },
-  publishing: { name: "Publishing & Editorial", desc: "Editorial passes, interior and eBook formatting, cover coordination, release strategy and distribution — under Redd Ladys Chronicles." },
+  publishing: { name: "Publishing & Editorial", desc: "Editorial passes, interior and eBook formatting, cover coordination, release strategy and distribution — under Redd Ladys Chronicles, our in-house publishing imprint." },
   media: { name: "Music, Media & Podcast", desc: "Episode editing, show and cover art, audiograms, season pipelines and distribution setup." },
   digital: { name: "App, Web & PWA Development", desc: "Landing pages, multi-page sites, PWA MVPs and phased app builds, with hosting and handoff." },
   trainingSvc: { name: "Corporate Training", desc: "Eight classes taught on site or virtually — workbook, resource pack and a hands-on build lab that produces real deliverables." },

@@ -55,6 +55,7 @@ export async function POST(req: Request) {
   const skills = cap(g("skills"), 2000);
   const certifications = cap(g("certifications"), 2000);
   const portfolio_url = cap(g("portfolio_url"), 400);
+  const work_samples = cap(g("work_samples"), 2000);
   const why = cap(g("why"), 4000);
   const referral = cap(g("referral"), 200);
   const education = arr("education", ["school", "degree", "field", "location", "completed"]);
@@ -109,7 +110,7 @@ export async function POST(req: Request) {
       available_start: available_start || null, hours_available: hours_available || null, days_available: days_available || null,
       work_authorized: yn("work_authorized"), over_18: yn("over_18"), sponsorship_required: yn("sponsorship_required"),
       desired_pay: desired_pay || null, experience: experience || null, skills: skills || null,
-      certifications: certifications || null, portfolio_url: portfolio_url || null,
+      certifications: certifications || null, portfolio_url: portfolio_url || null, work_samples: work_samples || null,
       education, employment_history, refs,
       attest_equipment: chk("attest_equipment"), attest_security: chk("attest_security"),
       attest_background: chk("attest_background"), attest_us_based: chk("attest_us_based"),

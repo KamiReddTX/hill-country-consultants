@@ -130,8 +130,8 @@ export const BOOK_ITEMS: BookItem[] = [
   { id: "podcast", svc: "media", group: "Publishing & media", name: "Podcast episode (edit + cover art)", unit: "each · up to 90 min · audio edit, cleanup, intro/outro, music, cover art · 1 revision", price: 350 },
   { id: "media-asset", svc: "media", group: "Publishing & media", name: "Media asset (audiogram / short)", unit: "each", price: 95 },
   { id: "grant-research", svc: "grants", group: "Specialty", name: "Grant research report", unit: "each", price: 350 },
-  { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20", price: 3000 },
-  { id: "class-full", svc: "trainingSvc", group: "Training", name: "Corporate class — full day, 6h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20", price: 4500 },
+  { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20 · book 30–90 days out", price: 3000 },
+  { id: "class-full", svc: "trainingSvc", group: "Training", name: "Corporate class — full day, 6h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20 · book 30–90 days out", price: 4500 },
 ];
 
 export interface QuoteItem {

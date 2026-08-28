@@ -342,7 +342,7 @@ export function BookingFlow({
           {step === "select" && (
             <>
               {!selectedClass && (
-                <p className="mb-6 text-[14px] prose-muted">Pick the services you need and set a quantity. Nothing is added to your booking until you set a quantity — so you&apos;re always in control of what you buy.</p>
+                <p className="mb-6 text-[14px] prose-muted">Select the services you need and set a quantity. Nothing is added to your booking until you set a quantity — so you&apos;re always in control of what you buy.</p>
               )}
               {selectedClass && (
                 <div className="mb-8 border border-line-warm bg-white p-6">

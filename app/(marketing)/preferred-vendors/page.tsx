@@ -44,8 +44,8 @@ export default async function PreferredVendorsPage() {
           <SectionHeading
             as="h1"
             kicker="Preferred Vendors"
-            title="Trusted partners we work with."
-            intro="These are the vetted businesses and professionals we bring in to make our clients' lives easier — from publishing and events to financial analysis. When a project calls for their expertise, we coordinate the hand-off so the work stays seamless."
+            title="Our division and the partners we work with."
+            intro="Publishing runs through Redd Ladys Chronicles, our own in-house division — not an outside vendor. Alongside it, these are the vetted outside businesses and professionals we bring in for specialized work, from events to financial analysis. When a project calls for their expertise, we coordinate the hand-off so the work stays seamless."
           />
         </div>
       </section>

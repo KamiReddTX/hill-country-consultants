@@ -103,7 +103,7 @@ Depending on the client, that work might be submittal packages for a contractor,
 
 **You work your own time zone.** We serve clients nationwide and we staff across all U.S. time zones, so your hours run on local time wherever you are — not on somebody else's clock.
 
-Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by appointment, applied in your zone. You'll be matched to clients where that schedule works for both of you.
+Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by preapproved appointment, applied in your zone. Our public-facing hours are published in Eastern Time; as an employee you work that same weekly pattern in your own time zone. You'll be matched to clients where that schedule works for both of you.
 
 Part-time: **four paid hours per day**, flexible within those windows. Additional approved hours are available on accounts that need them.
 
@@ -143,7 +143,9 @@ Because we handle client data, every role meets the same baseline:
 - **5%** of every recurring payment after that, for as long as that client stays with us
 - **10%** on standalone and one-time services
 
-**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that. Once your cumulative credited sales (every sale credited to you, across your time here) reach **$14,000**, you become eligible for an increase up to **$17.00 per hour** at your next review — it's an eligibility threshold, not an automatic bump, and the review is where it's decided.
+All commissions are calculated on revenue **actually collected** from the client — not merely contracted — and are released after the client has been retained three months. If a client cancels or is refunded before commission is released, that sale isn't credited; a clawback applies if a refund follows a release.
+
+**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that. "Cumulative credited sales" means every sale credited to you across your time here — initial, recurring, and standalone — counted on collected revenue. Once that total reaches **$14,000**, you become eligible for an increase up to **$17.00 per hour** at your next review — it's an eligibility threshold, not an automatic bump, and the review is where it's decided.
 
 The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands. We're direct about this: the base is a floor, not the income. This role is built for someone who wants their effort to show up in their check.
 
@@ -303,7 +305,7 @@ You'll need **both a Windows laptop and a Mac laptop**, each meeting our full se
 
 **You work your own time zone.** We serve clients nationwide and we staff across all U.S. time zones, so your hours run on local time wherever you are — not on somebody else's clock.
 
-Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by appointment, applied in your zone. You'll be matched to clients where that schedule works for both of you.
+Firm hours are Monday & Friday 9–5 · Tuesday & Thursday 11–7 · Wednesday & Sunday closed · Saturday by preapproved appointment, applied in your zone. Our public-facing hours are published in Eastern Time; as an employee you work that same weekly pattern in your own time zone. You'll be matched to clients where that schedule works for both of you.
 
 Part-time: **four paid hours per day**, flexible within those windows. Additional approved hours are available on accounts that need them.
 
@@ -343,7 +345,9 @@ Because we handle client data, every role meets the same baseline. **This role r
 - **5%** of every recurring payment after that, for as long as that client stays with us
 - **10%** on standalone and one-time services
 
-**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that — and once you reach $14,000 in cumulative sales, it can increase from there.
+All commissions are calculated on revenue **actually collected** from the client — not merely contracted — and are released after the client has been retained three months. If a client cancels or is refunded before commission is released, that sale isn't credited; a clawback applies if a refund follows a release.
+
+**Base pay grows with results.** Your base rate is reviewed within your first 90 days and quarterly after that. "Cumulative credited sales" means every sale credited to you — initial, recurring, and standalone — counted on collected revenue. Once that total reaches **$14,000**, you become eligible for an increase up to **$17.00 per hour** at your next review — an eligibility threshold, not an automatic bump.
 
 The recurring commission is the point. A client who stays is worth far more than one who signs and leaves — and since you're the one doing their work, keeping them is largely in your hands.
 
@@ -464,7 +468,7 @@ You carry your own accounts. You'll be given a leads sheet to start, and you're 
 
 ## Schedule
 
-Full-time, aligned to your Business Manager's coverage zone — Eastern or Pacific. Your team may be spread across time zones, and part of the job is being reachable when they need you.
+Full-time, standard business hours Monday through Friday in your Business Manager's coverage zone — Eastern or Pacific. (This is a salaried management seat, so you work a full weekday schedule rather than the client-facing booking calendar.) Your team may be spread across time zones, and part of the job is being reachable when they need you.
 
 ---
 
@@ -492,7 +496,9 @@ Because we handle client data, every role meets the same baseline:
 - **10%** of every recurring payment after that, for as long as that client stays with us
 - **5%** on retained accounts — paid on the accounts you keep
 
-**Quarterly bonus — 2.5% of quarterly profits.**
+All commissions are calculated on revenue **actually collected** from the client (not merely contracted), and are released after the client has been retained three months. Refunded or clawed-back revenue isn't credited.
+
+**Quarterly bonus — 2.5% of the firm's quarterly profit.**
 
 This is a commission-weighted seat by design. The base is a floor; the earnings come from what you and your team build and keep. Three of the four components pay on retention rather than on signatures, which is deliberate — we'd rather you keep twenty clients than sign forty and lose half.
 
@@ -533,7 +539,7 @@ We serve six industries — construction and contractors, authors and personal b
 
 We're hiring two Business Managers — **one covering Eastern hours, one covering Pacific.** We serve clients and staff across every U.S. time zone, and a firm that operates coast to coast needs management awake at both ends of the day. You'll cover your window, host your own morning meeting, and lead the Accounts Managers — and through them, the specialists — in your coverage area.
 
-**This role splits roughly in half: 50% sales, 50% running the firm.** You're not a manager who occasionally sells. You carry real new business alongside real management responsibility, and you'll be expected to be good at both. You won't start from a blank page — you'll be given a local leads sheet to work from on day one.
+**This role splits roughly in half: 50% sales, 50% running the firm.** You're not a manager who occasionally sells. You carry real new business alongside real management responsibility, and you'll be expected to be good at both. You won't start from a blank page — we provide a local leads sheet (a starter list of prospects in your area) on day one, and you build your own pipeline from there. Leads aren't purely self-generated, and they aren't handed to you finished either.
 
 These are our first management hires. You're not inheriting a finished machine — you're helping assemble one, and you'll have a real hand in how it ends up working.
 
@@ -703,11 +709,13 @@ You won't be building enterprise software. You'll be the person who makes our sy
 - **10%** of every initial sale
 - **5%** of every recurring payment after that, for as long as that client stays with us
 
-**Quarterly client-retention bonus — 5% of quarterly profits.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
+All commissions are calculated on revenue **actually collected** from the client (not merely contracted), and are released after the client has been retained three months. Refunded or clawed-back revenue isn't credited.
+
+**Quarterly client-retention bonus — 5% of the firm's quarterly profit.** Retention is the number this role most directly controls, and the bonus is tied to it. Keep clients with us and you share in what the firm earns.
 
 Half this job is selling, so the commission isn't a rounding error — it's a real part of what you take home, and the recurring piece keeps paying as long as your clients stay.
 
-**Specify which position you're applying for — Eastern or Pacific.** You'll work standard business hours in that zone, and the daily management meeting anchors every business morning.
+**Specify which position you're applying for — Eastern or Pacific.** You'll work standard full-time business hours Monday through Friday in that zone (a salaried management schedule, not the client-facing booking calendar), and the daily management meeting anchors every business morning.
 
 ---
 
@@ -785,7 +793,7 @@ export const JOBS: Job[] = [
     type: "Contracted · Part-time",
     location: "Remote / Hybrid · United States",
     tagline: "Clarity. Strategy. Organized Growth.",
-    pay: "$15/hr base + 15% initial · 5% recurring · 10% standalone",
+    pay: "$15/hr starting base (reviewed at 90 days, then quarterly; eligible up to $17/hr on results) + 15% initial · 5% recurring · 10% standalone",
     summary:
       "You make the work — graphics, brand systems, websites, PWAs and custom apps, print, video — and about a quarter of the time you're the one who brings it in. Roughly 75% creative, 25% sales. Requires a portfolio, both a Windows and a Mac laptop, and two years of sales experience. Reports to an Accounts Manager.",
     open: true,

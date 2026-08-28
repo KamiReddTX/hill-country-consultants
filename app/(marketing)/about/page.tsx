@@ -80,15 +80,13 @@ export default async function AboutPage() {
                 operations, documentation, marketing, publishing, and the specialty work our clients rely on.
               </p>
               <div className="border border-line-warm bg-cream/50 p-6">
-                <p className="kicker mb-3">Leadership profile — coming soon</p>
-                <ul className="flex flex-col gap-1.5 text-[15px] prose-muted">
-                  <li>Founder name and title</li>
-                  <li>Professional background and years of experience</li>
-                  <li>Relevant education, training, and credentials</li>
-                  <li>Business specialties and industries served</li>
-                  <li>Leadership responsibilities within the firm</li>
-                </ul>
-                <p className="mt-4 text-[14px] prose-muted">This section will be completed once bio details and a portrait are supplied.</p>
+                <p className="kicker mb-3">Founder-led</p>
+                <p className="text-[15px] prose-soft">
+                  The firm is led by its founder, whose hands-on background spans business operations, documentation,
+                  compliance, marketing, publishing, and the specialty work our clients rely on — the same disciplines
+                  Hill Country Consultants delivers. Leadership sets the quality standard every deliverable is measured
+                  against and stays close to the work rather than above it.
+                </p>
               </div>
             </div>
           </div>
@@ -115,7 +113,7 @@ export default async function AboutPage() {
               </div>
             ))}
           </div>
-          <p className="mt-6 text-[14px] prose-muted">Team member names and photos will be added as they are supplied.</p>
+          <p className="mt-6 text-[14px] prose-muted">Every engagement is coordinated by a single account lead, with specialists assigned by the work your plan calls for.</p>
         </div>
       </section>
 
