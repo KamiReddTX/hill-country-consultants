@@ -109,8 +109,10 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         if (!el.checkValidity()) {
           const invalid = Array.from(el.querySelectorAll<HTMLElement>(":invalid"));
           const names = Array.from(new Set(invalid.map((x) => {
-            const lbl = x.closest("label")?.textContent?.replace(/\*/g, "").trim();
-            return lbl && lbl.length > 0 && lbl.length < 70 ? lbl : ((x as HTMLInputElement).name || "a required field");
+            const lab = x.closest("label");
+            const textNode = lab ? Array.from(lab.childNodes).find((n) => n.nodeType === 3 && (n.textContent || "").trim()) : null;
+            const lbl = (textNode?.textContent || "").replace(/\*/g, "").trim();
+            return lbl || (x as HTMLInputElement).name || "a required field";
           })));
           fail("Please complete the required field" + (names.length > 1 ? "s" : "") + " before submitting: " + names.join("; ") + ".");
           invalid[0]?.scrollIntoView({ behavior: "smooth", block: "center" });
