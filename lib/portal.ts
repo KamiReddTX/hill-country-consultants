@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ClientRow, BookingRow, ClientTaskRow, VaultRow } from "@/lib/database.types";
+import { AUTH_BYPASS, BYPASS_CLIENT_EMAIL } from "@/lib/auth-bypass";
 
 export interface WorkLogRow { id: string; worked_on: string; service: string | null; task: string | null; performed_by: string | null; hours: number }
 export interface DeliverableRow { id: string; name: string; service: string | null; status: string; file_url: string | null; delivered_on: string | null }
@@ -21,7 +22,21 @@ export interface PortalData {
 export async function getPortalClient(): Promise<ClientRow | null> {
   const db = createClient();
   const { data: { user } } = await db.auth.getUser();
-  if (!user) return null;
+  if (!user) {
+    // TEMPORARY login bypass: act as a real active client so the client portal
+    // is testable without signing in. Remove by setting AUTH_BYPASS = false.
+    if (AUTH_BYPASS) {
+      if (BYPASS_CLIENT_EMAIL) {
+        const byEmail = await db.from("clients").select("*").eq("email", BYPASS_CLIENT_EMAIL).maybeSingle();
+        if (byEmail.data) return byEmail.data;
+      }
+      const active = await db.from("clients").select("*").eq("status", "Active").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      if (active.data) return active.data;
+      const any = await db.from("clients").select("*").order("created_at", { ascending: false }).limit(1).maybeSingle();
+      return any.data ?? null;
+    }
+    return null;
+  }
   // First-login claim: bind this client row to the auth user by email (no-op after).
   await db.rpc("link_client_to_user");
   const { data } = await db.from("clients").select("*").eq("user_id", user.id).maybeSingle();

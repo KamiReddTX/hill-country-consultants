@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import type { Database } from "@/lib/database.types";
+import { AUTH_BYPASS } from "@/lib/auth-bypass";
 
 /**
  * Refreshes the auth session on every request and gates the two portals.
@@ -38,6 +39,10 @@ export async function updateSession(request: NextRequest) {
   // Gate the portals, but NOT their own login pages (or they redirect to themselves forever).
   const wantsPortal = path.startsWith("/portal") && !path.startsWith("/portal/login");
   const wantsStaff = path.startsWith("/staff") && !path.startsWith("/staff/login");
+
+  // TEMPORARY login bypass: while on, don't force sign-in for the portals.
+  // Restore by setting AUTH_BYPASS = false in lib/auth-bypass.ts.
+  if (AUTH_BYPASS) return response;
 
   if ((wantsPortal || wantsStaff) && !user) {
     const url = request.nextUrl.clone();

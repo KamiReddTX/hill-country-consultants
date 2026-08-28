@@ -4,8 +4,11 @@ import { redirect } from "next/navigation";
 import { getStaffMember, isAdmin, isPrivileged, isSalesOrAdmin, isSalesLead, getMessageUnreads } from "@/lib/staff";
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
+import { AUTH_BYPASS } from "@/lib/auth-bypass";
 
 export const metadata: Metadata = { title: "Employee Portal", robots: { index: false } };
+// Authed portal — always render per request, never statically prerender.
+export const dynamic = "force-dynamic";
 
 export default async function StaffLayout({ children }: { children: ReactNode }) {
   const me = await getStaffMember();
@@ -95,6 +98,11 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   return (
     <div className="min-h-screen bg-cream">
+      {AUTH_BYPASS && (
+        <div className="bg-red-700 px-4 py-1.5 text-center text-[12px] font-semibold uppercase tracking-wide text-white">
+          Test mode — login is temporarily bypassed. Turn this off before launch.
+        </div>
+      )}
       <header className="sticky top-0 z-40 border-b border-line/70 bg-white/85 shadow-[0_1px_0_rgba(224,214,191,.6)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
         <div className="shell flex flex-wrap items-center justify-between gap-3 py-4">
           <div>

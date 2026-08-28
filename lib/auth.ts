@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import type { ClientRow, StaffRow } from "@/lib/database.types";
+import { AUTH_BYPASS, BYPASS_STAFF_EMAIL, BYPASS_CLIENT_EMAIL } from "@/lib/auth-bypass";
 
 /** The signed-in auth user, or null. */
 export async function getUser() {
@@ -16,7 +17,17 @@ export async function getStaff(): Promise<StaffRow | null> {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) return null;
+  if (!user) {
+    if (AUTH_BYPASS) {
+      const byEmail = await supabase.from("staff").select("*").eq("email", BYPASS_STAFF_EMAIL).eq("active", true).maybeSingle();
+      if (byEmail.data) return byEmail.data;
+      const anyAdmin = await supabase.from("staff").select("*").eq("role", "Administrator").eq("active", true).limit(1).maybeSingle();
+      if (anyAdmin.data) return anyAdmin.data;
+      const anyStaff = await supabase.from("staff").select("*").eq("active", true).limit(1).maybeSingle();
+      return anyStaff.data ?? null;
+    }
+    return null;
+  }
   const { data } = await supabase
     .from("staff")
     .select("*")
