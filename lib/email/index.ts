@@ -46,9 +46,9 @@ export async function sendBookingConfirmation(opts: {
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">What you booked:</p>
     <div style="font-size:15px;line-height:1.7;color:#3a3f38">${opts.itemsHtml}</div>
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">Requested start: <strong>${opts.startDate || "to be confirmed"}</strong>.</p>
-    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Your account is <strong>in review</strong>. We confirm scope and next steps within <strong>48 hours</strong>.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Your account is <strong>in review</strong>. We acknowledge every booking the same business day and confirm scope and next steps within <strong>two business days</strong>.</p>
     <p style="margin:22px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Access your client portal</a></p>
-    <p style="font-size:13px;color:#6b6552">All sales are final. See the Refund &amp; Cancellation Policy.</p>`;
+    <p style="font-size:13px;line-height:1.6;color:#6b6552"><strong style="color:#20241f">All sales are final — no refunds.</strong> By completing this purchase you accepted our <a href="https://www.hillcountryconsultants.com/refund-policy" style="color:#3a5a40">Refund &amp; Cancellation Policy</a> and <a href="https://www.hillcountryconsultants.com/terms" style="color:#3a5a40">Terms of Service</a>. Charges appear as <strong>Hill Country Consultants</strong>. If anything isn&apos;t right, contact us first at <a href="mailto:info@hillcountryconsultants.com" style="color:#3a5a40">info@hillcountryconsultants.com</a> — we make it right if we ever fall short.</p>`;
   await send(opts.to, `Booking confirmed · ${opts.ref}`, shell("Your booking is confirmed", body));
 }
 
