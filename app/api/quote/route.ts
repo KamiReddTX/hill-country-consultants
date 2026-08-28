@@ -11,7 +11,9 @@ async function notifyRecipients(admin: ReturnType<typeof createClient<Database>>
   const list = (data ?? [])
     .filter((s: any) => NOTIFY_ROLES.includes(s.role) || (Array.isArray(s.roles) && s.roles.some((r: string) => NOTIFY_ROLES.includes(r))))
     .map((s: any) => s.email).filter(Boolean) as string[];
-  return list.length ? Array.from(new Set(list)) : [process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com"];
+  // Always copy the firm's shared notification inbox, in addition to matched staff.
+  const always = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  return Array.from(new Set([...list, always]));
 }
 
 /**
