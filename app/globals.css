@@ -3,7 +3,9 @@
 @tailwind utilities;
 
 /* ─────────────────────────────────────────────────────────────
-   Hill Country Consultants — base + contrast system
+   Hill Country Consultants — modern design system
+   Brand palette (forest / cream / gold / charcoal) is unchanged;
+   the treatment is modernized: soft radii, layered depth, motion.
    Fonts are wired via next/font in app/layout.tsx which sets
    --font-fraunces and --font-inter on <html>.
    ───────────────────────────────────────────────────────────── */
@@ -15,10 +17,25 @@
   --gold-hover: #a98a35;
   --gold-on-forest: #d4b55f;
   --charcoal: #20241f;
+
+  /* Radii */
+  --r-sm: 10px;
+  --r: 14px;
+  --r-lg: 20px;
+  --r-pill: 9999px;
+
+  /* Layered soft shadows */
+  --shadow-sm: 0 1px 2px rgba(32,36,31,.05), 0 2px 6px rgba(32,36,31,.06);
+  --shadow-md: 0 6px 16px rgba(32,36,31,.09), 0 2px 6px rgba(32,36,31,.06);
+  --shadow-lg: 0 18px 40px rgba(32,36,31,.14), 0 6px 12px rgba(32,36,31,.07);
+  --shadow-gold: 0 8px 22px rgba(194,162,74,.38);
+
+  /* Motion */
+  --ease: cubic-bezier(.22,.61,.36,1);
 }
 
 @layer base {
-  html { -webkit-font-smoothing: antialiased; }
+  html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
   body {
     background: var(--cream);
     color: var(--charcoal);
@@ -29,49 +46,81 @@
   h1, h2, h3, h4 {
     font-family: var(--font-fraunces), Georgia, serif;
     color: var(--forest);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.02em;
     text-wrap: pretty;
   }
+  h1 { letter-spacing: -0.03em; }
   a { color: var(--forest); text-decoration: none; }
   a:hover { color: var(--gold); }
+  ::selection { background: rgba(35,75,52,.14); }
+
   /* Every interactive control clears the 44px touch target. */
   button, [role="button"], input[type="submit"], input[type="button"] { min-height: 44px; }
+
+  /* Modern form controls: rounded, with a soft focus ring. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+  select, textarea {
+    border-radius: var(--r-sm);
+    transition: border-color .2s var(--ease), box-shadow .2s var(--ease);
+  }
+  input:not([type="checkbox"]):not([type="radio"]):not([type="file"]):focus,
+  select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--forest);
+    box-shadow: 0 0 0 3px rgba(35,75,52,.14);
+  }
+  img { border-radius: var(--r-sm); }
 }
 
 @layer components {
   /* Layout shells ------------------------------------------------ */
   .shell { @apply mx-auto w-full max-w-shell px-6; }
 
-  /* Sections alternate cream → white → cream.
-     Use .section-cream / .section-white; one .band-forest per page at most. */
-  .section-cream { @apply bg-cream border-t border-line; }
-  .section-white { @apply bg-white border-t border-line; }
-  .band-forest   { @apply bg-forest text-white; }
+  /* Sections alternate cream → white → cream. Hairline dividers are
+     kept faint so the surfaces read as depth, not boxes. */
+  .section-cream { @apply bg-cream; border-top: 1px solid rgba(224,214,191,.55); }
+  .section-white { @apply bg-white; border-top: 1px solid rgba(224,214,191,.55); }
+  .band-forest {
+    @apply text-white;
+    background:
+      radial-gradient(120% 140% at 50% -20%, #2c5b40 0%, rgba(44,91,64,0) 60%),
+      var(--forest);
+  }
 
-  /* Buttons — gold is the only place gold touches a surface behind text,
-     and the text on gold is charcoal (never white, never gold-on-gold). */
+  /* Buttons — gold pill with depth and a subtle lift on hover. */
   .btn-gold {
     @apply inline-flex items-center justify-center min-h-touch bg-gold text-charcoal
-           font-inter font-semibold px-6 tracking-wide transition-colors;
+           font-inter font-semibold px-6 tracking-wide;
+    border-radius: var(--r-pill);
+    box-shadow: var(--shadow-sm);
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background-color .2s var(--ease);
   }
-  .btn-gold:hover { background: var(--gold-hover); color: var(--charcoal); }
+  .btn-gold:hover { background: var(--gold-hover); color: var(--charcoal); transform: translateY(-2px); box-shadow: var(--shadow-gold); }
+  .btn-gold:active { transform: translateY(0); }
 
   .btn-outline {
     @apply inline-flex items-center justify-center min-h-touch border border-forest
-           text-forest font-inter font-medium px-6 transition-colors;
+           text-forest font-inter font-medium px-6;
+    border-radius: var(--r-pill);
+    transition: transform .22s var(--ease), box-shadow .22s var(--ease), background-color .2s var(--ease), color .2s var(--ease);
   }
-  .btn-outline:hover { @apply bg-forest text-white; }
+  .btn-outline:hover { @apply bg-forest text-white; transform: translateY(-2px); box-shadow: var(--shadow-md); }
+  .btn-outline:active { transform: translateY(0); }
 
-  /* A gold link underline used for "learn more" style links on light. */
+  /* Animated underline that grows from the left on hover. */
   .link-underline {
     @apply font-inter font-medium text-forest;
-    border-bottom: 1px solid var(--gold);
+    background-image: linear-gradient(var(--gold), var(--gold));
+    background-position: 0 100%;
+    background-repeat: no-repeat;
+    background-size: 100% 1px;
     padding-bottom: 3px;
+    transition: color .2s var(--ease), background-size .25s var(--ease);
   }
-  .link-underline:hover { color: var(--charcoal); }
+  .link-underline:hover { color: var(--charcoal); background-size: 100% 2px; }
 
   /* The thin gold rule under headings. Gold is decorative only. */
-  .rule-gold { @apply block h-0.5 w-12 bg-gold; }
+  .rule-gold { @apply block h-0.5 w-12 rounded-full bg-gold; }
 
   /* Small uppercase label. On light use faint ink; on forest use gold-on-forest. */
   .kicker { @apply font-inter uppercase text-ink-faint; font-size: 12px; letter-spacing: 0.2em; }
@@ -80,4 +129,48 @@
   /* Body copy tones that satisfy the contrast rules on light surfaces. */
   .prose-soft { @apply text-ink-soft; }
   .prose-muted { @apply text-ink-muted; }
+
+  /* Reusable modern card (available for new markup). */
+  .card {
+    @apply bg-white p-5;
+    border: 1px solid var(--line, #e0d6bf);
+    border-radius: var(--r-lg);
+    box-shadow: var(--shadow-sm);
+  }
+}
+
+/* ── Site-wide card modernization ───────────────────────────────
+   Every existing panel uses the token pair `border-line-warm` +
+   `bg-white`. Rounding and softly elevating that pair upgrades all
+   ~400 panels at once. Tables use `border-collapse` (no border-line-warm),
+   so they are untouched. */
+[class~="border-line-warm"][class~="bg-white"] {
+  border-radius: var(--r);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow .25s var(--ease), transform .25s var(--ease), border-color .25s var(--ease);
+}
+/* Gentle hover lift for card-like containers (never form fields). */
+:where(a, div, article, section, li, figure)[class~="border-line-warm"][class~="bg-white"]:hover {
+  box-shadow: var(--shadow-md);
+}
+input[class~="border-line-warm"], select[class~="border-line-warm"], textarea[class~="border-line-warm"] {
+  box-shadow: none;
+}
+/* Gold-accented highlight boxes get the same soft radius. */
+[class~="border-gold"] { border-radius: var(--r); }
+
+/* ── Motion: scroll reveal + reduced-motion guard ───────────────── */
+@keyframes hcc-rise { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: no-preference) {
+  html.js-reveal [data-reveal] {
+    opacity: 0;
+    transform: translateY(22px);
+    transition: opacity .6s var(--ease), transform .6s var(--ease);
+    will-change: opacity, transform;
+  }
+  html.js-reveal [data-reveal].is-visible {
+    opacity: 1;
+    transform: none;
+  }
 }

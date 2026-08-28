@@ -95,7 +95,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   return (
     <div className="min-h-screen bg-cream">
-      <header className="border-b border-line bg-white">
+      <header className="sticky top-0 z-40 border-b border-line/70 bg-white/85 shadow-[0_1px_0_rgba(224,214,191,.6)] backdrop-blur-md supports-[backdrop-filter]:bg-white/75">
         <div className="shell flex flex-wrap items-center justify-between gap-3 py-4">
           <div>
             <p className="kicker">Employee portal</p>

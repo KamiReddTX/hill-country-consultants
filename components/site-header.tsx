@@ -7,7 +7,7 @@ import { MobileNav } from "@/components/mobile-nav";
  *  Full nav on md+, hamburger menu (MobileNav) below md. */
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-line bg-white">
+    <header className="sticky top-0 z-50 border-b border-line/70 bg-white/80 shadow-[0_1px_0_rgba(224,214,191,.6)] backdrop-blur-md backdrop-saturate-150 supports-[backdrop-filter]:bg-white/70">
       <div className="relative shell flex items-center justify-between gap-6 py-4">
         <Link href="/" className="shrink-0" aria-label={`${"Hill Country Consultants"} — home`}>
           <Image

@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 import { SITE } from "@/content/site";
+import { ScrollReveal } from "@/components/scroll-reveal";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
       <body>
         {children}
+        <ScrollReveal />
         <Analytics />
         <SpeedInsights />
       </body>
