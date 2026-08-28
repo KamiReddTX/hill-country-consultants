@@ -607,7 +607,7 @@ export function BookingFlow({
             {hasSelection && (
               <button onClick={clearAll} className="mt-3 w-full text-[13px] link-underline">Clear selections</button>
             )}
-            <p className="mt-4 text-[12.5px] prose-muted">All sales are final. Scoped work is quoted in writing before it begins.</p>
+            <p className="mt-4 text-[12.5px] prose-soft"><strong className="text-charcoal">All sales are final — no refunds.</strong> By paying, you accept the <Link href="/refund-policy" className="link-underline" target="_blank">Refund &amp; Cancellation Policy</Link> and <Link href="/terms" className="link-underline" target="_blank">Terms</Link> above. Scoped work is quoted in writing before it begins.</p>
             <p className="mt-2 text-[12.5px] prose-muted">After you book, a receipt and secure client-portal access arrive by email, and your account goes into review — we acknowledge it the same business day and confirm scope and next steps within two business days.</p>
           </div>
         </aside>
