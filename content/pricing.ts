@@ -85,6 +85,19 @@ export const PLAN_ROWS: { label: string; f: string; m: string; e: string }[] = [
   { label: "Turnaround", f: "Standard", m: "Priority in queue", e: "Priority on everything" },
 ];
 
+/** Plain-language definition of the cryptic plan-table cells, by service line.
+ *  Rendered under the comparison table so a prospect knows what each line means. */
+export const PLAN_GLOSSARY: { line: string; def: string }[] = [
+  { line: "Publishing", def: "Foundation: a publishing consult plus one short piece that month — up to ~2,000 words (a book description, author bio, back-cover copy, or one short formatted piece). Momentum: one title in production per term — editorial, interior and eBook formatting, and cover coordination for a single manuscript or eBook. Enterprise: end-to-end production of one book (edit, layout, cover, print-ready and eBook files) plus a launch plan, under Redd Ladys Chronicles. ISBN and print runs at cost." },
+  { line: "Media", def: "Foundation: one produced asset a month — an audiogram, short-form video, or show/cover art. Momentum: two podcast episodes a month (up to ~90 min each — edit, cleanup, intro/outro, music) plus episode art. Enterprise: a full season (13–15 episodes) with show/cover art and distribution setup. Recording talent and studio/venue costs at cost." },
+  { line: "Digital", def: "Foundation: one landing page — design, responsive build, a form, basic SEO, deployed to your hosting. Momentum: a multi-page site or a minimum-viable PWA — several pages/screens, forms and integrations, deploy. Enterprise: a full custom app or PWA delivered in phases; larger builds scoped from $6,000. Hosting, domain, and app-store fees at cost." },
+  { line: "Events", def: "In-person only. Foundation: one event per term — plan, budget outline, and vendor coordination (planning, not day-of). Momentum: one event per quarter with a detailed run-of-show. Enterprise: quarterly events with on-site coordination the day of. Venue, catering, and hard costs at cost." },
+  { line: "Corporate training", def: "Half- or full-day classes, on-site or virtual, 20-attendee minimum (+$250 per person over 20). Foundation: one class per term. Momentum: one class per quarter. Enterprise: a class each quarter plus a custom training track for your team." },
+  { line: "Systems & automation", def: "Foundation: one workflow built per term — a process map plus the build (an automation, tracker, or dashboard). Momentum: a buildout each quarter. Enterprise: ongoing automation throughout the term. Third-party software billed at cost." },
+  { line: "Agriculture & land", def: "Foundation: one deliverable a month — a regenerative-plan section, stewardship calendar, or records template. Momentum: one full land or stewardship plan per quarter. Enterprise: ongoing program management. Specialized surveying, legal, or agronomy referred out as needed." },
+  { line: "Grants", def: "No guarantee of award — we research, prepare, and submit. Foundation: a research/prospect list plus one application prepared and submitted per quarter. Momentum: two applications per quarter, plus a separate quarterly funder-reporting allotment. Enterprise: a managed grants calendar with ongoing research, applications, and submissions." },
+];
+
 export const PLAN_INCLUDED: string[] = [
   "Dedicated account lead",
   "Onboarding strategy session and 30-day roadmap",

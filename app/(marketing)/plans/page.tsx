@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionHeading } from "@/components/section-heading";
-import { PLANS, PLAN_FEE_CENTS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS, DELIVERABLE_EQUIVALENTS } from "@/content/pricing";
+import { PLANS, PLAN_FEE_CENTS, PLAN_ROWS, PLAN_INCLUDED, PLAN_BILLED, PLAN_TERMS, DELIVERABLE_EQUIVALENTS, PLAN_GLOSSARY } from "@/content/pricing";
 import { PlanInterest } from "@/components/plan-interest";
 import { PlanChooser } from "@/components/plan-chooser";
 import { getSiteContent, pick } from "@/lib/site-content";
@@ -136,6 +136,22 @@ export default async function PlansPage() {
                 </div>
               ))}
             </div>
+          </div>
+
+          <div className="mt-12">
+            <h3 className="font-fraunces text-[20px] font-medium text-forest">What each line includes</h3>
+            <span className="rule-gold mb-4 mt-2" />
+            <p className="mb-5 max-w-[52em] text-[15px] prose-soft">
+              The comparison rows above are summaries. Here&apos;s what each service line covers, and how the tiers differ. Anything beyond your allotment is quoted in writing first.
+            </p>
+            <dl className="grid gap-x-8 gap-y-4 md:grid-cols-2">
+              {PLAN_GLOSSARY.map((g) => (
+                <div key={g.line} className="border-t border-line-soft pt-2.5">
+                  <dt className="text-[15px] font-medium text-charcoal">{g.line}</dt>
+                  <dd className="mt-0.5 text-[14px] prose-muted">{g.def}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <div className="mt-12 max-w-[42em]">

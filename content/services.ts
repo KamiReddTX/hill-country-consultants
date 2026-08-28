@@ -122,7 +122,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "We drive projects and initiatives to completion — tracking tasks, deadlines, dependencies, and the people involved, so there is one place to see where things stand.",
     included: ["A project plan and timeline", "A live task and status board — a single source of truth", "Regular status updates, meeting coordination and notes", "Vendor and subcontractor coordination", "Proactive risk and blocker flags"],
     expect: ["A named coordinator and a regular status cadence", "One active project at Foundation, up to three concurrent at Momentum, program-level at Enterprise", "Weekly status at minimum; same day on blockers", "Scope and milestones approved in writing before work starts", "A close-out wrap summary at the end"],
-    scope: "We coordinate — we do not provide stamped or licensed construction management or engineering.",
+    scope: "We coordinate — we do not provide stamped or licensed construction management or engineering. The $1,200/mo starting rate is the minimum monthly engagement and covers one active project — a plan, a live status board, meeting notes, and proactive blocker flags.",
     how: HOW,
     forWho: [
       "Owners juggling a launch, build, or initiative on top of running the business.",
@@ -249,7 +249,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "We build the documents that make a business bid-ready and audit-ready — the paperwork that keeps you eligible to work.",
     included: ["Capabilities statements and company and executive profiles", "Certification and registration application support, non-debarment statements, and one-sheets", "Vendor qualification and prequalification packages", "Compliance forms and standard business documents", "Mutual NDAs from template", "SOPs and records organization"],
     expect: ["Branded, accurate, on-time documents", "One revision round included", "Builds or refreshes per month set by your tier — 1, 3, or 6, plus full library buildout at Enterprise", "Contact information verified; no personal details"],
-    scope: "Legal-wording conflicts are flagged to your attorney and never altered by us. Legal review is your attorney’s role.",
+    scope: "Legal-wording conflicts are flagged to your attorney and never altered by us. Legal review is your attorney’s role. A “single document” (from $450) is one such deliverable — a capabilities statement, certification or registration document, company profile, one-sheet, or SOP — and includes one revision round.",
     how: HOW,
     forWho: [
       "Contractors and vendors who need to stay bid-ready and audit-ready.",
@@ -314,7 +314,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "The posting happens when there is time, and prospects see an inconsistent company. We keep the brand visible with consistent, on-brand content and campaigns produced on a schedule.",
     included: ["Social graphics, flyers and ad creative", "Email and promotional graphics", "Multi-asset campaign concepts", "A content calendar at higher tiers"],
     expect: ["4, 12, or 24 graphics a month by tier, plus campaigns at Momentum and Enterprise", "Brand-consistent work at correct platform dimensions", "Two revision rounds included per design deliverable", "An approval cadence set by your package — per batch, or against an approved calendar"],
-    scope: "Where we run paid campaigns, the ad spend is billed to you directly by the platform, not through HCC. Stock and licensing are billed at cost. Volumes are set by tier.",
+    scope: "Where we run paid campaigns, the ad spend is billed to you directly by the platform, not through HCC. Stock and licensing are billed at cost. Volumes are set by tier. Copywriting is billed at $0.25/word with a $250 project minimum — small jobs land at the $250 floor; larger jobs bill per word.",
     how: HOW,
     forWho: [
       "Businesses whose posting happens only when there's time — so prospects see an inconsistent brand.",
@@ -452,7 +452,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "The manuscript is done, or close, and the next steps are a maze. We take a manuscript from draft to launch under Redd Ladys Chronicles, our publishing imprint — and you keep ownership of your book.",
     included: ["Editorial consultation and manuscript editing", "Developmental, line, and proof passes", "eBook formatting and cover coordination", "Full interior and production build", "Release and launch strategy, and distribution setup"],
     expect: ["A staged pipeline with clear milestones", "Metadata and ISBN set before release", "One title per term at Enterprise", "Editorial from $450 per 10k words; full production and release from $3,500 standalone"],
-    scope: "Ghostwriting is priced separately, from $10,000. ISBN and print runs at cost. Contract and rights language is flagged to your attorney and never altered by us.",
+    scope: "Ghostwriting is priced separately, from $10,000 (a starting/minimum project price; the final quote depends on length and scope). ISBN and print runs at cost. Contract and rights language is flagged to your attorney and never altered by us. On a plan: Foundation includes a consult plus one short piece a month (up to ~2,000 words); Momentum carries one title in production per term; Enterprise is full book production plus a release plan.",
     how: "Bring the manuscript, or the idea, to the free strategy session. We scope the stage you are actually at.",
     forWho: [
       "Authors with a finished or nearly finished manuscript who don't know the next steps.",
@@ -524,7 +524,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "We produce and publish audio and media content on a schedule, so a show does not stall at episode four.",
     included: ["Podcast episode editing, show and cover art", "Audiograms and short-form clips", "Full season pipeline, up to 13 episodes", "Distribution setup"],
     expect: ["A set number of episodes and assets per month by tier", "Audio leveled and clean, art on brand, metadata complete", "Published on schedule", "Promo assets delivered with each episode"],
-    scope: "Recording talent is yours. Studio and venue costs are billed at cost.",
+    scope: "Recording talent is yours. Studio and venue costs are billed at cost. On a plan: Foundation is one produced asset a month; Momentum is two podcast episodes a month plus art; Enterprise is a full season (13–15 episodes) with art and distribution setup.",
     how: HOW,
     forWho: [
       "Podcasters and creators whose show stalls because editing piles up.",
@@ -921,7 +921,7 @@ export const SERVICE_DETAILS: Record<ServiceKey, ServiceDetail> = {
     pain: "We take nonprofits from grant research through application and submission, on the funder’s deadlines.",
     included: ["Grant research reports and prospect lists", "Application preparation and submission", "Budget and narrative development", "Compliance checklists"],
     expect: ["A set number of applications per quarter by tier", "Eligibility confirmed before work begins", "Narrative, budget and attachments complete against the guidelines", "Submission confirmed when you authorize it"],
-    scope: "No guarantee of award — we research, prepare, and submit. Volumes are set by tier.",
+    scope: "No guarantee of award — we research, prepare, and submit. Volumes are set by tier. Two different deliverables: the $350 grant research report is research only (a prospect list and fit analysis); a grant application (from $750) is preparing and submitting one specific application. On Momentum, quarterly funder reporting is a separate allotment from the two applications.",
     how: HOW,
     forWho: [
       "Nonprofits and mission-driven organizations chasing funding without a grants team.",
