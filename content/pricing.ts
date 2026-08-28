@@ -75,11 +75,11 @@ export const PLAN_ROWS: { label: string; f: string; m: string; e: string }[] = [
   { label: "Publishing", f: "Consult + 1 short piece", m: "Manuscript / eBook track (1)", e: "Full book production + release strategy" },
   { label: "Media", f: "1 asset/mo", m: "Podcast 2 episodes/mo + art", e: "Full season pipeline + distribution" },
   { label: "Digital", f: "1 landing page", m: "Multi-page site or PWA MVP", e: "Full app / PWA build, phased" },
-  { label: "Events", f: "1 per term", m: "1/qtr + run-of-show", e: "Quarterly + on-site coordination" },
-  { label: "Corporate training", f: "1 class per term", m: "1 class/qtr", e: "Quarterly classes + custom track" },
-  { label: "Systems & automation", f: "1 workflow per term", m: "Quarterly buildout", e: "Continuous automation retainer" },
-  { label: "Agriculture & land", f: "1 deliverable/mo", m: "1 plan/qtr", e: "Full program management" },
-  { label: "Grants", f: "Research + 1 application/qtr", m: "2 applications + reporting/qtr", e: "Full grants calendar + submissions" },
+  { label: "Events", f: "1 event per term", m: "1 event/quarter + run-of-show", e: "1/quarter + on-site coordination" },
+  { label: "Corporate training", f: "1 class per term (min 20)", m: "1 class/quarter", e: "1 class/quarter + custom track" },
+  { label: "Systems & automation", f: "1 workflow per term", m: "1 buildout/quarter", e: "Continuous (capacity-based)" },
+  { label: "Agriculture & land", f: "1 deliverable/mo", m: "1 land/stewardship plan/quarter", e: "Full program management" },
+  { label: "Grants", f: "Research + 1 application/quarter", m: "2 applications + reporting/quarter", e: "Full grants calendar (capacity-based)" },
   { label: "Notary", f: "Included · RON + in-person (TX)", m: "Included · priority scheduling", e: "Included · priority + mobile" },
   { label: "Reviews", f: "Monthly review + summary", m: "Bi-weekly + KPI dashboard", e: "Weekly + executive reporting" },
   { label: "Turnaround", f: "Standard", m: "Priority in queue", e: "Priority on everything" },
@@ -112,7 +112,7 @@ export const PLAN_BILLED: string[] = [
   "Additional VA hours $55 Foundation / $50 Momentum / $40 Enterprise",
   "Anything beyond allotment quoted in writing first",
   "Hard costs at cost",
-  "State-regulated notary fees ($25 online / $10 per act in-person, TX) apply per act, whether you're on a plan or booking notary standalone",
+  "Notary fees ($25 online / $10 per act in-person, TX) apply per act, whether you're on a plan or booking notary standalone; in-person adds travel from $35",
 ];
 
 export const PLAN_TERMS: string[] = [
@@ -134,8 +134,8 @@ export interface BookItem {
 }
 
 export const BOOK_ITEMS: BookItem[] = [
-  { id: "sub-pkg", svc: "submittals", group: "Construction", name: "Construction submittal package", unit: "per package", price: 350 },
-  { id: "sub-week", svc: "submittals", group: "Construction", name: "Weekly submittal service", unit: "per week · any volume", price: 750 },
+  { id: "sub-pkg", svc: "submittals", group: "Construction", name: "Construction submittal package", unit: "per package · includes index, OEM cut sheets, marked selections, compliance checklist & transmittal", price: 350 },
+  { id: "sub-week", svc: "submittals", group: "Construction", name: "Weekly submittal service", unit: "per week · any volume within the week's agreed capacity", price: 750 },
   { id: "rush", svc: "submittals", group: "Construction", name: "Rush turnaround (surcharge)", unit: "surcharge added on top of a package · never included in a plan", price: 550 },
   { id: "va-block", svc: "va", group: "Admin", name: "Virtual assistant block", unit: "10 hours at $65/hr · minimum booking", price: 650 },
   { id: "graphic", svc: "marketing", group: "Marketing & brand", name: "Marketing graphic (flyer / social)", unit: "each", price: 125 },
@@ -145,6 +145,8 @@ export const BOOK_ITEMS: BookItem[] = [
   { id: "grant-research", svc: "grants", group: "Specialty", name: "Grant research report", unit: "each", price: 350 },
   { id: "class-half", svc: "trainingSvc", group: "Training", name: "Corporate class — half day, 4h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20 · book 30–90 days out", price: 3000 },
   { id: "class-full", svc: "trainingSvc", group: "Training", name: "Corporate class — full day, 6h", unit: "min enrollment 20 · base covers up to 20 · +$250/person over 20 · book 30–90 days out", price: 4500 },
+  { id: "notary-online", svc: "notary", group: "Specialty", name: "Notarization — online (RON)", unit: "per notarial act · remote, by secure video", price: 25 },
+  { id: "notary-inperson", svc: "notary", group: "Specialty", name: "Notarization — in person (Texas)", unit: "per notarial act · + travel from $35, scheduled after booking", price: 10 },
 ];
 
 export interface QuoteItem {
@@ -172,8 +174,7 @@ export const QUOTE_ITEMS: QuoteItem[] = [
   { id: "q-systems", name: "Systems & automation buildout", from: "scoped to your process" },
   { id: "q-ag", name: "Agriculture & land planning", from: "from $500 per deliverable" },
   { id: "q-grant-app", name: "Grant application", from: "from $750" },
-  { id: "q-copy", name: "Copywriting", from: "from $0.25/word or $250 per project" },
-  { id: "q-notary", name: "Notary service — online or in person (Texas)", from: "$25 online · $10/act in person (TX) + travel" },
+  { id: "q-copy", name: "Copywriting", from: "$0.25/word · $250 minimum project" },
 ];
 
 export interface RateLine {
@@ -189,16 +190,16 @@ export const RATE_LINES: RateLine[] = [
   { svc: "va", n: "Virtual assistant block — 10 hours (standalone)", p: "$650", cart: "va-block" },
   { svc: "va", n: "Additional hours beyond the block (standalone)", p: "$65/hr" },
   { svc: "va", n: "Plan clients — hours beyond your monthly allotment", p: "$55 Foundation · $50 Momentum · $40 Enterprise, per hour" },
-  { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo", quote: "q-pm" },
+  { svc: "pm", n: "Project management & coordination", p: "from $1,200/mo · one active project", quote: "q-pm" },
   { svc: "submittals", n: "Submittal package (standalone)", p: "$350 each", cart: "sub-pkg" },
   { svc: "submittals", n: "Weekly submittal service · any volume (standalone)", p: "$750/wk", cart: "sub-week" },
   { svc: "submittals", n: "Plan clients — extra weekly packages beyond allotment", p: "$450/wk flat · any volume that week" },
   { svc: "submittals", n: "Rush turnaround (surcharge on a package)", p: "$550 · added on top of a package · never in a plan", cart: "rush" },
   { svc: "compliance", n: "Single document — capabilities, cert, profile, one-sheet or SOP", p: "from $450", quote: "q-doc" },
   { svc: "compliance", n: "Branded document suite", p: "from $1,800", quote: "q-suite" },
-  { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each", cart: "graphic" },
+  { svc: "marketing", n: "Marketing graphic — flyer, social, ad or email", p: "$125 each · 2 revision rounds", cart: "graphic" },
   { svc: "marketing", n: "Multi-asset campaign", p: "from $850", quote: "q-campaign" },
-  { svc: "marketing", n: "Copywriting", p: "from $0.25/word or $250 per project", quote: "q-copy" },
+  { svc: "marketing", n: "Copywriting", p: "$0.25/word · $250 minimum project", quote: "q-copy" },
   { svc: "marketing", n: "Speaker / media one-sheet & kit", p: "from $350", quote: "q-kit" },
   { svc: "brand", n: "Brand starter kit", p: "$950", cart: "brand-starter" },
   { svc: "brand", n: "Full brand system", p: "from $3,500", quote: "q-brand" },
@@ -206,7 +207,7 @@ export const RATE_LINES: RateLine[] = [
   { svc: "publishing", n: "eBook formatting", p: "from $650 per title", quote: "q-ebook" },
   { svc: "publishing", n: "Full book production + release strategy", p: "from $3,500", quote: "q-book" },
   { svc: "publishing", n: "Ghostwriting", p: "from $10,000", quote: "q-ghost" },
-  { svc: "media", n: "Podcast episode — edit + cover art", p: "$350 each", cart: "podcast" },
+  { svc: "media", n: "Podcast episode — edit + cover art (up to 90 min · 1 revision)", p: "$350 each", cart: "podcast" },
   { svc: "media", n: "Season pipeline — 13 episodes", p: "from $3,900", quote: "q-season" },
   { svc: "media", n: "Media asset — audiogram or short", p: "$95 each", cart: "media-asset" },
   { svc: "digital", n: "Landing page", p: "from $650", quote: "q-landing" },
@@ -219,7 +220,8 @@ export const RATE_LINES: RateLine[] = [
   { svc: "ag", n: "Agriculture & land planning", p: "from $500 per deliverable", quote: "q-ag" },
   { svc: "grants", n: "Grant research report", p: "$350 each", cart: "grant-research" },
   { svc: "grants", n: "Grant application", p: "from $750 each", quote: "q-grant-app" },
-  { svc: "notary", n: "Notarization — Remote Online Notarization (RON) or in-person (Texas)", p: "$25 online · $10/act in-person (TX) + travel from $35", quote: "q-notary" },
+  { svc: "notary", n: "Notarization — online, Remote Online Notarization (RON)", p: "$25 per act", cart: "notary-online" },
+  { svc: "notary", n: "Notarization — in person (Texas)", p: "$10 per act + travel from $35", cart: "notary-inperson" },
 ];
 
 export const bookItemById = (id: string) => BOOK_ITEMS.find((b) => b.id === id);

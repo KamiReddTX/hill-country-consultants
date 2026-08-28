@@ -112,7 +112,7 @@ export function InquiryForm({ presetService = "", presetClass = "" }: { presetSe
           <input className={field} value={form.industry} onChange={set("industry")} />
         </label>
         <label className="flex flex-col gap-1.5">
-          <span className="text-[13px] font-medium text-ink-faint">Timeline</span>
+          <span className="text-[13px] font-medium text-ink-faint">Desired timeline</span>
           <input className={field} placeholder="e.g. this month" value={form.timeline} onChange={set("timeline")} />
         </label>
         <label className="flex flex-col gap-1.5">
@@ -122,7 +122,7 @@ export function InquiryForm({ presetService = "", presetClass = "" }: { presetSe
         <label className="flex flex-col gap-1.5">
           <span className="text-[13px] font-medium text-ink-faint">Referral or employee code</span>
           <input className={field} value={form.referral} onChange={set("referral")} />
-          <span className="text-[12px] prose-muted">If a member of our team referred you, enter their code so they are credited.</span>
+          <span className="text-[12px] prose-muted">If an HCC team member referred you, enter their code so the referral is credited.</span>
         </label>
       </div>
       <label className="flex flex-col gap-1.5">

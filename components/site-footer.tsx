@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SITE, HOURS_SHORT } from "@/content/site";
+import { SITE, HOURS } from "@/content/site";
 import { getSiteContent, pick } from "@/lib/site-content";
 
 /** Footer nav — one row, matches the header with Home and Policies added. */
@@ -62,11 +62,11 @@ export async function SiteFooter() {
             <span className="whitespace-nowrap text-white/85">{locations}</span>
             <span className="whitespace-nowrap text-white/85">Nationwide since 2024</span>
           </div>
-          <div className="flex flex-wrap items-baseline gap-x-[18px] gap-y-2 text-white/85">
-            {HOURS_SHORT.map((r) => (
-              <span key={r.d} className="whitespace-nowrap">{r.d} {r.h}</span>
+          <div className="flex flex-col gap-y-0.5 text-white/85">
+            {HOURS.map((r) => (
+              <span key={r.d} className="whitespace-nowrap"><span className="inline-block w-[92px]">{r.d}</span>{r.h}</span>
             ))}
-            <span className="whitespace-nowrap text-white/60">Eastern</span>
+            <span className="whitespace-nowrap text-white/60">All times Eastern</span>
           </div>
         </div>
       </div>

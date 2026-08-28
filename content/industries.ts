@@ -71,7 +71,7 @@ export const INDUSTRIES: Industry[] = [
     img: "Stacked books and page proofs",
     headline: "Get the book finished, published, and selling.",
     problem:
-      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles, our publishing imprint and a registered publisher in the Library of Congress Preassigned Control Number (PCN) Program.",
+      "The manuscript is done, or close, and the next steps are a maze — editorial, formatting, distribution, launch assets, the platform decisions nobody explains. Most manuscripts stall here rather than at the writing. Publishing runs under Redd Ladys Chronicles — Hill Country Consultants' in-house publishing imprint (a division of HCC, not an outside vendor) — and a registered publisher in the Library of Congress Preassigned Control Number (PCN) Program.",
     handles: [
       "Editorial at the stage you are at",
       "Interior and eBook formatting",
@@ -85,11 +85,11 @@ export const INDUSTRIES: Industry[] = [
       "A cover concept coordinated through to distribution",
       "A launch kit: graphics, media one-sheet, and posting calendar",
       "Podcast or audiogram assets to promote the release",
-      "An ISBN/registration path coordinated under Redd Ladys Chronicles",
+      "ISBN handled to fit your path — on the client-owned path you obtain and own your ISBN (we coordinate the registration); on the imprint path your book is published under Redd Ladys Chronicles' ISBN",
     ],
     samples: ["Book cover concept", "Interior spread", "Launch graphic set", "Media one-sheet"],
     faqs: [
-      { q: "Do I keep my rights and royalties?", a: "Yes. You own your work. Redd Ladys Chronicles is our publishing imprint that helps you produce and distribute — rights and contract terms are yours, and we flag any legal language to your attorney. You can publish on your own accounts (you own the ISBN and are publisher of record), or through the imprint — we'll explain both paths before you decide." },
+      { q: "Do I keep my rights and royalties?", a: "Yes. You own your work. Redd Ladys Chronicles is Hill Country Consultants' in-house publishing imprint (our own division, not an outside vendor) that helps you produce and distribute — rights and contract terms are yours, and we flag any legal language to your attorney. You can publish on your own accounts (you obtain and own the ISBN and are publisher of record), or through the imprint (your book is published under the imprint's ISBN) — we'll explain both paths before you decide." },
       { q: "Can you help if my manuscript isn't finished?", a: "Yes — we meet you at your stage, whether that's developmental editing, line editing, or final formatting." },
       { q: "Do you guarantee sales?", a: "No one honestly can. We produce professional assets and coordinate distribution and launch; the results depend on many factors beyond production." },
     ],

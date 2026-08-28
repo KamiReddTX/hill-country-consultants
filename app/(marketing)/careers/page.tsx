@@ -39,9 +39,15 @@ export default function CareersPage() {
         ))}
       </div>
 
-      <p className="mt-6 max-w-[52em] border-l-2 border-gold pl-4 text-[14px] leading-relaxed prose-muted">
-        <strong className="text-charcoal">Every role is remote / hybrid and U.S.-based</strong> — primarily remote, with local and regional on-site work when a project calls for it. You&apos;ll need a <strong>Windows computer</strong> with a <strong>dual-monitor</strong> setup, a <strong>wired Ethernet</strong> connection (not Wi-Fi only), and a <strong>smartphone and/or tablet</strong> that can run apps (the Creative Specialist role additionally requires a Mac laptop). Because we handle client data, every role also meets standard security basics &mdash; antivirus and an updated, encrypted Windows, 2FA on work accounts, a secured home network, and a signed confidentiality agreement &mdash; and consents to a background check.
-      </p>
+      <div className="mt-8 max-w-[52em] border-l-2 border-gold pl-4">
+        <p className="text-[15px] font-semibold text-forest">Work environment &amp; equipment</p>
+        <p className="mt-1.5 text-[14px] leading-relaxed prose-muted">
+          Every role is U.S.-based. You&apos;ll need a <strong className="text-charcoal">Windows computer</strong> with a <strong>dual-monitor</strong> setup, a <strong>wired Ethernet</strong> connection (not Wi-Fi only), and a <strong>smartphone and/or tablet</strong> that can run apps (the Creative Specialist role additionally requires a Mac laptop). Because we handle client data, every role also meets standard security basics &mdash; antivirus and an updated, encrypted Windows, 2FA on work accounts, a secured home network, and a signed confidentiality agreement &mdash; and consents to a background check.
+        </p>
+        <p className="mt-2 text-[13.5px] leading-relaxed prose-muted">
+          Our client-facing company hours are published in Eastern Time. Staff work their own time zone; the two Business Manager roles are assigned an Eastern or Pacific coverage window for internal team coverage, so the two schedules are not in conflict.
+        </p>
+      </div>
 
       {/* Open roles */}
       <section className="mt-12">

@@ -167,7 +167,7 @@ export default async function HomePage() {
           <div className="flex flex-col gap-4">
             <p className="text-[20px] prose-soft">
               One hire gets you one skill set —{" "}
-              <span className="font-semibold text-charcoal">$5,500–$7,500/month</span> calculating
+              <span className="font-semibold text-charcoal">$5,500–$7,500/mo</span> calculating
               salary, benefits, PTO, equipment, software, and management. For the same money, often
               less, you get the whole firm.
             </p>

@@ -28,13 +28,13 @@ const TEAM: { t: string; d: string }[] = [
   { t: "Administrative support", d: "Day-to-day admin, inbox, scheduling, and document production." },
   { t: "Project management", d: "Plans, timelines, task boards, and status reporting that keep work moving." },
   { t: "Creative & marketing specialists", d: "Graphics, branding, content, and campaign support on your brand." },
-  { t: "Publishing specialists", d: "Editorial, formatting, cover and distribution coordination, and launch assets." },
+  { t: "Publishing specialists", d: "Editorial, formatting, cover and distribution coordination, and launch assets — through Redd Ladys Chronicles, our in-house imprint." },
   { t: "Digital & web specialists", d: "Landing pages, multi-page sites, PWAs, and custom app builds." },
   { t: "Construction documentation specialists", d: "Submittals, cut sheets, compliance files, and transmittal logs." },
   { t: "Agriculture & land support", d: "Stewardship records, program paperwork, and regenerative-plan frameworks." },
   { t: "Grant & nonprofit support", d: "Research, application preparation, and funder reporting." },
   { t: "Corporate training specialists", d: "Class delivery, workbooks, and hands-on build labs, virtual or on-site." },
-  { t: "Specialist partners", d: "Vetted contractors and licensed professionals brought in when a scope calls for them." },
+  { t: "Specialist partners", d: "Vetted outside contractors and licensed professionals — such as our event vendor — brought in when a scope calls for them, distinct from our in-house divisions." },
 ];
 
 export default async function AboutPage() {

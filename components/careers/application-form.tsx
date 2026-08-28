@@ -93,11 +93,15 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
         fd.set("education", JSON.stringify(edu.filter((r) => r.school || r.degree || r.field)));
         fd.set("employment_history", JSON.stringify(jobs.filter((r) => r.employer || r.title)));
         fd.set("refs", JSON.stringify(refs.filter((r) => r.name || r.phone || r.email)));
-        // Creative role: fold the discrete work-sample links into one stored field.
-        if (isCreative) {
-          const labels: Record<string, string> = { cs_site1: "Site 1", cs_site2: "Site 2", cs_video: "Video/motion", cs_appbuild: "App/build" };
-          const parts = Object.keys(labels)
-            .map((k) => { const v = (fd.get(k) || "").toString().trim(); return v ? `${labels[k]}: ${v}` : ""; })
+        // Creative / Business Manager roles: fold the discrete work-sample links into one stored field.
+        const wsLabels: Record<string, string> | null = isCreative
+          ? { cs_site1: "Site 1", cs_site2: "Site 2", cs_video: "Video/motion", cs_appbuild: "App/build" }
+          : isBM
+          ? { bm_design: "Design sample", bm_built: "Built/coded sample" }
+          : null;
+        if (wsLabels) {
+          const parts = Object.keys(wsLabels)
+            .map((k) => { const v = (fd.get(k) || "").toString().trim(); return v ? `${wsLabels[k]}: ${v}` : ""; })
             .filter(Boolean);
           if (parts.length) fd.set("work_samples", parts.join(" | "));
         }
@@ -278,6 +282,16 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
             </div>
           </div>
         )}
+        {isBM && (
+          <div className="flex flex-col gap-3 border border-line-soft p-3">
+            <p className="text-[13px] font-medium text-forest">Work samples (required for this role)</p>
+            <p className={sub}>The posting asks for something you designed and something you built or coded — paste a URL for each (or note where we can find it).</p>
+            <div className="grid gap-3 md:grid-cols-2">
+              <label className={labelCls}>Design sample (URL) *<input name="bm_design" required placeholder="https://…" className={field} /></label>
+              <label className={labelCls}>Built / coded sample (URL) *<input name="bm_built" required placeholder="https://…" className={field} /></label>
+            </div>
+          </div>
+        )}
         <label className={labelCls}>{role ? "Your answer to the question in this posting *" : "Relevant experience"}<textarea name="experience" rows={5} required={!!role} placeholder={rolePrompt} className={area} /></label>
         <label className={labelCls}>Why Hill Country Consultants?<textarea name="why" rows={3} className={area} /></label>
       </section>
@@ -297,7 +311,7 @@ export function ApplicationForm({ role }: { role?: string } = {}) {
       <section className={sectionCls}>
         <p className={legend}>Attachments</p>
         <div className="grid gap-4 md:grid-cols-2">
-          <label className={labelCls}>Résumé (PDF or Word, optional — max 8MB)<input name="resume" type="file" accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="text-[14px]" /></label>
+          <label className={labelCls}>Résumé (PDF or Word — max 8MB){role ? " *" : " · optional"}<input name="resume" type="file" required={!!role} accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" className="text-[14px]" /></label>
           <label className={labelCls}>Credentials / portfolio file (optional — PDF or image, max 8MB)<input name="credentials" type="file" accept=".pdf,.doc,.docx,image/*,application/pdf" className="text-[14px]" /></label>
         </div>
       </section>
