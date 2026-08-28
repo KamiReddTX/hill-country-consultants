@@ -90,6 +90,16 @@ export async function sendApplicationAlert(opts: {
   await send(to, `New application${opts.position ? ` · ${opts.position}` : ""} · ${opts.name}`, shell("New employment application", body), opts.email || undefined);
 }
 
+/** Confirmation to the applicant after they submit an application. */
+export async function sendApplicantConfirmation(opts: { to: string; name: string | null; position: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">Thank you${opts.name ? `, ${esc(opts.name)}` : ""} — we&rsquo;ve received your application${opts.position ? ` for the <strong>${esc(opts.position)}</strong> role` : ""}.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Please allow us some time to review it. If we&rsquo;re interested in moving forward, a member of our team will contact you at this email address. Not hearing from us right away doesn&rsquo;t mean no &mdash; we review every application carefully.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Your application will stay on file with us for <strong>six months</strong>, so we can also consider you for future openings.</p>
+    <p style="font-size:14px;line-height:1.6;color:#6b6552">Thank you for your interest in Hill Country Consultants.</p>`;
+  await send(opts.to, "We received your application &mdash; Hill Country Consultants", shell("Thank you for applying", body));
+}
+
 /** Ask a client to pay an additional charge before a task starts. */
 export async function sendTaskPaymentRequest(opts: { to: string; amount: string; payUrl: string; taskTitle: string }) {
   const body = `
@@ -375,11 +385,13 @@ export async function sendShiftAlert(opts: { to: string; name: string; hours: nu
 }
 
 /** Invite an applicant to schedule an interview via the firm's booking link. */
-export async function sendInterviewInvite(opts: { to: string; name: string | null; position?: string | null; link: string }) {
+export async function sendInterviewInvite(opts: { to: string; name: string | null; position?: string | null; link: string; note?: string | null }) {
   const hi = opts.name ? `Hi ${esc(opts.name)},` : "Hello,";
+  const noteHtml = opts.note && opts.note.trim() ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38;white-space:pre-line">${esc(opts.note.trim())}</p>` : "";
   const body = `
     <p style="font-size:16px;line-height:1.6">${hi}</p>
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">Thank you for applying to Hill Country Consultants${opts.position ? ` for the <strong>${esc(opts.position)}</strong> role` : ""}. We&rsquo;d like to invite you to an interview.</p>
+    ${noteHtml}
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">Please pick a time that works for you:</p>
     <p style="margin:22px 0"><a href="${opts.link}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:14px 22px;text-decoration:none;display:inline-block">Schedule your interview</a></p>
     <p style="font-size:13px;color:#6b6552">If the button doesn&rsquo;t work, use this link: <a href="${opts.link}">${esc(opts.link)}</a></p>
@@ -396,4 +408,19 @@ export async function sendApplicationDecline(opts: { to: string; name: string | 
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">We&rsquo;ll keep your résumé on file for six months and will reach out if a role that fits your background opens up. We genuinely appreciate your interest and wish you the very best.</p>
     <p style="font-size:15px;line-height:1.6;color:#3a3f38">Warmly,<br/>The Hill Country Consultants team</p>`;
   await send(opts.to, "Your application to Hill Country Consultants", shell("Thank you for applying", body));
+}
+
+/** Offer / hiring letter to a successful applicant. Optional note carries the
+ *  specific offer details the manager types in. */
+export async function sendHiringLetter(opts: { to: string; name: string | null; position?: string | null; note?: string | null }) {
+  const hi = opts.name ? `Dear ${esc(opts.name)},` : "Hello,";
+  const noteHtml = opts.note && opts.note.trim() ? `<p style="font-size:15px;line-height:1.6;color:#3a3f38;white-space:pre-line">${esc(opts.note.trim())}</p>` : "";
+  const body = `
+    <p style="font-size:16px;line-height:1.6">${hi}</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Congratulations! We&rsquo;re delighted to offer you a position${opts.position ? ` as <strong>${esc(opts.position)}</strong>` : ""} with Hill Country Consultants. Your background stood out, and we believe you&rsquo;ll be a strong addition to our team.</p>
+    ${noteHtml}
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">A member of our team will follow up with your formal offer details, start date, and onboarding steps. If you have any questions in the meantime, simply reply to this email.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38"><strong>Please look out for a separate email</strong> inviting you to set up your access to our team portal — that&rsquo;s where your onboarding, tasks, and schedule will live.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">Welcome aboard,<br/>The Hill Country Consultants team</p>`;
+  await send(opts.to, "Your offer from Hill Country Consultants", shell("Welcome to the team", body));
 }

@@ -1837,12 +1837,13 @@ export async function hireFromApplication(applicationId: string, role: string): 
 }
 
 // ── Careers: interview invite + decline ───────────────────────────────────────
-import { sendInterviewInvite, sendApplicationDecline } from "@/lib/email";
+import { sendInterviewInvite, sendApplicationDecline, sendHiringLetter } from "@/lib/email";
 
 const INTERVIEW_BOOKING_URL = process.env.INTERVIEW_BOOKING_URL || "https://calendar.app.google/A5xRj84DEisW8WcR9";
 
-/** Email the applicant an interview-scheduling link and mark them 'interview'. */
-export async function inviteToInterview(applicationId: string): Promise<ActionResult> {
+/** Email the applicant an interview-scheduling link and mark them 'interview'.
+ *  An optional note lets the manager add a proposed time, format, or instructions. */
+export async function inviteToInterview(applicationId: string, note?: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
   const admin = createServiceClient();
@@ -1851,10 +1852,29 @@ export async function inviteToInterview(applicationId: string): Promise<ActionRe
   const a = app as any;
   if (!a.email) return { error: "Application has no email." };
   try {
-    await sendInterviewInvite({ to: a.email, name: a.name || null, position: a.position || null, link: INTERVIEW_BOOKING_URL });
+    await sendInterviewInvite({ to: a.email, name: a.name || null, position: a.position || null, link: INTERVIEW_BOOKING_URL, note: (note || "").slice(0, 2000) });
   } catch (e: any) { return { error: e?.message || "Could not send the interview email." }; }
   await admin.from("job_applications").update({ status: "interview" }).eq("id", applicationId);
   await logAudit({ actorEmail: me!.email, action: "update", entity: "application", entityId: applicationId, summary: `interview invite sent to ${a.name || a.email}` });
+  revalidatePath("/staff/directory");
+  return { ok: true };
+}
+
+/** Email the applicant a hiring / offer letter and mark them 'offer'. An optional
+ *  note carries the specific offer details (rate, start date, terms). */
+export async function sendHiringLetterToApplicant(applicationId: string, note?: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!isSalesLead(me)) return { error: "Admins, business managers, and sales managers only." };
+  const admin = createServiceClient();
+  const { data: app } = await admin.from("job_applications").select("email, name, position").eq("id", applicationId).maybeSingle();
+  if (!app) return { error: "Application not found." };
+  const a = app as any;
+  if (!a.email) return { error: "Application has no email." };
+  try {
+    await sendHiringLetter({ to: a.email, name: a.name || null, position: a.position || null, note: (note || "").slice(0, 4000) });
+  } catch (e: any) { return { error: e?.message || "Could not send the hiring letter." }; }
+  await admin.from("job_applications").update({ status: "offer" }).eq("id", applicationId);
+  await logAudit({ actorEmail: me!.email, action: "update", entity: "application", entityId: applicationId, summary: `hiring letter sent to ${a.name || a.email}` });
   revalidatePath("/staff/directory");
   return { ok: true };
 }

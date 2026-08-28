@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/database.types";
-import { sendApplicationAlert } from "@/lib/email";
+import { sendApplicationAlert, sendApplicantConfirmation } from "@/lib/email";
 
 export const runtime = "nodejs";
 
@@ -128,6 +128,9 @@ export async function POST(req: Request) {
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
     await sendApplicationAlert({ name, email, phone, position, location, portalUrl: site ? `${site}/staff/directory` : "", hasResume: !!resume_path });
   } catch (e) { console.warn("[apply] alert", e); }
+
+  // Confirmation to the applicant (best-effort; never blocks the saved application).
+  try { await sendApplicantConfirmation({ to: email, name, position }); } catch (e) { console.warn("[apply] confirmation", e); }
 
   return NextResponse.json({ ok: true, persisted: true });
 }
