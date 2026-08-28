@@ -27,35 +27,50 @@ export default async function Dashboard() {
   const priv = isPrivileged(me);
   const canSeeRequests = isSalesOrAdmin(me);
 
-  const [clients, directory] = await Promise.all([getClients(), getDirectory()]);
-  const ownerName = new Map(directory.map((s) => [s.id, s.name || s.email]));
-  const { mine, unassigned } = splitClients(clients, me);
-
-  const leads = canSeeRequests ? await getLeads() : [];
-  const newRequests = leads.filter((l) => (l.stage || "New lead") === "New lead");
-  const stageCounts = STAGES.map((st) => ({ st, n: leads.filter((l) => (l.stage || "New lead") === st).length }));
-
   // A rep earns commission on the clients attributed to their employee code, so
   // anyone in sales (with a code) gets a personal running tally.
   const salesCredit = isSalesOrAdmin(me) && !!me.employee_code;
+  const period = periodOf(0);
 
-  // Manager-only firm-wide queues (bookings are also needed to tally a rep's own).
-  const bookings = priv || salesCredit ? await getBookings() : [];
-  // Revenue collected = one-time booking payments (Stripe at checkout) + every
-  // invoice marked paid in Billing & AR. Both are real money in; summing them
-  // keeps the dashboard in step with the invoicing system.
-  let revenueCents = bookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0);
-  let pendingLog: any[] = [];
-  if (priv) {
-    const db = createClient();
-    const [{ data: pl }, { data: paidInv }] = await Promise.all([
-      db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(50),
-      db.from("invoices").select("amount_cents").eq("status", "paid"),
-    ]);
-    pendingLog = pl ?? [];
-    revenueCents += (paidInv ?? []).reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
-  }
+  const [clients, directory] = await Promise.all([getClients(), getDirectory()]);
+  const ownerName = new Map(directory.map((s) => [s.id, s.name || s.email]));
+  const { mine, unassigned } = splitClients(clients, me);
   const clientName = new Map(clients.map((c) => [c.id, c.business || c.contact || c.email]));
+
+  // Everything below is independent, so fire it all off in one concurrent batch
+  // rather than a chain of sequential round-trips. Each branch resolves to []
+  // or null when the viewer's role doesn't need it.
+  const db = createClient();
+  const [leads, bookings, privBatch, attentionBatch, repInv, punches, open] = await Promise.all([
+    canSeeRequests ? getLeads() : Promise.resolve([] as any[]),
+    priv || salesCredit ? getBookings() : Promise.resolve([] as any[]),
+    priv
+      ? Promise.all([
+          db.from("client_work_log").select("*").eq("approved", false).order("worked_on", { ascending: false }).limit(50),
+          db.from("invoices").select("amount_cents").eq("status", "paid"),
+        ]).then(([pl, paid]) => ({ pendingLog: pl.data ?? [], paidInv: paid.data ?? [] }))
+      : Promise.resolve({ pendingLog: [] as any[], paidInv: [] as any[] }),
+    priv
+      ? (() => { const admin = createServiceClient(); return Promise.all([
+          admin.from("invoices").select("amount_cents,status").in("status", ["sent", "overdue"]),
+          admin.from("time_off_requests").select("id").eq("status", "pending"),
+          admin.from("staff_acknowledgments").select("staff_id").eq("kind", ACK_KIND).eq("version", ACK_VERSION),
+          admin.from("client_feedback").select("client_id,rating,comment,created_at").order("created_at", { ascending: false }).limit(12),
+          admin.from("service_upgrade_requests").select("id,client_id,label,note,created_at").eq("status", "new").order("created_at", { ascending: false }).limit(20),
+        ]).then(([unpaid, pto, acks, fb, upg]) => ({ unpaid: unpaid.data ?? [], pto: pto.data ?? [], acks: acks.data ?? [], fb: fb.data ?? [], upg: upg.data ?? [] })); })()
+      : Promise.resolve(null as null | { unpaid: any[]; pto: any[]; acks: any[]; fb: any[]; upg: any[] }),
+    salesCredit ? createServiceClient().from("invoices").select("client_id, kind, status, amount_cents, period_month").then((r) => r.data ?? []) : Promise.resolve([] as any[]),
+    me.hourly ? getMyPunches(me, period.startISO, period.endISO) : Promise.resolve([] as any[]),
+    me.hourly ? getOpenPunch(me) : Promise.resolve(null),
+  ]);
+
+  const newRequests = leads.filter((l) => (l.stage || "New lead") === "New lead");
+  const stageCounts = STAGES.map((st) => ({ st, n: leads.filter((l) => (l.stage || "New lead") === st).length }));
+  // Revenue collected = one-time booking payments (Stripe at checkout) + every
+  // invoice marked paid in Billing & AR — real money in, kept in step with billing.
+  const pendingLog: any[] = privBatch.pendingLog;
+  let revenueCents = bookings.reduce((s, b) => s + Number(b.paid_cents || 0), 0)
+    + privBatch.paidInv.reduce((s: number, r: any) => s + Number(r.amount_cents || 0), 0);
 
   // Kickoff calls a client scheduled that still need staff added to the invite.
   // Shown to the account owner and to managers.
@@ -72,23 +87,15 @@ export default async function Dashboard() {
   const attention = { renewalsSoon: 0, unpaidCount: 0, unpaidCents: 0, ptoPending: 0, missingAck: 0, lowRatings: 0 };
   let recentFeedback: any[] = [];
   let upgradeReqs: any[] = [];
-  if (priv) {
-    const admin = createServiceClient();
-    const [{ data: unpaid }, { data: pto }, { data: acks }, { data: fb }, { data: upg }] = await Promise.all([
-      admin.from("invoices").select("amount_cents,status").in("status", ["sent", "overdue"]),
-      admin.from("time_off_requests").select("id").eq("status", "pending"),
-      admin.from("staff_acknowledgments").select("staff_id").eq("kind", ACK_KIND).eq("version", ACK_VERSION),
-      admin.from("client_feedback").select("client_id,rating,comment,created_at").order("created_at", { ascending: false }).limit(12),
-      admin.from("service_upgrade_requests").select("id,client_id,label,note,created_at").eq("status", "new").order("created_at", { ascending: false }).limit(20),
-    ]);
-    recentFeedback = fb ?? [];
-    upgradeReqs = upg ?? [];
+  if (priv && attentionBatch) {
+    recentFeedback = attentionBatch.fb;
+    upgradeReqs = attentionBatch.upg;
     const cutoff30 = Date.now() - 30 * 86400000;
     attention.lowRatings = recentFeedback.filter((f: any) => f.rating <= 2 && new Date(f.created_at).getTime() >= cutoff30).length;
-    attention.unpaidCount = (unpaid ?? []).length;
-    attention.unpaidCents = (unpaid ?? []).reduce((s: number, i: any) => s + Number(i.amount_cents || 0), 0);
-    attention.ptoPending = (pto ?? []).length;
-    const acked = new Set((acks ?? []).map((a: any) => a.staff_id));
+    attention.unpaidCount = attentionBatch.unpaid.length;
+    attention.unpaidCents = attentionBatch.unpaid.reduce((s: number, i: any) => s + Number(i.amount_cents || 0), 0);
+    attention.ptoPending = attentionBatch.pto.length;
+    const acked = new Set(attentionBatch.acks.map((a: any) => a.staff_id));
     attention.missingAck = directory.filter((s) => s.active !== false && !acked.has(s.id)).length;
     attention.renewalsSoon = clients.filter((c) => {
       const d = daysUntil(renewalDate((c as any).retained_since, (c as any).renewal_date));
@@ -110,15 +117,10 @@ export default async function Dashboard() {
   // rep's aggregated totals — never raw rows.
   let repEarnings: ReturnType<typeof computeRepEarnings> | null = null;
   if (salesCredit) {
-    const { data: inv } = await createServiceClient()
-      .from("invoices").select("client_id, kind, status, amount_cents, period_month");
-    repEarnings = computeRepEarnings({ employeeCode: me.employee_code, clients, bookings, invoices: (inv ?? []) as any });
+    repEarnings = computeRepEarnings({ employeeCode: me.employee_code, clients, bookings, invoices: (repInv ?? []) as any });
   }
 
-  const period = periodOf(0);
-  const punches = me.hourly ? await getMyPunches(me, period.startISO, period.endISO) : [];
-  const open = me.hourly ? await getOpenPunch(me) : null;
-  const hours = punches.reduce((s, p) => s + Number(p.hours || 0), 0);
+  const hours = punches.reduce((s: number, p: any) => s + Number(p.hours || 0), 0);
 
   const stat = (label: string, value: React.ReactNode) => (
     <div><p className="kicker">{label}</p><p className="font-fraunces text-[28px] text-charcoal tabular-nums">{value}</p></div>

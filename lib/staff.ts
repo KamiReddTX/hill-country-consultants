@@ -136,24 +136,15 @@ export type MessageUnreads = {
  *  employee's last_read marker (or all, if they've never opened it). Safe to call
  *  on every staff page — a couple of cheap counts scoped by RLS. */
 export async function getMessageUnreads(meId: string): Promise<MessageUnreads> {
+  // One database round-trip (a SQL function) instead of 3 + one-per-channel
+  // count queries. This runs on every staff page, so collapsing it is the
+  // single biggest reduction in per-page database load.
   const db = createClient();
-  const [{ data: dms }, { data: reads }, { data: chans }] = await Promise.all([
-    db.from("direct_messages").select("sender_id").eq("recipient_id", meId).is("read_at", null),
-    db.from("channel_reads").select("channel_id,last_read_at").eq("staff_id", meId),
-    db.from("channels").select("id").eq("archived", false),
-  ]);
-  const byMate = new Map<string, number>();
-  (dms ?? []).forEach((d: any) => byMate.set(d.sender_id, (byMate.get(d.sender_id) || 0) + 1));
-  const readMap = new Map<string, string>((reads ?? []).map((r: any) => [r.channel_id, r.last_read_at]));
-  const byChannel = new Map<string, number>();
-  await Promise.all((chans ?? []).map(async (c: any) => {
-    let q = db.from("channel_messages").select("id", { count: "exact", head: true }).eq("channel_id", c.id).neq("author_id", meId);
-    const last = readMap.get(c.id);
-    if (last) q = q.gt("created_at", last);
-    const { count } = await q;
-    if (count) byChannel.set(c.id, count);
-  }));
-  const dmTotal = (dms ?? []).length;
+  const { data } = await db.rpc("staff_unread", { me: meId });
+  const j: any = data || {};
+  const byMate = new Map<string, number>(Object.entries(j.by_mate || {}).map(([k, v]) => [k, Number(v)]));
+  const byChannel = new Map<string, number>(Object.entries(j.by_channel || {}).map(([k, v]) => [k, Number(v)]));
+  const dmTotal = Number(j.dm_total || 0);
   const chanTotal = [...byChannel.values()].reduce((a, b) => a + b, 0);
   return { dmTotal, chanTotal, total: dmTotal + chanTotal, byMate, byChannel };
 }
