@@ -13,41 +13,85 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   const priv = isPrivileged(me), admin = isAdmin(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
   const unread = await getMessageUnreads(me.id).catch(() => ({ total: 0 } as any));
-  // Dashboard first for every employee (content differs by role — a manager sees
-  // a firm-wide roll-up, an individual sees their own clients and hours).
-  const tabs: { href: string; label: string; badge?: number }[] = [{ href: "/staff", label: "Dashboard" }];
-  // Manager overview + tools (the Admin tab is retired — its queues now live on
-  // the Dashboard, and per-client work lives on the Clients tab).
-  if (salesLead) tabs.push({ href: "/staff/directory", label: "Directory" });
-  if (admin) tabs.push({ href: "/staff/payroll", label: "Payroll" });
-  if (salesLead) tabs.push({ href: "/staff/sales", label: "Sales" });
-  // Everyday work tabs — every employee's job surface (scoped to their clients)
-  tabs.push(
-    { href: "/staff/onboarding", label: "Onboarding" },
-    { href: "/staff/calendar", label: "Calendar" },
+
+  // Grouped, role-aware navigation. Home and Messages are one-click; the rest live
+  // in short, labelled menus so nobody faces a 30-tab wall. A regular employee sees
+  // ~4 menus; a manager/admin sees the additional groups their role unlocks.
+  const groups: NavGroup[] = [{ label: "Home", href: "/staff" }];
+
+  // My work — the daily job surface, for every employee.
+  const myWork: NavItem[] = [
     { href: "/staff/tasks", label: "Task board" },
+    { href: "/staff/calendar", label: "Calendar" },
+    { href: "/staff/onboarding", label: "Onboarding" },
     { href: "/staff/checklists", label: "Checklists" },
     { href: "/staff/work-log", label: "Work log" },
-    { href: "/staff/vault", label: "Vault" },
-    { href: "/staff/files", label: "Files" },
     { href: "/staff/weekly", label: "Weekly report" },
+    { href: "/staff/files", label: "Files" },
+    { href: "/staff/vault", label: "Vault" },
+  ];
+  if (hourly) myWork.push({ href: "/staff/clock", label: "Timesheet" });
+  groups.push({ label: "My work", items: myWork });
+
+  // Clients — delivery + client-facing work, for anyone who carries accounts.
+  if (priv || sales) groups.push({ label: "Clients", items: [
+    { href: "/staff/clients", label: "Clients" },
+    { href: "/staff/daily", label: "Daily tasks" },
+    { href: "/staff/delivery", label: "Delivery" },
+    { href: "/staff/reports", label: "Reports" },
+  ]});
+
+  // Sales — pipeline and revenue tools.
+  if (sales) {
+    const salesItems: NavItem[] = [];
+    if (salesLead) salesItems.push({ href: "/staff/sales", label: "Sales overview" });
+    salesItems.push(
+      { href: "/staff/pipeline", label: "Pipeline" },
+      { href: "/staff/intake", label: "Intake" },
+      { href: "/staff/follow-ups", label: "Follow-ups" },
+      { href: "/staff/accounts", label: "Accounts" },
+      { href: "/staff/prospecting", label: "Prospecting" },
+      { href: "/staff/commissions", label: "Commissions" },
+      { href: "/staff/playbook", label: "Playbook" },
+    );
+    groups.push({ label: "Sales", items: salesItems });
+  }
+
+  // Team — hiring + people, for managers/admins.
+  if (salesLead || admin) {
+    const team: NavItem[] = [];
+    if (salesLead) team.push({ href: "/staff/directory", label: "Directory & hiring" });
+    if (admin) team.push({ href: "/staff/payroll", label: "Payroll" });
+    if (team.length) groups.push({ label: "Team", items: team });
+  }
+
+  // Finance — money operations, for managers/admins.
+  if (priv) {
+    const finance: NavItem[] = [
+      { href: "/staff/billing", label: "Billing & AR" },
+      { href: "/staff/renewals", label: "Renewals" },
+      { href: "/staff/contracts", label: "Contracts" },
+      { href: "/staff/capacity", label: "Capacity" },
+    ];
+    if (admin) finance.push({ href: "/staff/finance", label: "Finance" });
+    groups.push({ label: "Finance", items: finance });
+  }
+
+  // Admin — firm settings, admins only.
+  if (admin) groups.push({ label: "Admin", items: [
+    { href: "/staff/site-content", label: "Edit website" },
+    { href: "/staff/vendors", label: "Vendors" },
+    { href: "/staff/audit", label: "Audit log" },
+  ]});
+
+  // Resources — reference material for everyone.
+  groups.push({ label: "Resources", items: [
     { href: "/staff/kb", label: "Knowledge base" },
     { href: "/staff/partners", label: "Preferred vendors" },
-    { href: "/staff/messages", label: "Messages", badge: unread.total || undefined },
-  );
-  if (hourly) tabs.push({ href: "/staff/clock", label: "Timesheet" });
-  // Sales tabs
-  if (sales) tabs.push(
-    { href: "/staff/intake", label: "Intake" }, { href: "/staff/pipeline", label: "Pipeline" },
-    { href: "/staff/prospecting", label: "Prospecting" },
-    { href: "/staff/accounts", label: "Accounts" }, { href: "/staff/commissions", label: "Commissions" },
-    { href: "/staff/playbook", label: "Playbook" }, { href: "/staff/follow-ups", label: "Follow-ups" });
-  // Manager operations
-  if (priv || sales) tabs.push({ href: "/staff/daily", label: "Daily tasks" }, { href: "/staff/delivery", label: "Delivery" }, { href: "/staff/clients", label: "Clients" }, { href: "/staff/reports", label: "Reports" });
-  if (priv) tabs.push({ href: "/staff/billing", label: "Billing & AR" }, { href: "/staff/renewals", label: "Renewals" }, { href: "/staff/contracts", label: "Contracts" }, { href: "/staff/capacity", label: "Capacity" });
-  if (admin) tabs.push({ href: "/staff/finance", label: "Finance" }, { href: "/staff/vendors", label: "Vendors" }, { href: "/staff/site-content", label: "Edit website" }, { href: "/staff/audit", label: "Audit log" });
-  // My profile is always last.
-  tabs.push({ href: "/staff/profile", label: "My profile" });
+  ]});
+
+  // Messages — one click, with the unread badge.
+  groups.push({ label: "Messages", href: "/staff/messages", badge: unread.total || undefined });
 
   return (
     <div className="min-h-screen bg-cream">
@@ -58,9 +102,12 @@ export default async function StaffLayout({ children }: { children: ReactNode })
             <p className="font-fraunces text-[20px] text-forest">{me.name || me.email}</p>
             <p className="text-[12px] prose-muted">{me.role}{me.employee_code ? ` · ${me.employee_code}` : ""}{me.hourly ? " · hourly" : ""}</p>
           </div>
-          <StaffSignOut />
+          <div className="flex items-center gap-3">
+            <a href="/staff/profile" className="text-[13px] font-medium text-forest hover:underline">My profile</a>
+            <StaffSignOut />
+          </div>
         </div>
-        <div className="shell"><StaffNav tabs={tabs} /></div>
+        <div className="shell"><StaffNav groups={groups} /></div>
       </header>
       <main className="shell py-10">{children}</main>
     </div>
