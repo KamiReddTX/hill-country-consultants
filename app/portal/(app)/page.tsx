@@ -3,6 +3,7 @@ import { getPortalClient, getPortalData, deriveOnboarding, money } from "@/lib/p
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { SITE } from "@/content/site";
 import { KickoffStep } from "@/components/portal/kickoff-step";
+import { OnboardingRecording } from "@/components/portal/onboarding-recording";
 import { PhotoShootButton } from "@/components/portal/photo-shoot-button";
 import { FeedbackCard, ReferralCard } from "@/components/portal/client-extras";
 import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
@@ -71,12 +72,21 @@ export default async function OnboardingPage() {
                 <p className="text-[16px] font-medium text-charcoal">{s.t} <span className="ml-2 text-[12px] font-normal text-ink-faint">{s.when}</span></p>
                 <p className="text-[15px] prose-soft">{s.d}</p>
                 <p className={`text-[12px] font-semibold ${s.done ? "text-forest" : "text-ink-faint"}`}>{s.done ? "Done" : "Pending"}</p>
-                {s.key === "kickoff" && <KickoffStep url={SITE.kickoffUrl} done={s.done} />}
+                {s.key === "kickoff" && <KickoffStep url={SITE.kickoffUrl} done={s.done} completed={!!(client as any).kickoff_completed_at} kickoffAt={(client as any).kickoff_at || null} />}
               </div>
             </li>
           ))}
         </ul>
       </section>
+
+      {((client as any).onboarding_video_url || (client as any).onboarding_transcript_path) && (
+        <OnboardingRecording
+          videoUrl={(client as any).onboarding_video_url || null}
+          hasTranscript={!!(client as any).onboarding_transcript_path}
+          clientId={client.id}
+          recordedAt={(client as any).onboarding_recorded_at || null}
+        />
+      )}
 
       {activity.length > 0 && (
         <section>

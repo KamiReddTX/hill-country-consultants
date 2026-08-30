@@ -4,6 +4,8 @@ import { getStaffMember, getClients } from "@/lib/staff";
 import { createClient } from "@/lib/supabase/server";
 import { RoadmapCheck } from "@/components/staff/roadmap-check";
 import { ClientRoadmapEditor } from "@/components/staff/client-roadmap-editor";
+import { StaffKickoffControls } from "@/components/staff/kickoff-controls";
+import { OnboardingMediaForm } from "@/components/staff/onboarding-media-form";
 import { SITE } from "@/content/site";
 
 export default async function StaffOnboardingPage() {
@@ -44,7 +46,7 @@ export default async function StaffOnboardingPage() {
                 <summary className="min-h-touch cursor-pointer px-4 py-3 text-[15px] font-medium text-charcoal">{c.business || c.contact || c.email}</summary>
                 <div className="flex flex-col gap-4 border-t border-line-soft p-4">
                   <ul className="flex flex-col gap-2 text-[14px]">
-                    <li className="flex items-center gap-2">{dot(kickoff)} Kickoff call {kickoff ? <span className="text-[12px] text-forest">· booked</span> : <a href={SITE.kickoffUrl} target="_blank" rel="noreferrer" className="link-underline text-[12px]">· booking link</a>}</li>
+                    <li className="flex flex-wrap items-center gap-2">{dot(kickoff)} Kickoff call {(c as any).kickoff_completed_at ? <span className="text-[12px] font-semibold text-forest">· completed</span> : kickoff ? <span className="text-[12px] text-forest">· booked{(c as any).kickoff_at ? ` ${new Date((c as any).kickoff_at).toLocaleDateString()}` : ""}</span> : <a href={SITE.kickoffUrl} target="_blank" rel="noreferrer" className="link-underline text-[12px]">· booking link</a>}{kickoff && !(c as any).kickoff_completed_at && <StaffKickoffControls clientId={c.id} />}</li>
                     <li className="flex flex-wrap items-center gap-2">{dot(roadmapSet)} 30-day roadmap set <RoadmapCheck clientId={c.id} done={roadmapSet} /></li>
                     <li className="flex items-center gap-2">{dot(hasVault)} Credentials in the shared vault {hasVault ? <span className="text-[12px] text-forest">· {vaultCount.get(c.id)} on file</span> : <Link href="/staff/vault" className="link-underline text-[12px]">· add in Vault</Link>}</li>
                     <li className="flex items-center gap-2">{dot(hasTasks)} First tasks on the board {hasTasks ? <span className="text-[12px] text-forest">· {taskCount.get(c.id)}</span> : <Link href="/staff/tasks" className="link-underline text-[12px]">· open Task board</Link>}</li>
@@ -52,6 +54,11 @@ export default async function StaffOnboardingPage() {
                   <div>
                     <p className="mb-2 text-[13px] font-semibold text-forest">30-day roadmap phases</p>
                     <ClientRoadmapEditor clientId={c.id} rows={roadmapByClient.get(c.id) || []} />
+                  </div>
+                  <div>
+                    <p className="mb-1 text-[13px] font-semibold text-forest">Onboarding call recording</p>
+                    <p className="text-[12px] prose-muted">Paste the recording link and upload the transcript PDF — the client watches and reads it from their dashboard.</p>
+                    <OnboardingMediaForm clientId={c.id} videoUrl={(c as any).onboarding_video_url} hasTranscript={!!(c as any).onboarding_transcript_path} />
                   </div>
                 </div>
               </details>

@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
-import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady, sendVendorAssignment, sendVendorReferralAlert } from "@/lib/email";
+import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady, sendVendorAssignment, sendVendorReferralAlert, sendKickoffRescheduled } from "@/lib/email";
 import { buildWeeklyReportPdf } from "@/lib/reports";
 import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
@@ -2031,6 +2031,78 @@ export async function confirmKickoff(clientId: string): Promise<ActionResult> {
   if (error) return { error: error.message };
   await logAudit({ actorEmail: me.email, action: "update", entity: "client", entityId: clientId, summary: "kickoff handled (staff added to invite)" });
   revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Staff reschedule a client's kickoff to a new date/time. Updates the shared
+ *  in-app calendar and emails the client + admin + assigned team. */
+export async function staffRescheduleKickoff(clientId: string, dateISO: string, time: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
+  if (!dateISO) return { error: "Pick a date." };
+  const atISO = new Date(`${dateISO}T${(time || "09:00")}:00`).toISOString();
+  const admin = createServiceClient();
+  const { data: client } = await admin.from("clients").select("*").eq("id", clientId).maybeSingle();
+  if (!client) return { error: "Client not found." };
+  const { error } = await admin.from("clients").update({ kickoff_at: atISO, kickoff_completed_at: null, kickoff_confirmed_at: null }).eq("id", clientId);
+  if (error) return { error: error.message };
+  const whenText = `${dateISO}${time ? ` at ${time}` : ""}`;
+  await admin.from("client_events").delete().eq("client_id", clientId).eq("title", "Kickoff call");
+  await admin.from("client_events").insert({ client_id: clientId, title: "Kickoff call", event_date: dateISO, event_time: time || null, note: "Rescheduled", created_by_role: me.role, created_by_name: me.name || me.email } as any);
+  const recipients = new Set<string>();
+  if ((client as any).email) recipients.add((client as any).email);
+  const notify = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  if (notify) recipients.add(notify);
+  const aid = (client as any).assigned_to as string | null;
+  if (aid && /^[0-9a-f-]{36}$/i.test(aid) && aid !== me.id) {
+    const { data: s } = await admin.from("staff").select("email").eq("id", aid).maybeSingle();
+    if ((s as any)?.email) recipients.add((s as any).email);
+  }
+  const cname = (client as any).business || (client as any).contact || (client as any).email;
+  if (recipients.size) await sendKickoffRescheduled({ to: [...recipients], clientName: cname, whenText, byName: me.name || me.role, portalUrl: process.env.NEXT_PUBLIC_SITE_URL ? `${process.env.NEXT_PUBLIC_SITE_URL}/staff` : "" }).catch((e) => console.warn("[staffRescheduleKickoff email]", e));
+  await logAudit({ actorEmail: me.email, action: "update", entity: "client", entityId: clientId, summary: `kickoff rescheduled → ${whenText}` });
+  revalidatePath("/staff"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff mark a client's kickoff call completed. */
+export async function staffCompleteKickoff(clientId: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
+  const { error } = await createServiceClient().from("clients").update({ kickoff_completed_at: new Date().toISOString() }).eq("id", clientId);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me.email, action: "update", entity: "client", entityId: clientId, summary: "kickoff call completed" });
+  revalidatePath("/staff"); revalidatePath("/portal");
+  return { ok: true };
+}
+
+/** Staff set the onboarding-call recording link and/or upload a transcript PDF.
+ *  Shows on the client's dashboard: watch the video + open the transcript. */
+export async function setOnboardingMedia(formData: FormData): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const clientId = String(formData.get("client_id") || "");
+  if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
+  const videoUrl = String(formData.get("video_url") || "").trim();
+  if (videoUrl && !/^https?:\/\//i.test(videoUrl)) return { error: "Enter a full https:// recording link." };
+  const admin = createServiceClient();
+  const patch: any = { onboarding_video_url: videoUrl || null, onboarding_recorded_at: new Date().toISOString() };
+  const file = formData.get("transcript") as File | null;
+  if (file && typeof file === "object" && file.size > 0) {
+    if (file.type && file.type !== "application/pdf") return { error: "Transcript must be a PDF." };
+    if (file.size > 4 * 1024 * 1024) return { error: "Transcript PDF must be under 4 MB." };
+    const buf = Buffer.from(await file.arrayBuffer());
+    const path = `${clientId}/onboarding-transcript-${Date.now()}.pdf`;
+    const up = await admin.storage.from("client-files").upload(path, buf, { contentType: "application/pdf" });
+    if (up.error) return { error: up.error.message };
+    patch.onboarding_transcript_path = path;
+  }
+  const { error } = await admin.from("clients").update(patch).eq("id", clientId);
+  if (error) return { error: error.message };
+  await logAudit({ actorEmail: me.email, action: "update", entity: "client", entityId: clientId, summary: "onboarding recording set" });
+  revalidatePath("/portal"); revalidatePath("/staff/onboarding");
   return { ok: true };
 }
 

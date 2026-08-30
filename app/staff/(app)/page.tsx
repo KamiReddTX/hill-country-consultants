@@ -14,6 +14,7 @@ import { COMMISSION } from "@/content/commission";
 import { renewalDate, daysUntil } from "@/lib/health";
 import { ACK_KIND, ACK_VERSION } from "@/content/acknowledgments";
 import { KickoffHandledButton } from "@/components/staff/kickoff-handled-button";
+import { StaffKickoffControls } from "@/components/staff/kickoff-controls";
 import { SyncCalendarButton } from "@/components/staff/sync-calendar-button";
 import { UpgradeRequestActions } from "@/components/staff/upgrade-request-actions";
 import { gcalConfigured } from "@/lib/google-calendar";
@@ -184,7 +185,10 @@ export default async function Dashboard() {
                   {(c as any).kickoff_at && <span className="prose-muted"> · marked scheduled {new Date((c as any).kickoff_at).toLocaleDateString()}</span>}
                   <span className="prose-muted"> · owner {ownerName.get(c.assigned_to) || "unassigned"}</span>
                 </span>
-                <KickoffHandledButton clientId={c.id} />
+                <span className="flex flex-col items-end gap-2">
+                  <KickoffHandledButton clientId={c.id} />
+                  <StaffKickoffControls clientId={c.id} />
+                </span>
               </li>
             ))}
           </ul>

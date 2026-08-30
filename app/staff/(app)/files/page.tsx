@@ -51,7 +51,8 @@ export default async function StaffFilesPage() {
                         <div><p className="text-[15px] text-charcoal">{f.name}{f.doc_url ? " · Google Doc" : ""}</p>
                           <p className="text-[12px] prose-muted">{f.doc_url ? "editable link" : kb(f.size)}{f.uploaded_by ? ` · ${f.uploaded_by}` : ""} · {new Date(f.created_at).toLocaleDateString()}</p></div>
                         <span className="flex items-center gap-3">
-                          <a href={f.doc_url || `/api/client-file/${f.id}`} target="_blank" rel="noreferrer" className="link-underline text-[13px]">Open</a>
+                          <a href={f.doc_url || `/api/client-file/${f.id}?preview=1`} target="_blank" rel="noreferrer" className="link-underline text-[13px]">Open</a>
+                          {!f.doc_url && <a href={`/api/client-file/${f.id}`} className="text-[13px] text-ink-muted hover:text-forest">Download</a>}
                           <DeleteFileButton fileId={f.id} />
                         </span>
                       </li>

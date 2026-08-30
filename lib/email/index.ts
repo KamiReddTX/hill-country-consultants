@@ -332,6 +332,15 @@ export async function sendAppointmentAlert(opts: { to: string | string[]; client
   await send(opts.to, `Appointment booked · ${opts.clientName}`, shell("Appointment booked", body));
 }
 
+/** The kickoff call was rescheduled — notify the client, admin, and assigned team. */
+export async function sendKickoffRescheduled(opts: { to: string | string[]; clientName: string; whenText: string; byName?: string | null; portalUrl: string }) {
+  const body = `
+    <p style="font-size:16px;line-height:1.6">The <strong>kickoff call</strong> for <strong>${esc(opts.clientName)}</strong> has been rescheduled${opts.byName ? ` by ${esc(opts.byName)}` : ""}.</p>
+    <p style="font-size:15px;line-height:1.6;color:#3a3f38">New time: <strong>${esc(opts.whenText)}</strong>. It has been updated on the shared calendar in the portal.</p>
+    ${opts.portalUrl ? `<p style="margin:20px 0"><a href="${opts.portalUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Open the portal</a></p>` : ""}`;
+  await send(opts.to, `Kickoff call rescheduled · ${opts.clientName}`, shell("Kickoff call rescheduled", body));
+}
+
 /** To a prospect who chose a plan: send the free 30-min strategy-session booking link. */
 export async function sendPlanInterestBooking(opts: { to: string; plan: string; bookingUrl: string }) {
   const body = `

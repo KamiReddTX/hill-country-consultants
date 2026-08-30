@@ -4,7 +4,7 @@ export type ActionResult = { error?: string; ok?: boolean };
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getPortalClient } from "@/lib/portal";
-import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert, sendServiceUpgradeRequest } from "@/lib/email";
+import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert, sendServiceUpgradeRequest, sendKickoffRescheduled } from "@/lib/email";
 import { uploadNoteFiles } from "@/lib/message-files";
 import type { ClientRow } from "@/lib/database.types";
 
@@ -231,6 +231,53 @@ export async function markKickoffScheduled(): Promise<{ ok?: boolean; error?: st
 
   revalidatePath("/portal");
   revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Shared: put/refresh the kickoff on the in-app shared calendar (client_events)
+ *  and email the client + admin + assigned ES/CS that it moved. */
+async function syncKickoffMove(client: ClientRow, dateISO: string, time: string, byRole: string, byName: string) {
+  const admin = createServiceClient();
+  const whenText = `${dateISO}${time ? ` at ${time}` : ""}`;
+  // Replace any existing kickoff event so the shared calendar shows one entry.
+  await admin.from("client_events").delete().eq("client_id", client.id).eq("title", "Kickoff call");
+  await admin.from("client_events").insert({
+    client_id: client.id, title: "Kickoff call", event_date: dateISO, event_time: time || null,
+    note: "Rescheduled", created_by_role: byRole, created_by_name: byName,
+  } as any);
+  // Notify client + admin + assigned staff.
+  const recipients = new Set<string>();
+  if (client.email) recipients.add(client.email);
+  const notify = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+  if (notify) recipients.add(notify);
+  const aid = (client as any).assigned_to as string | null;
+  if (aid && /^[0-9a-f-]{36}$/i.test(aid)) {
+    const { data: s } = await admin.from("staff").select("email").eq("id", aid).maybeSingle();
+    if ((s as any)?.email) recipients.add((s as any).email);
+  }
+  if (recipients.size) {
+    await sendKickoffRescheduled({ to: [...recipients], clientName: clientLabel(client), whenText, byName, portalUrl: siteUrl() ? `${siteUrl()}/portal` : "" }).catch((e) => console.warn("[kickoff reschedule email]", e));
+  }
+}
+
+/** Client reschedules their own kickoff to a new date/time (in-app picker). */
+export async function rescheduleKickoff(dateISO: string, time: string): Promise<ActionResult> {
+  const client = await getPortalClient();
+  if (!client) return { error: "Not signed in." };
+  if (!dateISO) return { error: "Pick a date." };
+  const atISO = new Date(`${dateISO}T${(time || "09:00")}:00`).toISOString();
+  const { error } = await createClient().rpc("client_reschedule_kickoff", { p_at: atISO });
+  if (error) return { error: error.message };
+  try { await syncKickoffMove(client, dateISO, time, "client", clientLabel(client)); } catch (e) { console.warn("[rescheduleKickoff]", e); }
+  revalidatePath("/portal"); revalidatePath("/staff");
+  return { ok: true };
+}
+
+/** Client marks their kickoff call as completed. */
+export async function completeKickoff(): Promise<ActionResult> {
+  const { error } = await createClient().rpc("client_complete_kickoff");
+  if (error) return { error: error.message };
+  revalidatePath("/portal"); revalidatePath("/staff");
   return { ok: true };
 }
 
