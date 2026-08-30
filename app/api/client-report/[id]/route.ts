@@ -11,9 +11,12 @@ export async function GET(_req: NextRequest, { params }: { params: { id: string 
   if (!report) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const admin = createServiceClient();
+  const path = (report as any).path as string;
+  const ext = path.toLowerCase().endsWith(".xlsx") ? "xlsx" : "pdf";
+  const download = `${(report as any).name}.${ext}`.replace(/[^\w.\- ]+/g, "_");
   const { data, error } = await admin.storage
     .from("client-reports")
-    .createSignedUrl((report as any).path, 60, { download: `${(report as any).name}.pdf`.replace(/[^\w.\- ]+/g, "_") });
+    .createSignedUrl(path, 60, { download });
   if (error || !data?.signedUrl) return NextResponse.json({ error: "Unavailable" }, { status: 500 });
   return NextResponse.redirect(data.signedUrl);
 }

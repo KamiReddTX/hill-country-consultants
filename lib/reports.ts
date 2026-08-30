@@ -10,6 +10,65 @@ export interface ReportInput {
   deliverables: { name: string; status: string | null; delivered_on: string | null }[];
 }
 
+/** Build the weekly report as a branded, non-editable .xlsx workbook. */
+export async function buildWeeklyReportXlsx(input: ReportInput & { summary?: string | null }): Promise<Buffer> {
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  wb.creator = "Hill Country Consultants";
+  const ws = wb.addWorksheet("Weekly Report", { views: [{ showGridLines: false }] });
+  ws.columns = [{ width: 16 }, { width: 26 }, { width: 44 }, { width: 22 }, { width: 12 }];
+  const FOREST = "FF234B34", GOLD = "FFC2A24A", CREAM = "FFF6F1E6";
+
+  const titleRow = ws.addRow(["HILL COUNTRY CONSULTANTS"]);
+  titleRow.font = { bold: true, size: 11, color: { argb: FOREST } };
+  const h = ws.addRow(["Weekly Report"]);
+  h.font = { bold: true, size: 18, color: { argb: FOREST } };
+  ws.addRow([String(input.business || input.clientName)]).font = { bold: true, size: 12 };
+  ws.addRow([`Period: ${input.periodStart} to ${input.periodEnd}`]).font = { color: { argb: "FF6B6552" } };
+  ws.addRow([]);
+
+  const total = input.workLog.reduce((s, w) => s + Number(w.hours || 0), 0);
+  const tr = ws.addRow([`Total hours this period:`, Number(total.toFixed(1))]);
+  tr.font = { bold: true, color: { argb: FOREST } };
+  if (input.summary) { ws.addRow([]); const s = ws.addRow(["Summary", input.summary]); s.getCell(1).font = { bold: true }; s.getCell(2).alignment = { wrapText: true }; ws.mergeCells(s.number, 2, s.number, 5); }
+  ws.addRow([]);
+
+  // Hours by service
+  const byService: Record<string, number> = {};
+  input.workLog.forEach((w) => { const k = w.service || "General"; byService[k] = (byService[k] || 0) + Number(w.hours || 0); });
+  const svc = Object.entries(byService).sort((a, b) => b[1] - a[1]);
+  if (svc.length) {
+    ws.addRow(["Hours by service"]).font = { bold: true, size: 12 };
+    const head = ws.addRow(["Service", "Hours"]); head.eachCell((c) => { c.font = { bold: true, color: { argb: FOREST } }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CREAM } }; });
+    svc.forEach(([s, hrs]) => ws.addRow([s, Number(hrs.toFixed(1))]));
+    ws.addRow([]);
+  }
+
+  // Work performed
+  ws.addRow(["Work performed"]).font = { bold: true, size: 12 };
+  const wh = ws.addRow(["Date", "Service", "Task", "Performed by", "Hours"]);
+  wh.eachCell((c) => { c.font = { bold: true, color: { argb: FOREST } }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CREAM } }; });
+  if (input.workLog.length === 0) ws.addRow(["No approved hours logged in this period."]);
+  input.workLog.forEach((w) => ws.addRow([w.worked_on, w.service || "General", w.task || "—", w.performed_by || "—", Number(Number(w.hours).toFixed(1))]));
+  ws.addRow([]);
+
+  // Deliverables
+  if (input.deliverables.length) {
+    ws.addRow(["Deliverables"]).font = { bold: true, size: 12 };
+    const dh = ws.addRow(["Name", "Status", "Delivered"]);
+    dh.eachCell((c) => { c.font = { bold: true, color: { argb: FOREST } }; c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CREAM } }; });
+    input.deliverables.forEach((d) => ws.addRow([d.name, d.status || "—", d.delivered_on || "—"]));
+    ws.addRow([]);
+  }
+
+  ws.addRow(["Hill Country Consultants · info@hillcountryconsultants.com · 470-478-1590"]).font = { size: 9, color: { argb: "FF6B6552" } };
+
+  // Lock the sheet so the delivered file is non-editable (view/print only).
+  await ws.protect("", { selectLockedCells: true, selectUnlockedCells: true, formatCells: false, insertRows: false, deleteRows: false, sort: false });
+  const buf = await wb.xlsx.writeBuffer();
+  return Buffer.from(buf as ArrayBuffer);
+}
+
 /** Build a one- (or few-) page branded weekly report PDF with pdf-lib. */
 export async function buildWeeklyReportPdf(input: ReportInput): Promise<Uint8Array> {
   const doc = await PDFDocument.create();

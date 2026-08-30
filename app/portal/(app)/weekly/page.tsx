@@ -23,8 +23,8 @@ export default async function WeeklyPage() {
         <h1 className="font-fraunces text-[32px] font-normal text-forest">Weekly report</h1>
         <span className="rule-gold mb-4 mt-2" />
         <p className="max-w-[48em] prose-soft">
-          Each week we publish a report of the hours and work delivered on your account. Reports stay here for 30 days —
-          open or download any of them for your files.
+          Each week we publish an Excel report of the hours and work delivered on your account. Reports stay here for 30 days —
+          download any of them for your files.
         </p>
       </div>
 
@@ -40,7 +40,7 @@ export default async function WeeklyPage() {
                 <p className="font-medium text-charcoal">{r.name}</p>
                 <p className="text-[12px] prose-muted">Published <LocalTime iso={r.created_at} mode="date" /></p>
               </div>
-              <a href={`/api/client-report/${r.id}`} className="btn-gold text-[13px]">Open / Download</a>
+              <a href={`/api/client-report/${r.id}`} className="btn-gold text-[13px]">Download (Excel)</a>
             </li>
           ))}
         </ul>

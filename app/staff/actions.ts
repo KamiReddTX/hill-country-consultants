@@ -6,7 +6,7 @@ import { headers } from "next/headers";
 import { createClient, createServiceClient } from "@/lib/supabase/server";
 import { getStaffMember, isPrivileged, isSalesLead } from "@/lib/staff";
 import { sendTaskPaymentRequest, sendClientMessageAlert, sendVaultInvite, sendEmployeeWelcome, sendTeammateMessageAlert, sendClientWelcome, sendPasswordResetLink, sendClientFileReady, sendVendorAssignment, sendVendorReferralAlert, sendKickoffRescheduled } from "@/lib/email";
-import { buildWeeklyReportPdf } from "@/lib/reports";
+import { buildWeeklyReportPdf, buildWeeklyReportXlsx } from "@/lib/reports";
 import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
 import { getClientEmails } from "@/lib/client-contacts";
@@ -909,7 +909,7 @@ export async function approveWorkLog(id: string): Promise<ActionResult> {
 
 /** Admin only: generate & publish this week's PDF report for a client — the last
  *  7 days of approved hours + deliverables, stored for the client to download. */
-export async function generateWeeklyReport(clientId: string): Promise<ActionResult> {
+export async function generateWeeklyReport(clientId: string, summary?: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   if (!(await canReachClient(me, clientId))) return { error: "This isn't your account." };
@@ -922,17 +922,18 @@ export async function generateWeeklyReport(clientId: string): Promise<ActionResu
     db.from("client_work_log").select("*").eq("client_id", clientId).eq("approved", true).gte("worked_on", startISO).order("worked_on"),
     db.from("client_deliverables").select("*").eq("client_id", clientId).gte("delivered_on", startISO).order("delivered_on"),
   ]);
-  const pdf = await buildWeeklyReportPdf({
+  const xlsx = await buildWeeklyReportXlsx({
     clientName: (client as any).contact || (client as any).email,
     business: (client as any).business,
     periodStart: startISO,
     periodEnd: endISO,
+    summary: (summary || "").trim() || null,
     workLog: ((wl as any[]) || []).map((w) => ({ worked_on: w.worked_on, service: w.service, task: w.task, performed_by: w.performed_by, hours: Number(w.hours || 0) })),
     deliverables: ((dl as any[]) || []).map((d) => ({ name: d.name, status: d.status, delivered_on: d.delivered_on })),
   });
   const admin = createServiceClient();
-  const path = `${clientId}/${endISO}-weekly-${Date.now()}.pdf`;
-  const up = await admin.storage.from("client-reports").upload(path, Buffer.from(pdf), { contentType: "application/pdf" });
+  const path = `${clientId}/${endISO}-weekly-${Date.now()}.xlsx`;
+  const up = await admin.storage.from("client-reports").upload(path, xlsx, { contentType: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
   if (up.error) return { error: up.error.message };
   const { error } = await admin.from("client_reports").insert({
     client_id: clientId, name: `Weekly report · ${startISO} to ${endISO}`, path, period_start: startISO, period_end: endISO,
