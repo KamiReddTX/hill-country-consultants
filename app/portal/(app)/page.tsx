@@ -11,23 +11,23 @@ import { computeAllotmentUsage, monthKey } from "@/lib/allotments";
 export default async function OnboardingPage() {
   const client = await getPortalClient();
   if (!client) redirect("/portal/login");
-  const data = await getPortalData(client);
-  const ob = deriveOnboarding(data);
-
-  // Read-only checklist the account team maintains for this client (e.g. a
-  // branding launch cycle). Grouped by section, in order.
-  const { data: checklist } = await createClient()
-    .from("client_checklist_items").select("*").eq("client_id", client.id).order("position", { ascending: true });
-  const cl = (checklist ?? []) as any[];
-
-  // This month's plan usage (included vs used). Read this client's rows with the
-  // service client (the page is already scoped to the signed-in client).
+  // Everything below depends only on `client`, so fire it all off in one
+  // concurrent batch instead of a chain of sequential round-trips: the client's
+  // working data, the read-only checklist, this month's usage inputs, and the
+  // owning employee's name.
   const ym = monthKey();
   const svc = createServiceClient();
-  const [{ data: wl }, { data: adj }] = await Promise.all([
+  const hasOwner = !!client.assigned_to && /^[0-9a-f-]{36}$/i.test(client.assigned_to);
+  const [data, checklistRes, wlRes, adjRes, ownerRes] = await Promise.all([
+    getPortalData(client),
+    createClient().from("client_checklist_items").select("*").eq("client_id", client.id).order("position", { ascending: true }),
     svc.from("client_work_log").select("hours,worked_on,approved").eq("client_id", client.id),
     svc.from("client_allotment_adjustments").select("service_key,delta").eq("client_id", client.id).eq("period_month", `${ym}-01`),
+    hasOwner ? svc.from("staff").select("name,email").eq("id", client.assigned_to as string).maybeSingle() : Promise.resolve({ data: null } as any),
   ]);
+  const ob = deriveOnboarding(data);
+  const cl = (checklistRes.data ?? []) as any[];
+  const wl = wlRes.data; const adj = adjRes.data;
   const vaHours = (wl ?? []).filter((w: any) => String(w.worked_on || "").slice(0, 7) === ym && w.approved !== false).reduce((s: number, w: any) => s + Number(w.hours || 0), 0);
   const usageLines = computeAllotmentUsage((client as any).plan, vaHours, ((adj ?? []) as any[]).map((a) => ({ service_key: a.service_key, delta: Number(a.delta) }))).filter((u) => u.allot != null);
 
@@ -41,12 +41,8 @@ export default async function OnboardingPage() {
   const clGroups: { section: string | null; items: any[] }[] = [];
   { const idx = new Map<string, number>(); for (const it of cl) { const k = it.section || ""; if (!idx.has(k)) { idx.set(k, clGroups.length); clGroups.push({ section: it.section, items: [] }); } clGroups[idx.get(k)!].items.push(it); } }
   const clPct = cl.length ? Math.round((clDone / cl.length) * 100) : 0;
-  // assigned_to holds the owning employee's staff id — resolve it to a name.
-  let lead = "Assigned within one business day";
-  if (client.assigned_to && /^[0-9a-f-]{36}$/i.test(client.assigned_to)) {
-    const { data: s } = await createServiceClient().from("staff").select("name,email").eq("id", client.assigned_to).maybeSingle();
-    lead = (s as any)?.name || (s as any)?.email || lead;
-  }
+  // assigned_to holds the owning employee's staff id — resolved above in the batch.
+  const lead = (ownerRes?.data as any)?.name || (ownerRes?.data as any)?.email || "Assigned within one business day";
 
   return (
     <div className="flex flex-col gap-10">
