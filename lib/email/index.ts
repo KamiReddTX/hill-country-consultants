@@ -56,7 +56,7 @@ export async function sendBookingConfirmation(opts: {
  *  a reply reaches them directly. Recipient is ADMIN_NOTIFY_EMAIL (defaults to info@). */
 export async function sendPurchaseAdminAlert(opts: {
   ref: string; business: string; contact: string; email: string; phone: string;
-  itemsHtml: string; amount: string; startDate: string;
+  itemsHtml: string; amount: string; startDate: string; assignUrl?: string;
 }) {
   const to = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
   const row = (k: string, v: string) =>
@@ -68,8 +68,10 @@ export async function sendPurchaseAdminAlert(opts: {
     </table>
     <p style="font-size:14px;line-height:1.6;color:#3a3f38">Items:</p>
     <div style="font-size:14px;line-height:1.7;color:#3a3f38">${opts.itemsHtml}</div>
+    <p style="font-size:14px;line-height:1.6;color:#234b34;margin-top:16px"><strong>Action needed:</strong> assign an account owner and the right specialists to this client, then work the tasks (already queued in "In progress").</p>
+    ${opts.assignUrl ? `<p style="margin:12px 0 4px"><a href="${opts.assignUrl}" style="background:#c2a24a;color:#20241f;font-weight:600;padding:12px 20px;text-decoration:none;display:inline-block">Assign an owner</a></p>` : ""}
     <p style="font-size:13px;color:#6b6552;margin-top:16px">Reply to this email to reach the client directly.</p>`;
-  await send(to, `New booking · ${opts.amount} · ${opts.ref}`, shell("New paid booking", body), opts.email || undefined);
+  await send(to, `New booking · ${opts.amount} · ${opts.ref} · assign an owner`, shell("New paid booking", body), opts.email || undefined);
 }
 
 /** Internal alert when someone submits an employment application. Reply-to is

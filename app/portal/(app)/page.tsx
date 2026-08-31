@@ -152,6 +152,16 @@ export default async function OnboardingPage() {
         </section>
       )}
 
+      {!(client as any).plan && (
+        <section>
+          <h2 className="mb-2 font-fraunces text-[22px] font-medium text-forest">Your services</h2>
+          <div className="border border-line-warm bg-white p-5">
+            <p className="mb-3 max-w-[48em] text-[15px] prose-soft">You&rsquo;re set up <strong>à la carte</strong> — billed per service, with no monthly plan or allotment to track. Book individual services anytime; anything custom is quoted in writing before it begins. Prefer a monthly plan? Ask your account team and we&rsquo;ll map it out.</p>
+            <a href="/book" className="btn-gold text-[14px]">Book a service</a>
+          </div>
+        </section>
+      )}
+
       <section>
         <h2 className="mb-2 font-fraunces text-[22px] font-medium text-forest">Marketing photo shoot</h2>
         <div className="border border-line-warm bg-white p-5">

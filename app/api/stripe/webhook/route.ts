@@ -142,6 +142,7 @@ export async function POST(req: NextRequest) {
       await sendPurchaseAdminAlert({
         ref, business: m.business || "", contact: m.contact || "", email: m.email || "", phone: m.phone || "",
         itemsHtml, amount: paid, startDate: m.startDate || "",
+        assignUrl: site ? `${site}/staff/clients` : "",
       });
     } catch (e) { console.error("[webhook] admin alert", e); }
   }

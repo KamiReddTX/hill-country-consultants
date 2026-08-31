@@ -33,6 +33,11 @@ export async function POST(req: NextRequest) {
   const payMode = "full"; // deposits removed — full payment only
   if (!items.length) return NextResponse.json({ error: "No payable items in the cart." }, { status: 400 });
   if (!body.contact?.email) return NextResponse.json({ error: "Email is required." }, { status: 400 });
+  // Affirmative acceptance is required for a charge (card-network / no-refund
+  // defensibility). Enforced here on the server, not just in the UI.
+  if (body.consent !== true) {
+    return NextResponse.json({ error: "You must accept the Terms of Service and Refund & Cancellation Policy to check out." }, { status: 400 });
+  }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
   const site = process.env.NEXT_PUBLIC_SITE_URL || new URL(req.url).origin;

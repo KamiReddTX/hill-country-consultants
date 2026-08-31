@@ -220,6 +220,7 @@ export function BookingFlow({
       className: selectedClass ? `${selectedClass.no} — ${selectedClass.name}` : "",
       classDate: pickedDate, classSlot: slot, attendees,
       trainingFormat, onsite,
+      consent, // affirmative acceptance of Terms + Refund policy (server-verified)
       consentAt: new Date().toISOString(),
       repCode: form.repCode,
     };
