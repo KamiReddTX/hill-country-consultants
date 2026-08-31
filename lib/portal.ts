@@ -26,8 +26,12 @@ export async function getPortalClient(): Promise<ClientRow | null> {
     // TEMPORARY login bypass: act as a real active client so the client portal
     // is testable without signing in. Remove by setting AUTH_BYPASS = false.
     if (AUTH_BYPASS) {
-      if (BYPASS_CLIENT_EMAIL) {
-        const byEmail = await db.from("clients").select("*").eq("email", BYPASS_CLIENT_EMAIL).maybeSingle();
+      // Optional identity switch for testing: an `hcc_as` cookie (client email)
+      // picks which client to act as; else BYPASS_CLIENT_EMAIL; else newest active.
+      let asEmail = BYPASS_CLIENT_EMAIL;
+      try { asEmail = (await import("next/headers")).cookies().get("hcc_as")?.value || BYPASS_CLIENT_EMAIL; } catch {}
+      if (asEmail) {
+        const byEmail = await db.from("clients").select("*").eq("email", asEmail).maybeSingle();
         if (byEmail.data) return byEmail.data;
       }
       const active = await db.from("clients").select("*").eq("status", "Active").order("created_at", { ascending: false }).limit(1).maybeSingle();
