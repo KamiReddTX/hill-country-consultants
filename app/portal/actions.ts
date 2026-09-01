@@ -111,7 +111,16 @@ export async function requestChanges(taskId: string): Promise<ActionResult> {
   if ((client as any).suspended) return { error: "Your account is suspended. Please contact us to reactivate." };
   const { error } = await createClient().rpc("client_request_changes", { p_task: taskId });
   if (error) return { error: error.message };
-  revalidatePath("/portal/tasks");
+  // Notify the task's assignee that the client wants changes.
+  try {
+    const admin = createServiceClient();
+    const { data: t } = await admin.from("client_tasks").select("assignee_id,title").eq("id", taskId).maybeSingle();
+    if ((t as any)?.assignee_id) {
+      const { notify } = await import("@/lib/notify");
+      await notify((t as any).assignee_id, { kind: "changes", title: "Client requested changes", body: `${(t as any).title} · ${clientLabel(client)}`, href: "/staff/my-work" });
+    }
+  } catch (e) { console.warn("[requestChanges notify]", e); }
+  revalidatePath("/portal/tasks"); revalidatePath("/staff/my-work");
   return { ok: true };
 }
 

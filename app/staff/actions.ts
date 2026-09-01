@@ -11,6 +11,7 @@ import { seedClientOnboarding } from "@/lib/onboarding";
 import { uploadNoteFiles } from "@/lib/message-files";
 import { getClientEmails } from "@/lib/client-contacts";
 import { docusignConfigured, createEnvelope, recipientViewUrl } from "@/lib/docusign";
+import { notify } from "@/lib/notify";
 
 /** Clock in with a task note. The punch carries THIS staff member (RLS-enforced). */
 export async function clockIn(formData: FormData): Promise<ActionResult> {
@@ -576,12 +577,18 @@ export async function assignTask(taskId: string, staffId: string | null): Promis
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   const admin = createServiceClient();
-  const { data: t } = await admin.from("client_tasks").select("client_id").eq("id", taskId).maybeSingle();
+  const { data: t } = await admin.from("client_tasks").select("client_id,title").eq("id", taskId).maybeSingle();
   if (!t) return { error: "Task not found." };
   if (!(await canReachClient(me, (t as any).client_id))) return { error: "This isn't your account." };
   const { error } = await admin.from("client_tasks").update({ assignee_id: staffId }).eq("id", taskId);
   if (error) return { error: error.message };
-  revalidatePath("/staff/daily"); revalidatePath("/staff/delivery");
+  // Tell the assignee they've got new work (unless they assigned it to themselves).
+  if (staffId && staffId !== me.id) {
+    const { data: cl } = await admin.from("clients").select("business,contact").eq("id", (t as any).client_id).maybeSingle();
+    const who = (cl as any)?.business || (cl as any)?.contact || "a client";
+    await notify(staffId, { kind: "assignment", title: "New task assigned to you", body: `${(t as any).title} · ${who}`, href: "/staff/my-work" });
+  }
+  revalidatePath("/staff/daily"); revalidatePath("/staff/delivery"); revalidatePath("/staff/my-work");
   return { ok: true };
 }
 
@@ -729,7 +736,48 @@ export async function uploadStaffDocument(formData: FormData): Promise<ActionRes
     if (!up.error) { await admin.from("staff_documents").insert({ staff_id: staffId, name: file.name.slice(0, 200), path, kind, requires_signature: requires, uploaded_by: me!.id } as any); saved++; }
   }
   if (!saved) return { error: "Upload failed — try again." };
+  if (staffId !== me!.id) {
+    await notify(staffId, requires
+      ? { kind: "document", title: "A document needs your signature", body: `${saved} document${saved > 1 ? "s" : ""} to review and sign`, href: "/staff/profile" }
+      : { kind: "document", title: "New document shared with you", body: `${saved} document${saved > 1 ? "s" : ""} in your profile`, href: "/staff/profile" });
+  }
   revalidatePath("/staff/directory"); revalidatePath("/staff/profile");
+  return { ok: true };
+}
+
+/** Any employee: mark one of their notifications read (or all). */
+export async function markNotificationRead(id: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createServiceClient();
+  const { error } = await db.from("notifications").update({ read: true }).eq("id", id).eq("staff_id", me.id);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/notifications");
+  return { ok: true };
+}
+
+export async function markAllNotificationsRead(): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  const db = createServiceClient();
+  const { error } = await db.from("notifications").update({ read: true }).eq("staff_id", me.id).eq("read", false);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/notifications");
+  return { ok: true };
+}
+
+/** Owner/team/admin: set a task's priority (drives urgency flags + board sorting). */
+export async function setTaskPriority(taskId: string, priority: string): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!["Low", "Normal", "High", "Urgent"].includes(priority)) return { error: "Unknown priority." };
+  const admin = createServiceClient();
+  const { data: t } = await admin.from("client_tasks").select("client_id").eq("id", taskId).maybeSingle();
+  if (!t) return { error: "Task not found." };
+  if (!(await canReachClient(me, (t as any).client_id))) return { error: "This isn't your account." };
+  const { error } = await admin.from("client_tasks").update({ priority }).eq("id", taskId);
+  if (error) return { error: error.message };
+  revalidatePath("/staff/delivery"); revalidatePath("/staff/tasks"); revalidatePath("/staff/my-work");
   return { ok: true };
 }
 
@@ -913,8 +961,13 @@ export async function approveWorkLog(id: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!isPrivileged(me)) return { error: "Admins and business managers only." };
   const db = createServiceClient(); // work-log write is privileged; guarded above
+  const { data: entry } = await db.from("client_work_log").select("logged_by_staff,hours,task").eq("id", id).maybeSingle();
   const { error } = await db.from("client_work_log").update({ approved: true, approved_by: me!.name || me!.role, approved_at: new Date().toISOString() }).eq("id", id);
   if (error) return { error: error.message };
+  // Let the person who logged the time know it was approved.
+  if ((entry as any)?.logged_by_staff && (entry as any).logged_by_staff !== me!.id) {
+    await notify((entry as any).logged_by_staff, { kind: "approval", title: "Your logged time was approved", body: `${(entry as any).hours}h · ${(entry as any).task || "work entry"}`, href: "/staff/work-log" });
+  }
   revalidatePath("/staff/admin"); revalidatePath("/portal/work-log"); revalidatePath("/portal/weekly");
   return { ok: true };
 }
@@ -970,11 +1023,36 @@ export async function logWork(formData: FormData): Promise<ActionResult> {
     service: String(formData.get("service") || "") || null,
     task: String(formData.get("task") || "") || null,
     performed_by: me.name || me.role,
+    logged_by_staff: me.id,
     hours,
   });
   if (error) return { error: error.message };
   revalidatePath("/staff/daily"); revalidatePath("/staff/delivery");
   revalidatePath("/portal/work-log"); revalidatePath("/portal/weekly");
+  return { ok: true };
+}
+
+/** Quick-log time directly from a task card — prefills client/service/task from
+ *  the task so an employee doesn't re-enter what they're already looking at. */
+export async function logTimeOnTask(taskId: string, hours: number): Promise<ActionResult> {
+  const me = await getStaffMember();
+  if (!me) return { error: "Not signed in." };
+  if (!(hours > 0)) return { error: "Enter the hours worked." };
+  const admin = createServiceClient();
+  const { data: t } = await admin.from("client_tasks").select("client_id,title,service").eq("id", taskId).maybeSingle();
+  if (!t) return { error: "Task not found." };
+  if (!(await canReachClient(me, (t as any).client_id))) return { error: "This isn't your account." };
+  const { error } = await admin.from("client_work_log").insert({
+    client_id: (t as any).client_id,
+    worked_on: new Date().toISOString().slice(0, 10),
+    service: (t as any).service || null,
+    task: (t as any).title || null,
+    performed_by: me.name || me.role,
+    logged_by_staff: me.id,
+    hours,
+  });
+  if (error) return { error: error.message };
+  revalidatePath("/staff/work-log"); revalidatePath("/staff/my-work"); revalidatePath("/staff/delivery"); revalidatePath("/staff/tasks");
   return { ok: true };
 }
 

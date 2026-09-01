@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getStaffMember, isAdmin, isPrivileged, isSalesOrAdmin, isSalesLead, getMessageUnreads } from "@/lib/staff";
+import { getUnreadNotificationCount } from "@/lib/notify";
 import { StaffNav } from "@/components/staff/staff-nav";
 import { StaffSignOut } from "@/components/staff/staff-signout";
 import { AUTH_BYPASS } from "@/lib/auth-bypass";
@@ -15,7 +16,10 @@ export default async function StaffLayout({ children }: { children: ReactNode })
   if (!me) redirect("/staff/login");
 
   const priv = isPrivileged(me), admin = isAdmin(me), sales = isSalesOrAdmin(me), salesLead = isSalesLead(me), hourly = me.hourly;
-  const unread = await getMessageUnreads(me.id).catch(() => ({ total: 0 } as any));
+  const [unread, notifs] = await Promise.all([
+    getMessageUnreads(me.id).catch(() => ({ total: 0 } as any)),
+    getUnreadNotificationCount(me.id).catch(() => 0),
+  ]);
 
   // Grouped, role-aware navigation. Home and Messages are one-click; the rest live
   // in short, labelled menus so nobody faces a 30-tab wall. A regular employee sees
@@ -24,6 +28,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
 
   // My work — the daily job surface, for every employee.
   const myWork: NavItem[] = [
+    { href: "/staff/my-work", label: "My work" },
     { href: "/staff/tasks", label: "Task board" },
     { href: "/staff/calendar", label: "Calendar" },
     { href: "/staff/onboarding", label: "Client onboarding" },
@@ -111,6 +116,10 @@ export default async function StaffLayout({ children }: { children: ReactNode })
             <p className="text-[12px] prose-muted">{me.role}{me.employee_code ? ` · ${me.employee_code}` : ""}{me.hourly ? " · hourly" : ""}</p>
           </div>
           <div className="flex items-center gap-3">
+            <a href="/staff/notifications" className="relative inline-flex items-center text-forest hover:text-gold" aria-label={`Notifications${notifs ? ` (${notifs} unread)` : ""}`} title="Notifications">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M18 8A6 6 0 1 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" strokeLinecap="round" strokeLinejoin="round"/><path d="M13.7 21a2 2 0 0 1-3.4 0" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              {notifs > 0 && <span className="absolute -right-2 -top-1.5 inline-flex min-w-[16px] items-center justify-center rounded-full bg-red-600 px-1 py-0.5 text-[10px] font-semibold leading-none text-white">{notifs > 99 ? "99+" : notifs}</span>}
+            </a>
             <a href="/staff/profile" className="text-[13px] font-medium text-forest hover:underline">My profile</a>
             <StaffSignOut />
           </div>

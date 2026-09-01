@@ -7,6 +7,13 @@ import { ClientRoadmapEditor } from "@/components/staff/client-roadmap-editor";
 import { TaskWorkflowButton } from "@/components/staff/task-workflow-button";
 import { TaskChargeForm } from "@/components/staff/task-charge-form";
 import { TaskAssignee } from "@/components/staff/task-assignee";
+import { TaskPriority } from "@/components/staff/task-priority";
+import { LogTimeButton } from "@/components/staff/log-time-button";
+import { PriorityBadge, dueMeta } from "@/components/staff/task-urgency";
+
+const PRI_RANK: Record<string, number> = { Urgent: 0, High: 1, Normal: 2, Low: 3 };
+const dueDays = (d: string | null) => (d ? Math.round((new Date(d + "T00:00:00").getTime() - new Date().setHours(0, 0, 0, 0)) / 86400000) : Infinity);
+const byUrgency = (a: any, b: any) => (PRI_RANK[a.priority] ?? 2) - (PRI_RANK[b.priority] ?? 2) || dueDays(a.due_date) - dueDays(b.due_date);
 
 export default async function DeliveryPage() {
   const me = await getStaffMember();
@@ -39,8 +46,8 @@ export default async function DeliveryPage() {
     filesByTask.set(f.task_id, a);
   });
   const mine = (tasks.data ?? []).filter((t) => mineOrOpen(t.client_id));
-  const requested = mine.filter((t) => t.column_name === "Requested");
-  const queue = mine.filter((t) => t.column_name === "In progress" || t.column_name === "In review");
+  const requested = mine.filter((t) => t.column_name === "Requested").sort(byUrgency);
+  const queue = mine.filter((t) => t.column_name === "In progress" || t.column_name === "In review").sort(byUrgency);
   const delivered = (deliv.data ?? []).filter((d) => mineOrOpen(d.client_id));
   const name = (cid: string) => byId.get(cid)?.business || byId.get(cid)?.contact || "Client";
 
@@ -56,9 +63,9 @@ export default async function DeliveryPage() {
             return (
               <li key={t.id} className="flex flex-col gap-2 border border-line-warm bg-white p-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-[15px] text-charcoal">{t.title} <span className="text-[12px] text-ink-faint">· {name(t.client_id)}</span>{t.paid ? <span className="ml-2 text-[11px] font-semibold text-forest">Purchased</span> : ""}</p>
+                  <p className="text-[15px] text-charcoal">{t.title} <span className="text-[12px] text-ink-faint">· {name(t.client_id)}</span>{t.paid ? <span className="ml-2 text-[11px] font-semibold text-forest">Purchased</span> : ""} <PriorityBadge priority={t.priority} /></p>
                   {t.details && t.details !== t.title && <p className="mt-0.5 text-[13px] prose-soft">{t.details}</p>}
-                  <p className="mt-1 text-[12px] prose-muted">{t.due_date ? `needed by ${t.due_date}` : "no date set"}</p>
+                  <p className={`mt-1 text-[12px] ${dueMeta(t.due_date).cls}`}>{dueMeta(t.due_date).label}</p>
                   {tf.length > 0 && <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">{tf.map((f) => <li key={f.id}><a href={`/api/task-file/${f.id}`} className="text-[12px] text-forest underline underline-offset-2 hover:text-gold">{f.name}</a></li>)}</ul>}
                 </div>
                 <div className="flex shrink-0 flex-col items-start gap-2">
@@ -70,6 +77,7 @@ export default async function DeliveryPage() {
                       <TaskChargeForm taskId={t.id} status={t.charge_status} cents={t.charge_cents} />
                     </>
                   )}
+                  <TaskPriority taskId={t.id} current={t.priority} />
                 </div>
               </li>
             );
@@ -84,7 +92,8 @@ export default async function DeliveryPage() {
             return (
               <li key={t.id} className="flex flex-col gap-2 border border-line-warm bg-white p-4 sm:flex-row sm:items-start sm:justify-between">
                 <div className="min-w-0">
-                  <p className="text-[15px] text-charcoal">{t.title} <span className="text-[12px] text-ink-faint">· {name(t.client_id)} · {t.column_name}</span></p>
+                  <p className="text-[15px] text-charcoal">{t.title} <span className="text-[12px] text-ink-faint">· {name(t.client_id)} · {t.column_name}</span> <PriorityBadge priority={t.priority} /></p>
+                  <p className={`text-[12px] ${dueMeta(t.due_date).cls}`}>{dueMeta(t.due_date).label}</p>
                   {t.needs_clarification && <p className="mt-0.5 text-[12px] font-semibold text-gold">Client asked for changes — call them for clarification.</p>}
                   {tf.length > 0 && <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">{tf.map((f) => <li key={f.id}><a href={`/api/task-file/${f.id}`} className="text-[12px] text-forest underline underline-offset-2 hover:text-gold">{f.name}</a></li>)}</ul>}
                 </div>
@@ -94,6 +103,10 @@ export default async function DeliveryPage() {
                     <TaskMoveControl taskId={t.id} current={t.column_name} />
                   </div>
                   <TaskAssignee taskId={t.id} current={t.assignee_id} options={workers} />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <TaskPriority taskId={t.id} current={t.priority} />
+                    <LogTimeButton taskId={t.id} />
+                  </div>
                 </div>
               </li>
             );
