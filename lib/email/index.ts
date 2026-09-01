@@ -1,6 +1,21 @@
 import { Resend } from "resend";
+import { createServiceClient } from "@/lib/supabase/server";
 
 const from = process.env.EMAIL_FROM || "Hill Country Consultants <info@hillcountryconsultants.com>";
+
+/** Record every send attempt so "did the email actually go?" is answerable from
+ *  the database. Best-effort — logging never blocks or breaks an email. */
+async function logEmail(to: string | string[], subject: string, status: "sent" | "skipped_no_key" | "error", extra?: { providerId?: string | null; error?: string | null }) {
+  try {
+    await createServiceClient().from("email_log").insert({
+      to_addr: (Array.isArray(to) ? to.join(", ") : to).slice(0, 500),
+      subject: (subject || "").slice(0, 300) || null,
+      status,
+      provider_id: extra?.providerId ?? null,
+      error: extra?.error ? String(extra.error).slice(0, 500) : null,
+    } as any);
+  } catch (e) { console.warn("[email log]", e); }
+}
 
 function client(): Resend | null {
   const key = process.env.RESEND_API_KEY;
@@ -13,11 +28,23 @@ const esc = (s: string) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "
 
 async function send(to: string | string[], subject: string, html: string, replyTo?: string, fromName?: string) {
   const resend = client();
-  if (!resend) { console.warn("[email] RESEND_API_KEY not set — skipped:", subject); return; }
+  if (!resend) {
+    console.warn("[email] RESEND_API_KEY not set — skipped:", subject);
+    await logEmail(to, subject, "skipped_no_key");
+    return;
+  }
   // Keep the authenticated domain address, but show the sender's name when given,
   // so the recipient sees who it's from and Reply-To routes straight to them.
   const fromLine = fromName ? `${esc(fromName)} via Hill Country Consultants <${fromAddress}>` : from;
-  await resend.emails.send({ from: fromLine, to, subject, html, replyTo: replyTo || process.env.EMAIL_REPLY_TO } as any);
+  try {
+    const r: any = await resend.emails.send({ from: fromLine, to, subject, html, replyTo: replyTo || process.env.EMAIL_REPLY_TO } as any);
+    // The Resend SDK returns { data, error } rather than throwing on API errors.
+    if (r?.error) await logEmail(to, subject, "error", { error: r.error?.message || String(r.error) });
+    else await logEmail(to, subject, "sent", { providerId: r?.data?.id ?? r?.id ?? null });
+  } catch (e: any) {
+    console.error("[email] send failed:", subject, e?.message);
+    await logEmail(to, subject, "error", { error: e?.message || String(e) });
+  }
 }
 
 const shell = (title: string, body: string) => `

@@ -90,6 +90,7 @@ export default async function StaffLayout({ children }: { children: ReactNode })
     { href: "/staff/site-content", label: "Edit website" },
     { href: "/staff/vendors", label: "Vendors & 1099s" },
     { href: "/staff/audit", label: "Audit log" },
+    { href: "/staff/email-log", label: "Email log" },
   ]});
 
   // Resources — reference material for everyone.
