@@ -128,7 +128,7 @@ create or replace function can_access_client(cid uuid) returns boolean
     or exists (
       select 1 from staff s
       where s.user_id = auth.uid() and s.active
-        and s.id::text = (select assigned_to from clients c2 where c2.id = cid)
+        and s.id::text = nullif((select assigned_to from clients c2 where c2.id = cid), '')
     )
     or exists (
       select 1 from client_assignments a
@@ -136,9 +136,10 @@ create or replace function can_access_client(cid uuid) returns boolean
       where a.client_id = cid and s.user_id = auth.uid() and s.active
     )
     or (
-      -- Unassigned shared pool: any active staffer can see it.
+      -- Unassigned shared pool: any active staffer can see it. assigned_to
+      -- defaults to '' (not NULL), so treat '' and NULL alike as "no owner".
       exists (select 1 from staff s where s.user_id = auth.uid() and s.active)
-      and (select assigned_to from clients c3 where c3.id = cid) is null
+      and nullif((select assigned_to from clients c3 where c3.id = cid), '') is null
       and not exists (select 1 from client_assignments a2 where a2.client_id = cid)
     );
 $$;
