@@ -6,6 +6,7 @@ import { AddDeliverableForm } from "@/components/staff/add-deliverable-form";
 import { ClientRoadmapEditor } from "@/components/staff/client-roadmap-editor";
 import { TaskWorkflowButton } from "@/components/staff/task-workflow-button";
 import { TaskChargeForm } from "@/components/staff/task-charge-form";
+import { TaskAssignee } from "@/components/staff/task-assignee";
 
 export default async function DeliveryPage() {
   const me = await getStaffMember();
@@ -17,12 +18,14 @@ export default async function DeliveryPage() {
   const mineOrOpen = (cid: string) => byId.has(cid);
   const workable = clients.map((c) => ({ id: c.id, label: c.business || c.contact || c.email }));
   const db = createClient();
-  const [tasks, deliv, roadmap, files] = await Promise.all([
+  const [tasks, deliv, roadmap, files, staff] = await Promise.all([
     db.from("client_tasks").select("*").in("column_name", ["Requested", "In progress", "In review"]),
     db.from("client_deliverables").select("*").order("delivered_on", { ascending: false }).limit(40),
     db.from("client_roadmap").select("phase,status,note,client_id"),
     db.from("client_task_files").select("id,task_id,name"),
+    db.from("staff").select("id,name,email").eq("active", true).order("name"),
   ]);
+  const workers = (staff.data ?? []).map((s: any) => ({ id: s.id, label: s.name || s.email }));
   const roadmapByClient = new Map<string, { phase: string; status: string; note: string | null }[]>();
   (roadmap.data ?? []).forEach((r: any) => {
     const a = roadmapByClient.get(r.client_id) || [];
@@ -85,9 +88,12 @@ export default async function DeliveryPage() {
                   {t.needs_clarification && <p className="mt-0.5 text-[12px] font-semibold text-gold">Client asked for changes — call them for clarification.</p>}
                   {tf.length > 0 && <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5">{tf.map((f) => <li key={f.id}><a href={`/api/task-file/${f.id}`} className="text-[12px] text-forest underline underline-offset-2 hover:text-gold">{f.name}</a></li>)}</ul>}
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {t.column_name === "In progress" && <TaskWorkflowButton taskId={t.id} kind="submit" />}
-                  <TaskMoveControl taskId={t.id} current={t.column_name} />
+                <div className="flex shrink-0 flex-col items-stretch gap-2 sm:w-52">
+                  <div className="flex items-center justify-end gap-2">
+                    {t.column_name === "In progress" && <TaskWorkflowButton taskId={t.id} kind="submit" />}
+                    <TaskMoveControl taskId={t.id} current={t.column_name} />
+                  </div>
+                  <TaskAssignee taskId={t.id} current={t.assignee_id} options={workers} />
                 </div>
               </li>
             );

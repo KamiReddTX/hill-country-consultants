@@ -30,6 +30,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: `Signature verification failed: ${err.message}` }, { status: 400 });
   }
 
+  // Atomic, race-safe idempotency: Stripe delivers at-least-once and retries on
+  // any non-2xx. claim_stripe_event does an INSERT ... the FIRST caller for a
+  // given event.id wins (returns true); every concurrent/late retry returns
+  // false and we ack without reprocessing. This closes the window between the
+  // old SELECT-then-INSERT booking check (payment_intent is set only AFTER the
+  // RPC insert, so that check could not stop a duplicate client/booking/tasks).
+  try {
+    const guard = createServiceClient();
+    const { data: claimed, error: claimErr } = await guard.rpc("claim_stripe_event", { p_id: event.id });
+    if (claimErr) { console.error("[webhook] claim_stripe_event", claimErr); return NextResponse.json({ error: "idempotency check failed" }, { status: 500 }); }
+    if (claimed === false) return NextResponse.json({ received: true, duplicate: true });
+  } catch (e) {
+    console.error("[webhook] idempotency", e);
+    return NextResponse.json({ error: "idempotency check failed" }, { status: 500 });
+  }
+
   if (event.type === "checkout.session.completed") {
     const s = event.data.object as Stripe.Checkout.Session;
     const m = s.metadata || {};
@@ -66,6 +82,7 @@ export async function POST(req: NextRequest) {
       p_email: m.email, p_business: m.business, p_contact: m.contact, p_phone: m.phone,
       p_ref: ref, p_items: items as any, p_quotes: quotes as any,
       p_paid_cents: s.amount_total ?? 0, p_start: m.startDate || null, p_rep_code: m.repCode || "",
+      p_payment_intent: paymentIntent,
     });
     if (error) { console.error("[webhook] create_client_after_payment", error); return NextResponse.json({ error: error.message }, { status: 500 }); }
 
@@ -104,13 +121,26 @@ export async function POST(req: NextRequest) {
     // /auth/callback binds their user_id to their client row on first login.
     const site = process.env.NEXT_PUBLIC_SITE_URL || "";
     try {
-      const { data: link } = await db.auth.admin.generateLink({
+      // New buyer -> invite link. Repeat buyer already has an account (invite
+      // fails), so fall back to a magic-link so they still get one-click portal
+      // access rather than nothing.
+      let hashed: string | null = null;
+      let linkType: "invite" | "magiclink" = "invite";
+      const { data: inviteLink } = await db.auth.admin.generateLink({
         type: "invite", email: m.email,
         options: site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
       } as any);
-      const hashed = (link as any)?.properties?.hashed_token;
+      hashed = (inviteLink as any)?.properties?.hashed_token || null;
+      if (!hashed) {
+        const { data: magic } = await db.auth.admin.generateLink({
+          type: "magiclink", email: m.email,
+          options: site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined,
+        } as any);
+        hashed = (magic as any)?.properties?.hashed_token || null;
+        linkType = "magiclink";
+      }
       if (site && hashed) {
-        const actionUrl = `${site}/auth/callback?token_hash=${hashed}&type=invite&next=/portal`;
+        const actionUrl = `${site}/auth/callback?token_hash=${hashed}&type=${linkType}&next=/portal`;
         await sendClientWelcome({ to: m.email, name: m.contact || null, actionUrl });
       } else {
         await db.auth.admin.inviteUserByEmail(m.email, site ? { redirectTo: `${site}/auth/callback?next=/portal` } : undefined);

@@ -237,7 +237,9 @@ export function BookingFlow({
         const data = await res.json();
         if (res.ok && data.persisted) {
           track("quote_requested");
-          setDoneRef("HCC-" + Math.floor(100000 + Math.random() * 899999));
+          // Show the SAME reference the server stored on the lead, so staff can
+          // look the request up by it (was a throwaway client-side number).
+          setDoneRef(data.ref || "HCC-Q-" + Math.floor(100000 + Math.random() * 899999));
           setStep("done");
           return;
         }

@@ -62,34 +62,10 @@ revoke execute on function client_request_changes(uuid) from public, anon;
 grant execute on function client_approve_task(uuid) to authenticated;
 grant execute on function client_request_changes(uuid) to authenticated;
 
--- ── purchased services now start in "Requested" ─────────────────────────────
-create or replace function create_client_after_payment(
-  p_email text, p_business text, p_contact text, p_phone text,
-  p_ref text, p_items jsonb, p_quotes jsonb, p_paid_cents int,
-  p_start date, p_rep_code text default ''
-) returns uuid language plpgsql security definer as $$
-declare v_client uuid;
-begin
-  insert into clients (email, business, contact, phone, rep_code)
-  values (lower(p_email), p_business, p_contact, p_phone, p_rep_code)
-  on conflict (email) do update
-    set business = coalesce(excluded.business, clients.business),
-        contact  = coalesce(excluded.contact,  clients.contact),
-        phone    = coalesce(excluded.phone,    clients.phone)
-  returning id into v_client;
-
-  insert into bookings (client_id, ref, items, quotes, paid_cents, start_date)
-  values (v_client, p_ref, p_items, p_quotes, p_paid_cents, p_start);
-
-  -- Purchased services land in "Requested" (paid), for an AM/VA to accept &
-  -- assign after the kickoff call.
-  insert into client_tasks (client_id, title, service, due_date, paid, booking_ref, created_by, column_name)
-  select v_client, i->>'name', i->>'svc', p_start, true, p_ref, 'staff', 'Requested'
-  from jsonb_array_elements(p_items) i;
-
-  return v_client;
-end $$;
-
-revoke execute on function create_client_after_payment(
-  text, text, text, text, text, jsonb, jsonb, integer, date, text
-) from public, anon, authenticated;
+-- ── create_client_after_payment ────────────────────────────────────────────
+-- SUPERSEDED. The single canonical definition now lives in
+-- supabase/launch-hardening.sql: purchased services land in "In progress"
+-- (paid, staff-created) so they surface in the staff delivery queue, and the
+-- booking records the Stripe payment intent from creation. The earlier
+-- "Requested" variant that lived here is intentionally removed so no two SQL
+-- files disagree on the seeded column. See launch-hardening.sql.

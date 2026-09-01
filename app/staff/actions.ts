@@ -833,8 +833,17 @@ export async function moveTaskColumn(taskId: string, column: string): Promise<Ac
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   if (!(TASK_COLUMNS as readonly string[]).includes(column)) return { error: "Unknown column." };
-  const db = createClient();
-  const { error } = await db.from("client_tasks").update({ column_name: column }).eq("id", taskId);
+  const admin = createServiceClient();
+  const { data: task } = await admin.from("client_tasks").select("client_id,column_name").eq("id", taskId).maybeSingle();
+  if (!task) return { error: "Task not found." };
+  // Authorization: only someone who can reach this account may move its tasks.
+  if (!(await canReachClient(me, (task as any).client_id))) return { error: "This isn't your account." };
+  // A task can't jump straight to Delivered — it must pass through client review
+  // first, so nothing reaches the client without the pre-delivery review step.
+  if (column === "Delivered" && (task as any).column_name !== "In review") {
+    return { error: "Send the task to In review before delivering." };
+  }
+  const { error } = await admin.from("client_tasks").update({ column_name: column }).eq("id", taskId);
   if (error) return { error: error.message };
   revalidatePath("/staff/delivery"); revalidatePath("/staff/daily"); revalidatePath("/portal/tasks");
   return { ok: true };
@@ -846,12 +855,15 @@ export async function acceptTask(taskId: string): Promise<ActionResult> {
   const me = await getStaffMember();
   if (!me) return { error: "Not signed in." };
   const db = createClient();
-  const { data: task } = await db.from("client_tasks").select("paid,created_by").eq("id", taskId).maybeSingle();
+  const { data: task } = await db.from("client_tasks").select("paid,created_by,assignee_id").eq("id", taskId).maybeSingle();
   const isPurchase = !!task && (task as any).paid && (task as any).created_by === "staff";
   if (isPurchase && !isAdmin(me)) return { error: "Only an administrator can approve & assign a purchased service." };
-  const { error } = await db.from("client_tasks").update({ column_name: "In progress", needs_clarification: false }).eq("id", taskId);
+  // Accepting a task makes the accepter its owner (unless it already has one), so
+  // no task sits in progress unowned. Reassign later from the delivery board.
+  const owned = (task as any)?.assignee_id ? {} : { assignee_id: me.id };
+  const { error } = await db.from("client_tasks").update({ column_name: "In progress", needs_clarification: false, ...owned }).eq("id", taskId);
   if (error) return { error: error.message };
-  revalidatePath("/staff/delivery"); revalidatePath("/portal/tasks");
+  revalidatePath("/staff/delivery"); revalidatePath("/staff/daily"); revalidatePath("/portal/tasks");
   return { ok: true };
 }
 
@@ -1196,7 +1208,14 @@ export async function postChannelMessage(channelId: string, body: string): Promi
   if (!text) return { error: "Write a message first." };
   if (!channelId) return { error: "Pick a channel." };
   const { error } = await createClient().from("channel_messages").insert({ channel_id: channelId, author_id: me.id, author_name: me.name || me.email, body: text });
-  if (error) return { error: error.message };
+  if (error) {
+    // A restricted channel blocks non-privileged posters via RLS — show a plain
+    // message instead of a raw Postgres row-level-security error.
+    const friendly = /row-level security|violates|permission denied/i.test(error.message)
+      ? "You don't have permission to post in this channel."
+      : error.message;
+    return { error: friendly };
+  }
   revalidatePath("/staff/messages");
   return { ok: true };
 }

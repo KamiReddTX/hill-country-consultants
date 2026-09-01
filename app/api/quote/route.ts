@@ -45,8 +45,13 @@ export async function POST(req: Request) {
   const quotes: { id?: string; name?: string }[] = Array.isArray(body.quotes) ? body.quotes : [];
   const items: { id?: string; name?: string; qty?: number }[] = Array.isArray(body.items) ? body.items : [];
 
+  // A stable reference the visitor's confirmation can show and staff can search
+  // the lead by (stored in the lead body since leads have no ref column).
+  const ref = "HCC-Q-" + Math.floor(100000 + Math.random() * 899999);
+
   // Everything the visitor selected, in plain text, so staff read the scope on the lead.
   const pain = [
+    `Reference: ${ref}`,
     quotes.length ? `Quote requests: ${quotes.map((q) => `${clean(q.name) || clean(q.id)} (${clean(q.id)})`).join("; ")}` : "",
     items.length
       ? `Fixed-rate items: ${items
@@ -82,7 +87,7 @@ export async function POST(req: Request) {
         await sendLeadAlert({ to, kind: "Quote request", business: clean(contact.business), contact: clean(contact.name), email: clean(contact.email), phone: clean(contact.phone), timeline: clean(body.startDate), message: pain, portalUrl: site ? `${site}/staff` : undefined });
       } catch { /* email failure never blocks the lead */ }
     }
-    return NextResponse.json({ ok: true, persisted: !error });
+    return NextResponse.json({ ok: true, persisted: !error, ref: error ? undefined : ref });
   } catch {
     return NextResponse.json({ ok: true, persisted: false });
   }

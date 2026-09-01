@@ -8,17 +8,39 @@ import { sendStaffTaskAlert, sendStaffMessageAlert, sendKickoffScheduledAlert, s
 import { uploadNoteFiles } from "@/lib/message-files";
 import type { ClientRow } from "@/lib/database.types";
 
-/** Email the client's assigned VA/AM (a single owner). No-op if unassigned. */
+/**
+ * Email the client's assigned VA/AM. If the client is UNASSIGNED (a brand-new
+ * à la carte purchase has no owner yet), fall back to the admin / business-
+ * manager / accounts-manager inbox so a new client's first message or request
+ * is never silently dropped. Last resort is ADMIN_NOTIFY_EMAIL.
+ */
 async function notifyAssignedStaff(
   client: ClientRow,
   build: (email: string) => Promise<void>,
 ): Promise<void> {
   try {
+    const admin = createServiceClient();
     const aid = (client as any).assigned_to as string | null;
-    if (!aid || !/^[0-9a-f-]{36}$/i.test(aid)) return;
-    const { data: s } = await createServiceClient().from("staff").select("email").eq("id", aid).maybeSingle();
-    const email = (s as any)?.email;
-    if (email) await build(email);
+    let emails: string[] = [];
+    if (aid && /^[0-9a-f-]{36}$/i.test(aid)) {
+      const { data: s } = await admin.from("staff").select("email").eq("id", aid).maybeSingle();
+      if ((s as any)?.email) emails.push((s as any).email);
+    }
+    if (emails.length === 0) {
+      // Unassigned: notify every active admin / BM / AM so someone picks it up.
+      const { data: mgrs } = await admin.from("staff").select("email,roles,role").eq("active", true);
+      emails = (mgrs || [])
+        .filter((st: any) => {
+          const r = Array.isArray(st.roles) ? st.roles : [];
+          return r.includes("Administrator") || r.includes("Business Manager") || r.includes("Accounts Manager")
+            || st.role === "Administrator" || st.role === "Business Manager" || st.role === "Accounts Manager";
+        })
+        .map((st: any) => st.email).filter(Boolean);
+      const fallback = process.env.ADMIN_NOTIFY_EMAIL || "info@hillcountryconsultants.com";
+      if (emails.length === 0 && fallback) emails = [fallback];
+    }
+    // De-dupe and send.
+    for (const email of Array.from(new Set(emails))) { if (email) await build(email); }
   } catch (e) { console.warn("[notifyAssignedStaff]", e); }
 }
 
