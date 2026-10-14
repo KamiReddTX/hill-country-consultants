@@ -74,7 +74,7 @@ revoke execute on function
 -- "10:00 AM" -> minutes since midnight (null if unparseable). Mirrors the TS
 -- slotToMin used at checkout.
 create or replace function slot_to_min(s text) returns int
-  language plpgsql immutable as $$
+  language plpgsql immutable set search_path = pg_catalog, pg_temp as $$
 declare m text[]; h int;
 begin
   m := regexp_match(s, '(\d{1,2}):(\d{2})\s*(AM|PM)', 'i');
@@ -114,6 +114,8 @@ drop trigger if exists trg_bookings_class_buffer on bookings;
 create trigger trg_bookings_class_buffer
   before insert or update on bookings
   for each row execute function bookings_class_buffer_guard();
+-- Trigger-only: never meant to be called directly over the REST RPC surface.
+revoke execute on function bookings_class_buffer_guard() from anon, authenticated;
 
 -- 4. UNASSIGNED-CLIENT VISIBILITY -------------------------------------------
 -- The staff dashboard says the Unassigned queue is "visible to everyone until
