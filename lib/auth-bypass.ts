@@ -16,7 +16,7 @@
  *  session, or auth code has been removed.
  * ──────────────────────────────────────────────────────────────
  */
-export const AUTH_BYPASS = true;
+export const AUTH_BYPASS = false;
 
 /** Which staff identity the employee portal assumes while bypassed. */
 export const BYPASS_STAFF_EMAIL =
