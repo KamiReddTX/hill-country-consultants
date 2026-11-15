@@ -123,7 +123,7 @@
     show($("addr-hint"), t.print);
   }
 
-  A.ready.then(render);
+  A.ready.then(function () { return I ? I.refresh() : null; }).then(render);
   A.onChange(render);
 
   // ---- saving -------------------------------------------------------------
