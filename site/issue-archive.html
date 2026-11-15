@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Every issue · DBW News</title>
+<meta name="description" content="Every issue of DBW News, documenting Black womanhood. Read each issue online with the site, or open any story a year after it ran with a free account.">
+<link rel="icon" type="image/png" href="assets/brand/dbw-news-seal-64.png">
+<link rel="apple-touch-icon" href="assets/brand/dbw-news-seal-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Archivo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/dbw.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the archive</a>
+
+<header class="topbar on-dark">
+  <div class="topbar__inner">
+    <a class="topbar__brand" href="index.html">
+      <img src="assets/brand/dbw-news-seal-64.png" alt="" width="32" height="32">
+      DBW News
+      <span class="topbar__tagline">Documenting Black Womanhood</span>
+    </a>
+    <nav class="topbar__nav" aria-label="Account">
+      <a data-route="subscribe" href="shop.html">Subscribe</a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <span class="identity" id="identity"><a data-route="signIn" href="sign-in.html">Sign in</a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+
+  <section class="hero" aria-labelledby="page-title">
+    <div class="kicker">The archive</div>
+    <h1 id="page-title">Every issue</h1>
+    <p class="hero__lede"><span id="back-to">The archive holds every issue we have published.</span> The site reads any issue page by page. Every story, in every issue, opens in full to any account a year after it ran, so the older this list gets the more of it is free.</p>
+    <p class="hero__name">DBW News: Documenting Black Womanhood. Published by Dynamic Black Women Media, formerly Dear Black Woman.</p>
+    <div id="banner" class="banner" role="region" aria-label="Your access"></div>
+  </section>
+
+  <section class="this-month" aria-labelledby="this-month-title">
+    <div class="section-head">
+      <h2 id="this-month-title">This month</h2>
+      <span class="section-head__note" id="current-state"></span>
+    </div>
+    <div id="this-month"></div>
+  </section>
+
+  <section class="reader" id="reader" aria-labelledby="reader-title" hidden></section>
+
+  <section class="back-issues" aria-labelledby="back-title">
+    <div class="section-head">
+      <h2 id="back-title">Back issues</h2>
+      <span class="section-head__note" id="back-note"></span>
+    </div>
+    <ul class="issue-grid" id="issues"></ul>
+    <div id="loose"></div>
+  </section>
+
+  <section class="rules" aria-label="How the archive opens">
+    <div class="rules__box">
+      <div>
+        <div class="label">A year makes it free</div>
+        <p>Any story, in any issue, opens in full to any account twelve months after it ran. A free account is enough, and <span id="open-count">some</span> of the issues on this page are already past that mark.</p>
+      </div>
+      <div>
+        <div class="label">Reading the pages</div>
+        <p>Reading an issue as printed pages needs the site: online, everything, VIP or business. Print alone posts you the paper copy, and adding the site to print costs $27.</p>
+      </div>
+      <div>
+        <div class="label">Letters are always free</div>
+        <p>Reader letters, Her Flowers and community pieces are free to read in full in every issue, new or old, account or no account. <a data-route="letters" href="letters.html">All the letters</a>.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/issues.js"></script>
+<script src="assets/js/account.js"></script>
+<script src="assets/js/issue-archive.js"></script>
+</body>
+</html>
