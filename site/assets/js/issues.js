@@ -99,7 +99,35 @@
     return ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"][n] || String(n);
   }
 
+  // The calendar lives in the database once Supabase is connected, edited from
+  // manage.html. The list above is the fallback the site shows until then, or
+  // if the database cannot be reached. refresh() swaps the database rows in.
+  function coverUrl(path, client) {
+    if (!path) return "";
+    if (/^(assets\/|https?:)/.test(path)) return path;
+    return client ? client.storage.from("covers").getPublicUrl(path).data.publicUrl : "";
+  }
+  var loading = null;
+  function refresh() {
+    if (loading) return loading;
+    var client = w.DBWAccount && w.DBWAccount.client;
+    if (!client) return (loading = Promise.resolve(false));
+    loading = client.from("issues").select("ym, no, title, featured, edition, blurb, cover_path").order("ym")
+      .then(function (r) {
+        if (r.error || !r.data || !r.data.length) return false;
+        var rows = r.data.map(function (x) {
+          return { ym: x.ym, no: x.no, title: x.title, featured: x.featured, edition: x.edition,
+                   blurb: x.blurb, cover: coverUrl(x.cover_path, client), cover_path: x.cover_path };
+        });
+        ISSUES.splice.apply(ISSUES, [0, ISSUES.length].concat(rows));
+        return true;
+      })
+      .catch(function () { return false; });
+    return loading;
+  }
+
   w.DBWIssue = {
+    refresh: refresh, coverUrl: coverUrl,
     ISSUES: ISSUES, ONLINE_DAY: ONLINE_DAY, MAIL_DAY: MAIL_DAY,
     monthName: monthName, dayLabel: dayLabel, find: find, isOnline: isOnline,
     published: published, featured: featured, describe: describe,

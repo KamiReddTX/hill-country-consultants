@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Manage the site · DBW News</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="assets/brand/dbw-news-seal-64.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Archivo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/dbw.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to the workspace</a>
+
+<header class="topbar on-dark">
+  <div class="topbar__inner">
+    <a class="topbar__brand" data-route="home" href="index.html">
+      <img src="assets/brand/dbw-news-seal-64.png" alt="" width="32" height="32">
+      DBW News
+      <span class="topbar__tagline">Manage the site</span>
+    </a>
+    <nav class="topbar__nav" aria-label="Account">
+      <a href="index.html">View the site</a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <span class="identity" id="identity"><a data-route="signIn" href="sign-in.html">Sign in</a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page mg">
+  <div class="mg-head">
+    <div class="kicker">Staff workspace</div>
+    <h1>Manage the site</h1>
+    <p class="mg-head__lede">Issues, covers, page scans, the archive and members. Changes go live on the site as soon as you save them.</p>
+  </div>
+
+  <div id="gate" class="acct-msg" role="status">Checking your access&hellip;</div>
+
+  <div id="ws" hidden>
+    <div class="tabs" role="tablist" aria-label="Workspace sections" id="tabs">
+      <button type="button" role="tab" id="t-issues" aria-controls="p-issues" aria-selected="true">Issues</button>
+      <button type="button" role="tab" id="t-pages" aria-controls="p-pages" aria-selected="false" tabindex="-1">Page scans</button>
+      <button type="button" role="tab" id="t-articles" aria-controls="p-articles" aria-selected="false" tabindex="-1">Articles</button>
+      <button type="button" role="tab" id="t-members" aria-controls="p-members" aria-selected="false" tabindex="-1" data-admin hidden>Members</button>
+      <button type="button" role="tab" id="t-staff" aria-controls="p-staff" aria-selected="false" tabindex="-1" data-admin hidden>Staff</button>
+      <button type="button" role="tab" id="t-help" aria-controls="p-help" aria-selected="false" tabindex="-1">Help</button>
+    </div>
+
+    <!-- Issues ------------------------------------------------------------ -->
+    <section id="p-issues" role="tabpanel" aria-labelledby="t-issues" class="mg-grid">
+      <div>
+        <div class="section-head"><h2>The issues</h2><span class="section-head__note" id="issues-note"></span></div>
+        <ul class="mg-list" id="issue-list"></ul>
+      </div>
+      <form class="card card--ink mg-form" id="issue-form" novalidate>
+        <h2 class="mg-form__title" id="issue-form-title">Add an issue</h2>
+        <label class="field"><span class="field-label">Month</span><input type="month" id="i-ym" required></label>
+        <label class="field"><span class="field-label">Issue number</span><input type="number" id="i-no" min="1" step="1" placeholder="Leave empty until it is set"></label>
+        <label class="field"><span class="field-label">Title (the cover story)</span><input type="text" id="i-title" maxlength="200" required></label>
+        <label class="field"><span class="field-label">Featuring</span><input type="text" id="i-featured" maxlength="200" placeholder="Who is on the cover"></label>
+        <label class="field"><span class="field-label">Edition</span><input type="text" id="i-edition" maxlength="120" placeholder="For example: Mother's Day Edition"></label>
+        <label class="field"><span class="field-label">Short description</span><textarea id="i-blurb" rows="3" maxlength="600" placeholder="One or two sentences for the home page and the archive"></textarea></label>
+        <div class="field">
+          <span class="field-label">Cover</span>
+          <div class="mg-cover" id="i-cover-preview"></div>
+          <input type="file" id="i-cover" accept="image/*">
+          <label class="check" id="i-cover-remove-wrap" hidden><input type="checkbox" id="i-cover-remove"><span>Remove the current cover</span></label>
+        </div>
+        <div class="error" id="issue-err" role="alert" hidden></div>
+        <div class="said" id="issue-said" role="status" hidden></div>
+        <div class="actions">
+          <button type="submit" class="btn btn--ink" id="issue-save">Save the issue</button>
+          <button type="button" class="btn btn--plain" id="issue-new" hidden>Add a different issue</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Page scans -------------------------------------------------------- -->
+    <section id="p-pages" role="tabpanel" aria-labelledby="t-pages" hidden>
+      <div class="section-head"><h2>Page scans</h2><span class="section-head__note" id="pages-note"></span></div>
+      <p class="mg-p">Subscribers with the site read these in the archive, two pages at a time. Upload the whole issue as one <strong>PDF</strong> and it is split into pages for you, or upload page images in order.</p>
+      <div class="mg-row">
+        <label class="field"><span class="field-label">Issue</span><select id="pg-issue"></select></label>
+        <label class="field"><span class="field-label">PDF or page images</span><input type="file" id="pg-files" accept="application/pdf,image/jpeg,image/png,image/webp" multiple></label>
+      </div>
+      <fieldset class="mg-radios">
+        <legend class="field-label">The new pages</legend>
+        <label class="check"><input type="radio" name="pg-mode" value="replace" checked><span>Replace every page of this issue</span></label>
+        <label class="check"><input type="radio" name="pg-mode" value="append"><span>Add after the pages already there</span></label>
+      </fieldset>
+      <div class="actions"><button type="button" class="btn btn--ink" id="pg-upload">Upload the pages</button></div>
+      <div class="mg-progress" id="pg-progress" role="status" aria-live="polite"></div>
+      <div class="error" id="pg-err" role="alert" hidden></div>
+      <ul class="mg-thumbs" id="pg-thumbs"></ul>
+    </section>
+
+    <!-- Articles ---------------------------------------------------------- -->
+    <section id="p-articles" role="tabpanel" aria-labelledby="t-articles" class="mg-grid" hidden>
+      <div>
+        <div class="section-head"><h2>Archive articles</h2><span class="section-head__note" id="art-note"></span></div>
+        <label class="field"><span class="field-label">Find</span><input type="search" id="art-find" placeholder="Title, byline or section"></label>
+        <ul class="mg-list mg-list--plain" id="art-list"></ul>
+      </div>
+      <form class="card card--ink mg-form" id="art-form" novalidate>
+        <h2 class="mg-form__title" id="art-form-title">Add an article</h2>
+        <label class="field"><span class="field-label">Headline</span><input type="text" id="a-title" maxlength="300" required></label>
+        <label class="field"><span class="field-label">Date it ran</span><input type="date" id="a-date"></label>
+        <label class="field"><span class="field-label">Byline</span><input type="text" id="a-byline" maxlength="200"></label>
+        <label class="field"><span class="field-label">Section</span><input type="text" id="a-section" maxlength="120" placeholder="For example: The Money"></label>
+        <label class="field"><span class="field-label">Issue</span><input type="month" id="a-issue"><span class="hint">Leave empty to file it by the date it ran. Work from before the first issue is listed on its own.</span></label>
+        <label class="field"><span class="field-label">Link to the story</span><input type="text" id="a-url" maxlength="500" placeholder="https://… or a page on this site"></label>
+        <div class="error" id="art-err" role="alert" hidden></div>
+        <div class="said" id="art-said" role="status" hidden></div>
+        <div class="actions">
+          <button type="submit" class="btn btn--ink" id="art-save">Save the article</button>
+          <button type="button" class="btn btn--plain" id="art-new" hidden>Add a different article</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Members ----------------------------------------------------------- -->
+    <section id="p-members" role="tabpanel" aria-labelledby="t-members" hidden>
+      <div class="section-head"><h2>Members</h2><span class="section-head__note" id="mem-note"></span></div>
+      <p class="mg-p">Until online payments are connected, this is where a level is given: a subscription paid by check, a comp, a correction. Every reader starts as a free account.</p>
+      <form class="mg-row" id="mem-search" role="search">
+        <label class="field"><span class="field-label">Find a member</span><input type="search" id="mem-q" placeholder="Name or email"></label>
+        <div class="field"><span class="field-label">&nbsp;</span><button type="submit" class="btn btn--ink">Search</button></div>
+      </form>
+      <div class="error" id="mem-err" role="alert" hidden></div>
+      <div class="mg-table-wrap"><table class="mg-table" id="mem-table">
+        <thead><tr><th scope="col">Name</th><th scope="col">Email</th><th scope="col">Level</th><th scope="col">Ends</th><th scope="col">Joined</th><th scope="col"><span class="visually-hidden">Change</span></th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+    </section>
+
+    <!-- Staff ------------------------------------------------------------- -->
+    <section id="p-staff" role="tabpanel" aria-labelledby="t-staff" hidden>
+      <div class="section-head"><h2>Staff</h2></div>
+      <p class="mg-p"><strong>Editors</strong> manage issues, page scans and articles. <strong>Administrators</strong> can also change members' levels and this list. To add someone, she creates a free account on the site first, then you add her email here.</p>
+      <form class="mg-row" id="staff-form" novalidate>
+        <label class="field"><span class="field-label">Her account email</span><input type="email" id="st-email" autocomplete="off"></label>
+        <label class="field"><span class="field-label">Role</span><select id="st-role"><option value="editor">Editor</option><option value="admin">Administrator</option></select></label>
+        <div class="field"><span class="field-label">&nbsp;</span><button type="submit" class="btn btn--ink">Add to staff</button></div>
+      </form>
+      <div class="error" id="st-err" role="alert" hidden></div>
+      <div class="said" id="st-said" role="status" hidden></div>
+      <ul class="mg-list mg-list--plain" id="staff-list"></ul>
+    </section>
+
+    <!-- Help -------------------------------------------------------------- -->
+    <section id="p-help" role="tabpanel" aria-labelledby="t-help" hidden>
+      <div class="section-head"><h2>How to</h2></div>
+      <div class="mg-help">
+        <div><h3>Put a new issue on the site</h3><p>Issues &rarr; fill in the month, number, title and who is on the cover, choose the cover image, Save. The newest issue that has reached its online date (the 8th) shows on the home page; before then it shows as "Coming next".</p></div>
+        <div><h3>Let subscribers read an issue</h3><p>Page scans &rarr; choose the issue, choose the PDF, Upload. Keep this tab open until it says every page is done. Only readers whose level includes the site can open them.</p></div>
+        <div><h3>Add an old story to the archive</h3><p>Articles &rarr; headline, the date it ran, byline and section, and a link if it has a page. It is filed under its month automatically. Every story opens to any account a year after it ran.</p></div>
+        <div><h3>Give someone a subscription by hand</h3><p>Members &rarr; find her, Change, pick the level and the date it ends, Save. She sees it the next time she opens a page.</p></div>
+        <div><h3>Something looks wrong</h3><p>Nothing here can break the design of the site. If a save fails, the message says why. Write to the web team with the page and what you did.</p></div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<script src="assets/vendor/supabase-2.119.0.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/issues.js"></script>
+<script src="assets/js/account.js"></script>
+<script src="assets/js/page.js"></script>
+<script src="assets/js/manage.js"></script>
+</body>
+</html>

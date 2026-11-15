@@ -11,6 +11,7 @@ Static HTML/CSS/JS for dbw-news.com, built from the Claude Design handoff in
 | `sign-in.html` | `project/Sign In.dc.html` |
 | `index.html` | `project/DBW News Home.dc.html` (preview version: masthead, the issue on the stand, every issue) |
 | `member-profile.html` | `project/Member Profile.dc.html` (Subscription and Settings tabs) |
+| `manage.html` | Staff workspace (new): issues, covers, page scans from a PDF, archive articles, members' levels, staff |
 | `policies.html` | `project/Policies.dc.html` (v1.1, renamed to Dynamic Black Women Media, Inc.) |
 
 ## Shared files
@@ -46,7 +47,28 @@ Static HTML/CSS/JS for dbw-news.com, built from the Claude Design handoff in
 4. Put the project URL and **publishable (anon)** key in `assets/js/config.js`.
    Never the service-role key.
 
+## The staff workspace (`manage.html`)
+
+Run all three migrations first. Then make the first administrator, once:
+create an account on the site with your own email, and in the Supabase SQL
+editor run
+
+```sql
+insert into public.staff (user_id, role)
+select id, 'admin' from auth.users where email = 'YOUR-EMAIL';
+```
+
+From then on, add and remove staff on the workspace's Staff tab. Editors
+manage issues, page scans and articles; administrators also set members'
+levels and the staff list. The database enforces both.
+
+The issue calendar now lives in the `issues` table. `assets/js/issues.js`
+keeps a copy that the site shows only when the database cannot be reached.
+
 ## Adding an issue's pages
+
+Easiest: in the workspace, Page scans → choose the issue → choose the PDF.
+It is split into pages in the browser and uploaded. By hand:
 
 Upload scans to the `issue-pages` bucket as `YYYY-MM/001.jpg`, `002.jpg`, …
 (zero-padded, so they sort in page order). The archive's reader shows them

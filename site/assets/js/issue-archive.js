@@ -342,7 +342,7 @@
 
   A.mountIdentity($("identity"));
   render();
-  Promise.all([A.ready, loadArticles()]).then(function (res) {
+  Promise.all([A.ready, loadArticles(), I.refresh()]).then(function (res) {
     state.articles = res[1];
     render();
   });

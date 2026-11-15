@@ -20,6 +20,9 @@
     return ph;
   }
 
+  function render() {
+  $("stand-cover").textContent = "";
+  $("recent").textContent = "";
   var f = I.featured();
   if (f) {
     $("stand-cover").appendChild(cover(f.cover, f.month + " cover"));
@@ -47,4 +50,7 @@
     li.appendChild(a);
     list.appendChild(li);
   });
+  }
+  render();
+  I.refresh().then(function (changed) { if (changed) render(); });
 })(window, document);
