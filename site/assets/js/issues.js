@@ -8,7 +8,7 @@
 
    The back catalogue was read off the covers: seven monthly issues, January to
    July 2025, published under Redd Ladys Chronicles. The magazine paused after
-   July and comes back with November 2026, Issue #8. */
+   July and relaunches in January 2027 with Issue #8. */
 (function (w) {
   var ONLINE_DAY = 8;
   var MAIL_DAY = 15;
@@ -28,9 +28,13 @@
       featured: "Kami Redd", edition: "Premier Edition (6 Month Birthday)", cover: "assets/covers/2025-06.jpg" },
     { ym: "2025-07", no: 7, title: "Reclaiming the Fourth: The Unfinished Promise of Freedom",
       featured: "", edition: "4th of July Edition", cover: "assets/covers/2025-07.jpg" },
-    { ym: "2026-11", no: 8, title: "Should We Re-Segregate Our Children?",
+    { ym: "2027-01", no: 8, title: "Black Women Leading the Nation and the State of Georgia",
       featured: "", edition: "", cover: "",
-      blurb: "The launch issue, 112 pages, across six institutions: the classroom, the squad car, the exam room, the caseworker’s office, the newsroom, and the first job and first campus." }
+      blurb: "The first issue of the relaunch." },
+    // Numbered once February to April are set.
+    { ym: "2027-05", no: null, title: "Should We Re-Segregate Our Children?",
+      featured: "", edition: "", cover: "",
+      blurb: "Six institutions: the classroom, the squad car, the exam room, the caseworker\u2019s office, the newsroom, and the first job and first campus." }
   ];
 
   var MONTHS = ["January", "February", "March", "April", "May", "June",

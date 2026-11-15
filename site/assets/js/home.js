@@ -23,10 +23,13 @@
   var f = I.featured();
   if (f) {
     $("stand-cover").appendChild(cover(f.cover, f.month + " cover"));
+    var live = I.isOnline(f.ym);
+    $("stand-kicker").textContent = live ? "On the stand" : "Coming next";
+    if (!live) $("stand-read").textContent = "Read the back issues";
     $("stand-title").textContent = f.title || "In production";
     $("stand-when").textContent = f.month + (f.no ? " · Issue #" + f.no : "");
     $("stand-body").textContent = (f.blurb ? f.blurb + " " : "") +
-      "Online on " + f.online + " for readers who have the site; copies are posted on " + f.mails + ".";
+      (live ? "Online since " : "Online on ") + f.online + " for readers who have the site; copies are posted on " + f.mails + ".";
   }
 
   var list = $("recent");

@@ -123,6 +123,7 @@
     var f = I.featured();
     if (f) {
       var live = I.isOnline(f.ym);
+      $("this-month-title").textContent = live ? "This month" : "Coming next";
       $("current-state").textContent = a.site
         ? (live ? "Online now" : "Online " + f.online)
         : a.print ? "Posted " + f.mails : "Online " + f.online;
