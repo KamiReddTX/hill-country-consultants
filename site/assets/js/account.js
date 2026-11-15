@@ -21,12 +21,12 @@
 (function (w, d) {
   // The six levels. `site` is website access; print alone does not carry it.
   var TIERS = {
-    free:       { key: "free",       label: "Free account",    badge: "Free", site: false, print: false, vip: false, business: false },
-    online:     { key: "online",     label: "Online",          badge: "Paid", site: true,  print: false, vip: false, business: false },
-    print:      { key: "print",      label: "In print",        badge: "Paid", site: false, print: true,  vip: false, business: false },
-    everything: { key: "everything", label: "Everything",      badge: "Paid", site: true,  print: true,  vip: false, business: false },
-    vip:        { key: "vip",        label: "VIP",             badge: "VIP",  site: true,  print: true,  vip: true,  business: false },
-    business:   { key: "business",   label: "Business Member", badge: "Paid", site: true,  print: true,  vip: false, business: true }
+    free:       { key: "free",       label: "Free account",        badge: "Free", price: null,   monthly: null,  site: false, print: false, vip: false, business: false },
+    online:     { key: "online",     label: "Online",              badge: "Paid", price: "$50",  monthly: "$5",  site: true,  print: false, vip: false, business: false },
+    print:      { key: "print",      label: "In print",            badge: "Paid", price: "$120", monthly: "$12", site: false, print: true,  vip: false, business: false },
+    everything: { key: "everything", label: "Everything",          badge: "Paid", price: "$150", monthly: "$15", site: true,  print: true,  vip: false, business: false },
+    vip:        { key: "vip",        label: "VIP",                 badge: "VIP",  price: "$250", monthly: null,  site: true,  print: true,  vip: true,  business: false },
+    business:   { key: "business",   label: "Business Membership", badge: "Paid", price: "$350", monthly: null,  site: true,  print: true,  vip: false, business: true }
   };
 
   var cfg = w.DBW_CONFIG || {};
@@ -73,7 +73,7 @@
       state.user = session ? session.user : null;
       if (!state.user) { state.profile = null; return; }
       return client.from("profiles")
-        .select("display_name, tier, paused, cancelled, term_ends")
+        .select("display_name, tier, paused, cancelled, term_ends, mailing_address, email_list, created_at")
         .eq("id", state.user.id)
         .maybeSingle()
         .then(function (r) { state.profile = r.error ? null : r.data; });
@@ -120,6 +120,9 @@
   }
 
   function onChange(fn) { listeners.push(fn); }
+
+  // Re-read the session and profile, e.g. after saving settings.
+  function reload() { return load().then(notify); }
 
   // Where to come back to after signing in: this page, if it is one of ours.
   function here() {
@@ -173,6 +176,6 @@
     TIERS: TIERS, client: client, ready: ready,
     signedIn: signedIn, effective: effective, profile: profile, email: email,
     displayName: displayName, inRecovery: inRecovery, endRecovery: endRecovery,
-    keepSignedIn: keepSignedIn, signOut: signOut, onChange: onChange, mountIdentity: mountIdentity
+    keepSignedIn: keepSignedIn, signOut: signOut, onChange: onChange, reload: reload, mountIdentity: mountIdentity
   };
 })(window, document);

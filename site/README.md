@@ -9,6 +9,9 @@ Static HTML/CSS/JS for dbw-news.com, built from the Claude Design handoff in
 | --- | --- |
 | `issue-archive.html` | `project/Issue Archive.dc.html` |
 | `sign-in.html` | `project/Sign In.dc.html` |
+| `index.html` | `project/DBW News Home.dc.html` (preview version: masthead, the issue on the stand, every issue) |
+| `member-profile.html` | `project/Member Profile.dc.html` (Subscription and Settings tabs) |
+| `policies.html` | `project/Policies.dc.html` (v1.1, renamed to Dynamic Black Women Media, Inc.) |
 
 ## Shared files
 
@@ -16,6 +19,8 @@ Static HTML/CSS/JS for dbw-news.com, built from the Claude Design handoff in
 - `assets/js/config.js` — Supabase keys and every cross-page link (`routes`)
 - `assets/js/issues.js` — the issue calendar. **Add one line per new issue.**
 - `assets/js/account.js` — who is signed in, and their membership level
+- `assets/js/page.js` — top bar, routes and Back link for simple pages
+- `assets/vendor/supabase-2.119.0.js` — the Supabase library, hosted here and pinned to one version
 - `assets/covers/`, `assets/brand/` — web-sized covers and the DBW News seal
 
 ## Connecting Supabase
@@ -58,7 +63,9 @@ two at a time and works out the page count itself.
 
 ## Not built yet
 
-These links point at pages that still need building: `index.html`,
-`shop.html`, `checkout.html` (Stripe), `member-profile.html`,
-`community.html`, `what-you-get.html`, `policies.html`, `letters.html`,
-`newsroom-portal.html` and `issues/YYYY-MM.html` ("What is in it").
+These links point at pages that still need building: `shop.html`,
+`checkout.html` (Stripe), `community.html`, `what-you-get.html`,
+`letters.html`, `newsroom-portal.html`, `transparency.html`,
+`public-documents.html`, `prize-rules.html` and `issues/YYYY-MM.html`
+("What is in it"). The account page's Free to Me, Benefits and Saved Reading
+tabs come with the features they describe.
