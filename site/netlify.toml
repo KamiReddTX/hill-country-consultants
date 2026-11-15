@@ -1,0 +1,15 @@
+# DBW News on Netlify. A static site: nothing to build, publish this folder.
+[build]
+  publish = "."
+  command = ""
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    # PREVIEW ONLY: keep the preview out of search while dbw-news.com is still
+    # on Wix. Remove this line on the day the domain moves here.
+    X-Robots-Tag = "noindex, nofollow"
