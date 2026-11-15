@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your account · DBW News</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/png" href="assets/brand/dbw-news-seal-64.png">
+<link rel="apple-touch-icon" href="assets/brand/dbw-news-seal-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Archivo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/dbw.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to your account</a>
+
+<header class="topbar on-dark">
+  <div class="topbar__inner">
+    <a class="topbar__brand" data-route="home" href="index.html">
+      <img src="assets/brand/dbw-news-seal-64.png" alt="" width="32" height="32">
+      DBW News
+      <span class="topbar__tagline">Documenting Black Womanhood</span>
+    </a>
+    <nav class="topbar__nav" aria-label="Account">
+      <a data-route="subscribe" href="shop.html">Subscribe</a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <span class="identity" id="identity"><a data-route="signIn" href="sign-in.html">Sign in</a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page acct">
+
+  <div id="acct-loading" class="acct-msg" role="status">Opening your account&hellip;</div>
+  <div id="acct-off" class="acct-msg" hidden>Accounts are unavailable right now. Please try again later, or write to <a href="mailto:info@dbw-news.com">info@dbw-news.com</a>.</div>
+
+  <div id="acct" hidden>
+    <section class="acct-head">
+      <div class="acct-head__avatar" id="initials" aria-hidden="true"></div>
+      <div class="acct-head__who">
+        <div class="acct-head__line">
+          <h1 id="name"></h1>
+          <span class="badge-tier" id="tier-badge"></span>
+        </div>
+        <div class="acct-head__meta"><span id="since"></span><br><span id="email"></span></div>
+      </div>
+      <div class="acct-head__disc">
+        <div class="field-label field-label--muted">Subscriber discount</div>
+        <div class="acct-head__pct" id="disc"></div>
+        <div class="acct-head__note" id="disc-note"></div>
+      </div>
+    </section>
+
+    <div class="tabs" role="tablist" aria-label="Your account">
+      <button type="button" role="tab" id="tab-sub" aria-controls="panel-sub" aria-selected="true">Subscription</button>
+      <button type="button" role="tab" id="tab-set" aria-controls="panel-set" aria-selected="false" tabindex="-1">Settings</button>
+    </div>
+
+    <!-- Subscription -------------------------------------------------- -->
+    <section id="panel-sub" role="tabpanel" aria-labelledby="tab-sub" class="acct-grid">
+      <div class="acct-main">
+        <div class="card card--ink">
+          <div class="card__top">
+            <span class="label">Your subscription</span>
+            <span class="state" id="sub-state"></span>
+          </div>
+          <div class="card__title" id="plan-name"></div>
+          <div class="card__body" id="plan-line"></div>
+          <div class="facts">
+            <div><div class="field-label field-label--muted">Next issue</div><div id="next-issue"></div></div>
+            <div><div class="field-label field-label--muted" id="renew-label">Renews</div><div id="renew-value"></div></div>
+            <div><div class="field-label field-label--muted">Mailing to</div><div id="mail-to"></div></div>
+          </div>
+        </div>
+
+        <div class="card" id="upgrade-card" hidden>
+          <div class="label" id="up-tag"></div>
+          <div class="card__title card__title--sm" id="up-title"></div>
+          <p class="card__p" id="up-line"></p>
+          <a class="btn btn--ink" id="up-cta" href="#"></a>
+        </div>
+
+        <div class="card card--dark on-dark" id="join-card" hidden>
+          <div class="label label--gold">Become a subscriber</div>
+          <div class="card__title">Three ways to join: online, in print, or everything</div>
+          <p class="card__p card__p--dim">Your free account keeps the community and your saved reading. Online is $5 a month or $50 a year for every subscriber story and the archive; in print is $12 a month or $120 a year for the mailed issue; everything is $15 a month or $150 a year for both. All three take 10 percent off issues, tickets and classes.</p>
+          <a class="btn btn--red" data-route="subscribe" href="shop.html">See the subscription</a>
+        </div>
+
+        <div class="card" id="cancel-card" hidden>
+          <div class="label">Changing or cancelling</div>
+          <p class="card__p">You can cancel any time, with no fee and no explanation needed. You keep every issue already mailed and you finish the term you paid for. Access ends when the term does, and there is no refund of the term already paid.</p>
+          <a class="btn btn--line" href="mailto:billing@dbw-news.com?subject=Cancel%20or%20change%20my%20subscription">Write to billing</a>
+          <p class="fineprint">Cancelling from this page arrives with online payments. Until then a person at billing@dbw-news.com does it the same day.</p>
+        </div>
+      </div>
+
+      <aside class="acct-side">
+        <div class="card">
+          <div class="label">What your subscription opens</div>
+          <ul class="access" id="access"></ul>
+        </div>
+        <div class="card card--quiet">
+          <div class="label">Need a hand</div>
+          <p class="card__p">Missing issue, wrong address, a charge you do not recognize: write to us and a person answers.</p>
+          <a class="textlink" href="mailto:info@dbw-news.com">info@dbw-news.com</a>
+        </div>
+      </aside>
+    </section>
+
+    <!-- Settings ------------------------------------------------------ -->
+    <section id="panel-set" role="tabpanel" aria-labelledby="tab-set" class="acct-grid" hidden>
+      <div class="acct-main">
+        <form id="settings" novalidate>
+          <div class="section-head"><h2>Settings</h2><span class="section-head__note" id="saved-note" role="status"></span></div>
+          <div class="field-grid">
+            <label class="field"><span class="field-label">Name</span><input type="text" id="f-name" autocomplete="name" maxlength="120"></label>
+            <label class="field" id="f-addr-wrap"><span class="field-label">Mailing address</span><input type="text" id="f-addr" autocomplete="street-address" placeholder="Where the issue goes" maxlength="500"></label>
+          </div>
+          <div class="hint" id="addr-hint">Address changes need thirty days so the printer catches them.</div>
+
+          <div class="settings-block">
+            <div class="label">What DBW sends you</div>
+            <label class="check check--top"><input type="checkbox" id="f-news"><span>The email list: only when there is something to say.</span></label>
+            <p class="fineprint">Receipts, renewal notices and messages about your account are sent whatever this says.</p>
+          </div>
+
+          <div class="error" id="set-err" role="alert" hidden></div>
+          <div class="actions actions--top"><button type="submit" class="btn btn--ink btn--tall" id="save">Save changes</button></div>
+        </form>
+
+        <form id="email-form" class="settings-block" novalidate>
+          <div class="label">Your sign-in email</div>
+          <label class="field"><span class="field-label">Email</span><input type="email" id="f-email" autocomplete="email"></label>
+          <div class="error" id="email-err" role="alert" hidden></div>
+          <div class="said" id="email-said" role="status" hidden></div>
+          <button type="submit" class="btn btn--plain" id="email-save">Change email</button>
+        </form>
+
+        <form id="pw-form" class="settings-block" novalidate>
+          <div class="label">Password</div>
+          <label class="field"><span class="field-label">New password</span><input type="password" id="f-pw" autocomplete="new-password" aria-describedby="pw-hint"></label>
+          <div class="hint" id="pw-hint">Ten characters at least. A short phrase you will remember beats a short word with punctuation in it.</div>
+          <div class="error" id="pw-err" role="alert" hidden></div>
+          <div class="said" id="pw-said" role="status" hidden></div>
+          <div class="actions actions--top"><button type="submit" class="btn btn--plain" id="pw-save">Change password</button></div>
+        </form>
+
+        <div class="settings-block">
+          <div class="label">Sign out</div>
+          <div class="actions">
+            <button type="button" class="btn btn--plain" id="out-here">Sign out on this device</button>
+            <button type="button" class="btn btn--plain" id="out-all">Sign out everywhere</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="acct-side">
+        <div class="card">
+          <div class="label">Your data</div>
+          <p class="card__p">You can ask for a copy of everything we hold about you, ask us to correct it, or close your account and have it deleted. We answer within 30 days.</p>
+          <div class="stack">
+            <a class="textlink" href="mailto:privacy@dbw-news.com?subject=A%20copy%20of%20my%20data">Ask for a copy</a>
+            <a class="textlink" href="mailto:privacy@dbw-news.com?subject=Close%20and%20delete%20my%20account">Close and delete my account</a>
+            <a class="textlink textlink--ink" data-route="policies" data-hash="#privacy" href="policies.html#privacy">How we handle your data</a>
+          </div>
+        </div>
+      </aside>
+    </section>
+  </div>
+</main>
+
+<footer class="footer on-dark">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <img src="assets/brand/dbw-news-seal-128.png" alt="DBW News, Dynamic Black Women Media" width="88" height="88">
+      <div>
+        <div class="footer__name">DBW News</div>
+        <div class="footer__tag">Documenting Black Womanhood</div>
+      </div>
+    </div>
+    <p class="footer__legal">Dynamic Black Women Media, Inc. (formerly Dear Black Woman Media, Inc.) is a 501(c)(3) public charity (509(a)(2)). Contributions are tax-deductible to the extent allowed by law. EIN: 33-3726585</p>
+    <p class="footer__small">Published by Redd Ladys Chronicles Publishing &amp; Production. All administrative duties performed by Hill Country Consultants.</p>
+    <div class="footer__row">
+      <div class="footer__links">
+        <a href="index.html">Home</a>
+        <a href="issue-archive.html">Every issue</a>
+        <a href="policies.html">Policies &amp; terms</a>
+        <a href="policies.html#privacy">Privacy</a>
+        <a href="sign-in.html">Sign in</a>
+      </div>
+      <div class="footer__social">
+        <a href="https://www.youtube.com/@DearBlackWomanMedia" rel="noopener" target="_blank">YouTube</a>
+        <a href="https://www.instagram.com/dearblackwomanmedia" rel="noopener" target="_blank">Instagram</a>
+      </div>
+      <div class="footer__contact"><a href="mailto:info@dbw-news.com">info@dbw-news.com</a> &middot; (470) 236-1755<br>P.O. Box 54732, Atlanta, GA 30308</div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/vendor/supabase-2.119.0.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/issues.js"></script>
+<script src="assets/js/account.js"></script>
+<script src="assets/js/page.js"></script>
+<script src="assets/js/member-profile.js"></script>
+</body>
+</html>
