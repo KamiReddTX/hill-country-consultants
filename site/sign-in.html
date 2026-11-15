@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in or create a free account · DBW News</title>
+<meta name="description" content="Sign in to read subscriber stories, join the community and manage your subscription. Free accounts welcome.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="canonical" href="https://www.dbw-news.com/sign-in.html">
+<link rel="icon" type="image/png" href="assets/brand/dbw-news-seal-64.png">
+<link rel="apple-touch-icon" href="assets/brand/dbw-news-seal-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Archivo:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/dbw.css">
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to signing in</a>
+
+<header class="topbar on-dark">
+  <div class="topbar__inner">
+    <a class="topbar__brand" data-route="home" href="index.html">
+      <img src="assets/brand/dbw-news-seal-64.png" alt="" width="32" height="32">
+      DBW News
+      <span class="topbar__tagline">Documenting Black Womanhood</span>
+    </a>
+    <nav class="topbar__nav" aria-label="Account">
+      <a data-route="subscribe" href="shop.html">Subscribe</a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <span class="identity" id="identity"><a data-route="signIn" href="sign-in.html">Sign in</a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+
+  <div class="backlink"><a id="back" data-route="home" href="index.html">&larr; Back</a></div>
+
+  <div id="notice" class="notice" role="status" hidden></div>
+
+  <!-- Print subscribers adding the site: sign-in.html#upgrade-27 -->
+  <section id="upgrade" class="upgrade" aria-labelledby="up-title" hidden>
+    <div class="label" id="up-tag"></div>
+    <h2 class="upgrade__title" id="up-title"></h2>
+    <p class="upgrade__body" id="up-body"></p>
+    <div id="up-do" hidden>
+      <div class="upgrade__facts">
+        <div><div class="field-label field-label--muted">You pay now</div><div class="upgrade__price">$27.00</div></div>
+        <div><div class="field-label field-label--muted">Your level becomes</div><div class="upgrade__fact">Everything: print and the site</div></div>
+        <div><div class="field-label field-label--muted">Until</div><div class="upgrade__fact" id="up-term"></div></div>
+      </div>
+      <div class="actions">
+        <a class="btn btn--red btn--tall" data-route="checkoutUpgrade" href="checkout.html?upgrade=1">Add the site &middot; $27</a>
+        <a class="textlink textlink--ink" data-route="whatYouGet" href="what-you-get.html">What each level gets</a>
+      </div>
+      <p class="fineprint">The $27 is the $30 difference between print and everything, with your ten percent subscriber discount taken off it. Nothing about your print delivery changes, and your renewal date does not move.</p>
+    </div>
+  </section>
+
+  <div class="signin-grid">
+
+    <div class="signin-col">
+      <h1 class="signin-title">Sign in</h1>
+      <p class="signin-lede">One account for reading, the community, and your subscription.</p>
+
+      <p id="already" class="already" hidden></p>
+
+      <form id="signin-form" novalidate>
+        <label class="field">
+          <span class="field-label">Email</span>
+          <input type="email" id="s-email" autocomplete="email" placeholder="you@example.com" required>
+        </label>
+        <label class="field">
+          <span class="field-label">Password</span>
+          <input type="password" id="s-pass" autocomplete="current-password" required>
+        </label>
+        <div class="signin-row">
+          <label class="check"><input type="checkbox" id="s-keep" checked><span>Keep me signed in</span></label>
+          <button type="button" class="linkbtn" id="open-reset" aria-expanded="false" aria-controls="reset">Forgot your password?</button>
+        </div>
+
+        <!-- Getting back in: ask → sent, or set (after the emailed link) -->
+        <div id="reset" class="panel" hidden>
+          <div class="label" id="rs-eyebrow"></div>
+          <h2 class="panel__title" id="rs-title" tabindex="-1"></h2>
+          <p class="panel__blurb" id="rs-blurb"></p>
+
+          <div id="rs-ask">
+            <label class="field field--tight">
+              <span class="field-label field-label--muted">Your email</span>
+              <input type="email" id="rs-email" autocomplete="email">
+            </label>
+            <div class="actions">
+              <button type="button" class="btn btn--ink" id="rs-send">Send me a link</button>
+              <button type="button" class="btn btn--plain" data-rs-close>Never mind</button>
+            </div>
+          </div>
+
+          <div id="rs-sent" hidden>
+            <div class="said" id="rs-said"></div>
+            <button type="button" class="btn btn--plain" data-rs-close>Back to signing in</button>
+          </div>
+
+          <div id="rs-set" hidden>
+            <label class="field field--tight">
+              <span class="field-label field-label--muted">New password</span>
+              <input type="password" id="rs-pw" autocomplete="new-password" aria-describedby="rs-pw-hint">
+            </label>
+            <div class="hint" id="rs-pw-hint">Ten characters at least. A short phrase you will remember beats a short word with punctuation in it.</div>
+            <div class="actions">
+              <button type="button" class="btn btn--ink" id="rs-save">Set it and sign in</button>
+              <button type="button" class="btn btn--plain" data-rs-close>Cancel</button>
+            </div>
+          </div>
+
+          <div class="panel__err" id="rs-err" role="alert"></div>
+        </div>
+
+        <div class="error" id="s-err" role="alert" hidden></div>
+        <button type="submit" class="btn btn--ink btn--block" id="s-submit">Sign in</button>
+      </form>
+
+      <div class="newhere">
+        <a class="textlink" data-route="account" href="member-profile.html">Already signed in? Go to your membership</a>
+        <h2 class="newhere__title">New here?</h2>
+        <p class="newhere__body">A free account gets you the community, your saved stories and the email list. The subscriber stories come with Online, $5 a month or $50 a year. The printed issue comes with In print, $12 or $120. Both come with Everything, $15 or $150. VIP, at $250 a year, adds a profile in The Community and what you pay for an event.</p>
+        <div class="terms-box">
+          <div class="label">Before you create an account</div>
+          <p>A free account lets you read the open stories and join the community. Subscriber stories need a paid subscription. Your information is never sold, rented, or traded. If you add a subscription later, Stripe handles the payment and it appears on your statement as DBW NEWS. What you post stays yours. You grant us a licence to show it in the community and to quote it in the magazine. DBW may suspend or close an account that breaks the community rules. You can delete your account or ask for your data at any time by writing to <a href="mailto:info@dbw-news.com">info@dbw-news.com</a>.</p>
+        </div>
+        <div class="actions actions--top">
+          <a class="btn btn--line btn--tall" href="#create">Create a free account</a>
+          <a class="btn btn--red btn--tall" data-route="subscribe" href="shop.html">Subscribe</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="signin-col">
+      <section class="levels" aria-labelledby="levels-title">
+        <h2 class="label" id="levels-title">What each account gets</h2>
+        <div class="levels__grid">
+          <div class="level">
+            <h3 class="level__name">Free account</h3>
+            <div class="level__price">No charge</div>
+            <div class="level__list">Community access<br>Post, reply and follow<br>Profile with photo and bio<br>The email list<br>Free stories each month</div>
+          </div>
+          <div class="level">
+            <h3 class="level__name">Online</h3>
+            <div class="level__price">$5 a month &middot; $50 a year</div>
+            <div class="level__list">Everything in free<br><strong>Every subscriber story</strong><br><a data-route="issueArchive" href="issue-archive.html" id="every-issue">Every issue</a><br>10% off the shop and events<br>Nothing mailed</div>
+          </div>
+          <div class="level">
+            <h3 class="level__name">In print</h3>
+            <div class="level__price">$12 a month &middot; $120 a year</div>
+            <div class="level__list">Everything in free<br><strong>Twelve issues mailed</strong><br>10% off the shop and events<br>Subscriber ticket window<br>Site access not included</div>
+          </div>
+          <div class="level level--strong">
+            <h3 class="level__name">Everything</h3>
+            <div class="level__price level__price--red">$15 a month &middot; $150 a year</div>
+            <div class="level__list">The site and the magazine<br><strong>Saves $24 a year</strong><br>Every subscriber story and the archive<br>Twelve issues mailed<br>10% off the shop and events</div>
+          </div>
+          <div class="level level--strong">
+            <h3 class="level__name">VIP</h3>
+            <div class="level__price level__price--red">$250 a year</div>
+            <div class="level__list">Everything, plus<br><strong>A VIP profile in The Community</strong><br>Free online events, with registration<br>35% off in-person events<br>10% off shop</div>
+          </div>
+        </div>
+        <div class="levels__note">Your account carries its level everywhere on the site, whether online, in print, everything, or VIP, so prices and access are already right when you land on a page. Not ready to join? <a data-route="singleIssue" href="shop.html#issues">A single issue is $15</a>, and nothing renews.</div>
+      </section>
+
+      <section class="staff on-dark" aria-labelledby="staff-title">
+        <h2 class="label label--gold" id="staff-title">Staff and contributors</h2>
+        <p>Writers, editors, admin and billing sign in to the newsroom portal.</p>
+        <a data-route="portal" href="newsroom-portal.html">Go to the newsroom portal</a>
+      </section>
+
+      <section id="create" class="create" aria-labelledby="create-title" tabindex="-1">
+        <h2 class="create__title" id="create-title">Create a free account</h2>
+
+        <form id="create-form" novalidate>
+          <label class="field">
+            <span class="field-label">Your name</span>
+            <input type="text" id="c-name" autocomplete="name" placeholder="How you want to appear" required>
+          </label>
+          <label class="field">
+            <span class="field-label">Email</span>
+            <input type="email" id="c-email" autocomplete="email" placeholder="you@example.com" required>
+          </label>
+          <label class="field">
+            <span class="field-label">Password</span>
+            <input type="password" id="c-pass" autocomplete="new-password" placeholder="At least 10 characters" required>
+          </label>
+          <label class="field">
+            <span class="field-label">Joining as</span>
+            <select id="c-plan" aria-describedby="plan-note">
+              <option value="free">Free account: no charge</option>
+              <option value="online:monthly">Online: $5 a month</option>
+              <option value="online:annual">Online: $50 a year</option>
+              <option value="print:monthly">In print: $12 a month</option>
+              <option value="print:annual">In print: $120 a year</option>
+              <option value="everything:monthly">Everything: $15 a month</option>
+              <option value="everything:annual">Everything: $150 a year</option>
+              <option value="vip:annual">VIP: $250 a year</option>
+              <option value="business:annual">Business Membership: $350 a year</option>
+            </select>
+            <span class="hint" id="plan-note"></span>
+          </label>
+          <label class="field" id="addr-field" hidden>
+            <span class="field-label">Where the magazine is mailed</span>
+            <textarea id="c-addr" rows="3" autocomplete="street-address" placeholder="Street, city, state, ZIP"></textarea>
+          </label>
+          <div class="vip-note" id="vip-note" hidden>VIP membership lists your name and initials in the Community VIP directory. You add the rest of the card yourself, and the listing stays for as long as the membership does.</div>
+
+          <div class="consents">
+            <label class="check check--top"><input type="checkbox" id="c-age"><span>I am at least 13 years old, and if I am under 18 my parent or guardian agrees to this.</span></label>
+            <label class="check check--top"><input type="checkbox" id="c-terms"><span>I have read and accept the <a data-route="policies" data-hash="#terms" href="policies.html#terms">terms of use</a>, the <a data-route="policies" data-hash="#privacy" href="policies.html#privacy">privacy policy</a> and the <a data-route="policies" data-hash="#community" href="policies.html#community">community rules</a>.</span></label>
+            <label class="check check--top check--quiet"><input type="checkbox" id="c-news"><span>Add me to the email list. DBW writes only when there is something to say.</span></label>
+          </div>
+
+          <div class="error" id="c-err" role="alert" hidden></div>
+          <button type="submit" class="btn btn--red btn--block" id="c-submit">Create account</button>
+        </form>
+
+        <div class="done" id="c-done" role="status" hidden>
+          <h3 class="done__title" id="c-done-title"></h3>
+          <p id="c-done-body"></p>
+        </div>
+
+        <div class="fineprint">By creating an account you agree to our <a data-route="policies" href="policies.html">policies and terms</a>. Payments are handled by Stripe.</div>
+      </section>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/issues.js"></script>
+<script src="assets/js/account.js"></script>
+<script src="assets/js/sign-in.js"></script>
+</body>
+</html>
