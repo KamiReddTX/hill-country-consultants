@@ -23,6 +23,16 @@ window.DBW_CONFIG = {
     account: "member-profile.html",
     letters: "letters.html",
     issueArchive: "issue-archive.html",
+    community: "community.html",
+    whatYouGet: "what-you-get.html",
+    singleIssue: "shop.html#issues",
+    policies: "policies.html",
+    portal: "newsroom-portal.html",
+    // Paid levels are granted by the checkout (Stripe), never by the sign-up form.
+    checkout: function (tier, cadence) {
+      return "checkout.html?tier=" + encodeURIComponent(tier) + "&cadence=" + encodeURIComponent(cadence);
+    },
+    checkoutUpgrade: "checkout.html?upgrade=1",
     // "What is in it" for an issue. The design pointed at the Theme Calendar,
     // which was later moved into the newsroom portal as an internal page.
     issueContents: function (ym) { return "issues/" + ym + ".html"; }

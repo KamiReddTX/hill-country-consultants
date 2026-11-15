@@ -26,6 +26,8 @@ h1, h2, h3 { text-wrap: pretty; }
 a { color: var(--red); }
 a:hover { color: var(--ink); }
 img { max-width: 100%; }
+/* A class that sets display must never un-hide an element the script hid. */
+[hidden] { display: none !important; }
 
 /* ---- accessibility (dbw-a11y.js in the prototype) ----------------------- */
 a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
@@ -211,6 +213,130 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
 .rules__box .label { margin-bottom: 7px; }
 .rules__box p { font-size: 14px; line-height: 1.65; color: var(--text-2); margin: 0; }
 
+/* ---- forms -------------------------------------------------------------- */
+.field { display: block; margin-bottom: 16px; }
+.field--tight { margin-bottom: 12px; }
+.field-label {
+  display: block; font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase;
+  font-weight: 700; margin-bottom: 7px;
+}
+.field-label--muted { font-size: 10px; color: var(--text-3); margin-bottom: 6px; }
+.field input, .field select, .field textarea {
+  width: 100%; background: var(--white); border: 1px solid var(--rule-2); border-radius: 0;
+  font-family: var(--sans); font-size: 15px; padding: 13px 14px; color: var(--ink);
+}
+.field textarea { resize: vertical; }
+.field input:focus-visible, .field select:focus-visible, .field textarea:focus-visible,
+.check input:focus-visible { outline: 3px solid var(--red); outline-offset: 1px; }
+.hint { display: block; font-size: 12px; line-height: 1.55; color: var(--text-3); margin-top: 7px; }
+.check { display: flex; gap: 9px; align-items: center; font-size: 13.5px; color: var(--text-2); }
+.check--top { align-items: flex-start; gap: 11px; line-height: 1.55; color: var(--ink); }
+.check--top input { margin-top: 3px; flex: none; }
+.check--quiet { font-size: 13px; color: var(--text-2); }
+.linkbtn {
+  border: 0; background: none; padding: 0; cursor: pointer; text-decoration: underline;
+  font-family: var(--sans); font-size: 12.5px; font-weight: 600; color: var(--red);
+}
+.error {
+  border: 1px solid var(--red); background: #FBF3F3; color: var(--red);
+  padding: 14px 16px; margin-bottom: 16px; font-size: 13.5px; line-height: 1.55;
+}
+.btn--block { width: 100%; padding: 16px; font-size: 11.5px; letter-spacing: 0.16em; }
+.btn--tall { padding: 13px 24px; letter-spacing: 0.16em; }
+.btn--plain {
+  border: 1px solid var(--rule-2); background: var(--white); color: var(--text-2);
+  padding: 13px 18px;
+}
+.btn--plain:hover { border-color: var(--ink); }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+.btn--line.btn--tall { font-size: 10.5px; }
+.textlink--ink { color: var(--ink); }
+.label--gold { color: var(--gold); }
+.fineprint { font-size: 12px; line-height: 1.6; color: var(--text-3); margin: 12px 0 0; }
+.actions--top { margin-top: 22px; }
+h2.label { margin-top: 0; }
+
+/* ---- sign in ------------------------------------------------------------ */
+.backlink { padding-top: 14px; }
+.backlink a {
+  display: inline-flex; gap: 7px; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--text-3); font-weight: 600; text-decoration: none;
+}
+.backlink a:hover { color: var(--red); }
+.notice, .already {
+  border-left: 3px solid var(--gold); background: var(--gold-wash); padding: 12px 16px;
+  margin: 18px 0 0; font-size: 14px; line-height: 1.55; max-width: 720px;
+}
+.already { margin: 0 0 20px; }
+
+.upgrade { border: 1px solid var(--red); background: var(--white); padding: 26px 28px; margin: 26px 0 0; max-width: 720px; }
+.upgrade .label { margin-bottom: 8px; }
+.upgrade__title { font-family: var(--serif); font-size: 30px; line-height: 1.15; font-weight: 400; margin: 0 0 10px; }
+.upgrade__body { font-size: 15px; line-height: 1.65; color: var(--text-2); margin: 0 0 14px; max-width: 62ch; }
+.upgrade__facts {
+  border-top: 1px solid var(--rule-3); border-bottom: 1px solid var(--rule-3); padding: 14px 0; margin-bottom: 16px;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 14px;
+}
+.upgrade__price { font-family: var(--serif); font-size: 26px; }
+.upgrade__fact { font-size: 14px; line-height: 1.5; padding-top: 6px; }
+
+.signin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr)); gap: 44px; padding: 44px 0 0; }
+.signin-col:first-child { max-width: 520px; }
+.signin-title { font-family: var(--serif); font-size: 52px; line-height: 1.02; font-weight: 600; margin: 0 0 12px; }
+.signin-lede { font-size: 16px; line-height: 1.55; color: var(--text-2); margin: 0 0 26px; }
+.signin-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+
+.panel { border: 1px solid var(--ink); background: var(--paper-2); padding: 20px 22px; margin-bottom: 18px; }
+.panel .label { margin-bottom: 8px; }
+.panel__title { font-family: var(--serif); font-size: 23px; line-height: 1.2; font-weight: 400; margin: 0 0 8px; }
+.panel__title:focus { outline: none; }
+.panel__blurb { font-size: 13.5px; line-height: 1.65; color: var(--text-2); margin: 0 0 14px; max-width: 56ch; }
+.panel .hint { margin: 0 0 14px; font-size: 12.5px; }
+.panel__err { font-size: 13px; line-height: 1.6; color: var(--red); font-weight: 600; }
+.panel__err:not(:empty) { margin-top: 12px; }
+.said { font-size: 13.5px; line-height: 1.7; border-left: 3px solid var(--red); padding-left: 12px; margin-bottom: 14px; }
+
+.newhere { border-top: 1px solid var(--rule); margin-top: 26px; padding-top: 18px; }
+.newhere > .textlink { display: inline-block; margin-bottom: 18px; }
+.newhere__title { font-family: var(--serif); font-size: 22px; font-weight: 400; margin: 0 0 8px; }
+.newhere__body { font-size: 14.5px; line-height: 1.6; color: var(--text-2); margin: 0 0 14px; }
+.terms-box { border: 1px solid var(--ink); background: var(--white); padding: 20px; margin-top: 22px; }
+.terms-box .label { margin-bottom: 12px; letter-spacing: 0.18em; }
+.terms-box p { font-size: 12.5px; line-height: 1.6; color: var(--text-2); margin: 0; }
+
+.levels { border: 1px solid var(--rule); padding: 24px; margin-bottom: 20px; }
+.levels .label { margin-bottom: 14px; letter-spacing: 0.18em; }
+.levels__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(175px, 1fr)); gap: 20px; }
+.level__name { font-family: var(--serif); font-size: 21px; font-weight: 400; margin: 0 0 4px; }
+.level__price { font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-bottom: 8px; }
+.level__price--red { color: var(--red); }
+.level__list { font-size: 13.5px; line-height: 1.8; color: var(--text-2); }
+.level__list strong { font-weight: 600; }
+.levels__note { font-size: 12.5px; line-height: 1.6; color: var(--text-3); margin-top: 14px; }
+.levels__note a { font-weight: 600; }
+
+.staff { background: var(--ink); color: var(--cream); padding: 24px; margin-bottom: 20px; }
+.staff .label { margin-bottom: 10px; letter-spacing: 0.18em; font-weight: 400; }
+.staff p { font-size: 13.5px; line-height: 1.65; color: #B5AFA4; margin: 0 0 14px; }
+.staff a {
+  font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--cream);
+  border-bottom: 1px solid var(--red); padding-bottom: 3px; text-decoration: none;
+}
+
+.create { border: 1px solid var(--ink); padding: 24px; }
+.create:focus { outline: none; }
+.create__title { font-family: var(--serif); font-size: 26px; font-weight: 400; margin: 0 0 14px; }
+.consents { display: flex; flex-direction: column; gap: 12px; margin: 4px 0 18px; }
+.vip-note {
+  border: 1px solid var(--gold); background: var(--gold-wash); padding: 12px 14px; margin-bottom: 16px;
+  font-size: 12.5px; line-height: 1.6; color: var(--text-2);
+}
+.done { border: 1px solid var(--ink); background: var(--paper-2); padding: 16px 18px; max-width: 54ch; }
+.done:focus { outline: none; }
+.done__title { font-family: var(--serif); font-size: 20px; font-weight: 400; margin: 0 0 5px; }
+.done p { font-size: 13.5px; line-height: 1.6; color: var(--text-2); margin: 0; }
+.done a { font-weight: 600; }
+
 /* ---- small screens ------------------------------------------------------ */
 @media (max-width: 640px) {
   .topbar__inner, .page { padding-left: 16px; padding-right: 16px; }
@@ -222,4 +348,7 @@ a:focus-visible, button:focus-visible, [tabindex]:focus-visible {
   .this-month__title { font-size: 28px; }
   .issue-grid { grid-template-columns: minmax(0, 1fr); }
   .spread { grid-template-columns: minmax(0, 1fr); }
+  .signin-title { font-size: 42px; }
+  .upgrade, .levels, .create { padding: 20px 18px; }
+  .levels__grid { grid-template-columns: minmax(0, 1fr); }
 }

@@ -10,7 +10,11 @@
      client             the Supabase client, or null when not configured
      signedIn()         boolean
      effective()        the level that applies today (see TIERS)
+     profile()          her profile row, or null
+     email()            her sign-in address, or ""
      displayName()      her name, or "Reader"
+     inRecovery()       true when she arrived from a password-reset link
+     keepSignedIn(bool) remember this device (true) or only this tab (false)
      signOut()          Promise
      onChange(fn)       called after sign-in, sign-out or a profile change
      mountIdentity(el)  renders the top-bar sign-in / name / sign-out strip */
@@ -27,12 +31,39 @@
 
   var cfg = w.DBW_CONFIG || {};
   var routes = cfg.routes || {};
-  var client = null;
-  if (cfg.supabaseUrl && cfg.supabaseKey && w.supabase && w.supabase.createClient) {
-    client = w.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+
+  // ---- "Keep me signed in" ------------------------------------------------
+  // Kept: the session lives in localStorage and survives closing the browser.
+  // Not kept: it lives in sessionStorage and ends with the tab.
+  var SESSION_ONLY = "dbwSessionOnly";
+  function sessionOnly() { try { return !!w.localStorage.getItem(SESSION_ONLY); } catch (e) { return false; } }
+  var storage = {
+    getItem: function (k) {
+      try { var v = w.localStorage.getItem(k); return v != null ? v : w.sessionStorage.getItem(k); } catch (e) { return null; }
+    },
+    setItem: function (k, v) {
+      try {
+        var keep = !sessionOnly();
+        (keep ? w.localStorage : w.sessionStorage).setItem(k, v);
+        (keep ? w.sessionStorage : w.localStorage).removeItem(k);
+      } catch (e) {}
+    },
+    removeItem: function (k) {
+      try { w.localStorage.removeItem(k); w.sessionStorage.removeItem(k); } catch (e) {}
+    }
+  };
+  function keepSignedIn(keep) {
+    try { if (keep) w.localStorage.removeItem(SESSION_ONLY); else w.localStorage.setItem(SESSION_ONLY, "1"); } catch (e) {}
   }
 
-  var state = { user: null, profile: null };
+  var client = null;
+  if (cfg.supabaseUrl && cfg.supabaseKey && w.supabase && w.supabase.createClient) {
+    client = w.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, {
+      auth: { storage: storage, persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+  }
+
+  var state = { user: null, profile: null, recovery: false };
   var listeners = [];
 
   function load() {
@@ -51,16 +82,19 @@
 
   function notify() { listeners.forEach(function (fn) { try { fn(); } catch (e) {} }); }
 
-  var ready = load();
-
   if (client) {
+    // Registered before the first getSession, so the PASSWORD_RECOVERY event
+    // raised while the reset link is read from the URL is not missed.
     client.auth.onAuthStateChange(function (event) {
+      if (event === "PASSWORD_RECOVERY") state.recovery = true;
       if (event === "INITIAL_SESSION") return;
       // Supabase calls made inside this callback can deadlock the auth lock;
       // step out of it first.
       setTimeout(function () { load().then(notify); }, 0);
     });
   }
+
+  var ready = load();
 
   function signedIn() { return !!state.user; }
 
@@ -72,10 +106,11 @@
     return TIERS[p.tier] || TIERS.free;
   }
 
-  function displayName() {
-    var p = state.profile;
-    return (p && p.display_name) || "Reader";
-  }
+  function profile() { return state.profile; }
+  function email() { return (state.user && state.user.email) || ""; }
+  function displayName() { return (state.profile && state.profile.display_name) || "Reader"; }
+  function inRecovery() { return state.recovery; }
+  function endRecovery() { state.recovery = false; }
 
   function signOut() {
     if (!client) return Promise.resolve();
@@ -86,13 +121,20 @@
 
   function onChange(fn) { listeners.push(fn); }
 
+  // Where to come back to after signing in: this page, if it is one of ours.
+  function here() {
+    var p = w.location.pathname.split("/").pop() || "";
+    return /^[a-z0-9-]+\.html$/i.test(p) && p !== (routes.signIn || "sign-in.html") ? p : "";
+  }
+
   // ---- the top-bar strip --------------------------------------------------
   function mountIdentity(el) {
     function paint() {
       el.textContent = "";
       if (!signedIn()) {
         var a = d.createElement("a");
-        a.href = routes.signIn || "sign-in.html";
+        var back = here();
+        a.href = (routes.signIn || "sign-in.html") + (back ? "?next=" + encodeURIComponent(back) : "");
         a.textContent = "Sign in";
         el.appendChild(a);
         return;
@@ -129,7 +171,8 @@
 
   w.DBWAccount = {
     TIERS: TIERS, client: client, ready: ready,
-    signedIn: signedIn, effective: effective, displayName: displayName,
-    signOut: signOut, onChange: onChange, mountIdentity: mountIdentity
+    signedIn: signedIn, effective: effective, profile: profile, email: email,
+    displayName: displayName, inRecovery: inRecovery, endRecovery: endRecovery,
+    keepSignedIn: keepSignedIn, signOut: signOut, onChange: onChange, mountIdentity: mountIdentity
   };
 })(window, document);
