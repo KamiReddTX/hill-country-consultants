@@ -1,6 +1,7 @@
 # DBW News "coming soon" page for dbw-news.com. Static: nothing to build.
 [build]
-  publish = "."
+  publish = "public"
+  functions = "netlify/functions"
   command = ""
 
 [[headers]]
