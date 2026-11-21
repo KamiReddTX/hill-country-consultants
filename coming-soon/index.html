@@ -77,15 +77,29 @@
   .foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px 30px; border-top: 1px solid #2A2620; margin-top: 16px; padding-top: 16px; }
 
   @media (max-width: 720px) {
-    .hero__in { grid-template-columns: minmax(0, 1fr); gap: 22px; padding: 36px 16px 34px; text-align: left; }
-    .hero img { width: 112px; height: 112px; }
-    h1 { font-size: 46px; }
-    .lede { font-size: 16.5px; }
-    main { padding: 0 16px 40px; }
-    .first { grid-template-columns: minmax(0, 1fr); gap: 26px; padding-top: 32px; }
+    /* Phones: the header is centred, top to bottom. */
+    .hero__in { grid-template-columns: minmax(0, 1fr); justify-items: center; gap: 20px; padding: 34px 20px 32px; text-align: center; }
+    .hero img { width: 132px; height: 132px; }
+    .kicker { font-size: 10.5px; letter-spacing: 0.2em; margin-bottom: 10px; }
+    h1 { font-size: 50px; margin-bottom: 10px; }
+    .tag { font-size: clamp(10px, 3.1vw, 12.5px); letter-spacing: 0.14em; white-space: nowrap; margin-bottom: 18px; }
+    .lede { font-size: 16.5px; line-height: 1.6; margin: 0 auto; }
+    main { padding: 0 20px 40px; }
+    .first { grid-template-columns: minmax(0, 1fr); gap: 28px; padding: 32px 0 34px; }
     .first h2 { font-size: 30px; }
-    .foot { padding: 28px 16px; }
+    .signup { padding: 22px 18px; }
+    .meanwhile { padding-top: 34px; }
+    .meanwhile > h2 { font-size: 27px; }
+    .card { padding: 20px 18px; }
+    .links { gap: 0 18px; }
+    .links a { display: inline-block; padding: 12px 0; }   /* a thumb-sized target */
+    footer { margin-top: 36px; }
+    .foot { padding: 28px 20px; text-align: center; }
+    .foot__row { justify-content: center; flex-direction: column; align-items: center; gap: 6px; }
   }
+  /* 16px or larger stops iPhones zooming in when a box is tapped. */
+  .field input { font-size: 16px; }
+  .btn { min-height: 48px; }
 </style>
 </head>
 <body>
