@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DBW News</title>
+<meta name="description" content="DBW News: documenting Black womanhood.">
+<link rel="icon" type="image/png" href="assets/brand/dbw-news-seal-64.png">
+<link rel="apple-touch-icon" href="assets/brand/dbw-news-seal-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Archivo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="assets/css/dbw.css">
+</head>
+<body>
+<a class="skip-link" href="#story">Skip to the story</a>
+
+<header class="topbar on-dark">
+  <div class="topbar__inner">
+    <a class="topbar__brand" data-route="home" href="index.html">
+      <img src="assets/brand/dbw-news-seal-64.png" alt="" width="32" height="32">
+      DBW News
+      <span class="topbar__tagline">Documenting Black Womanhood</span>
+    </a>
+    <nav class="topbar__nav" aria-label="Account">
+      <a data-route="subscribe" href="shop.html">Subscribe</a>
+      <span class="topbar__sep" aria-hidden="true"></span>
+      <span class="identity" id="identity"><a data-route="signIn" href="sign-in.html">Sign in</a></span>
+    </nav>
+  </div>
+</header>
+
+<main id="main" class="page">
+  <div class="crumbs" id="crumbs"><a data-route="home" href="index.html">DBW News</a><span aria-hidden="true">/</span><a data-route="issueArchive" href="issue-archive.html">The archive</a></div>
+
+  <div id="art-msg" class="acct-msg" role="status">Opening the story&hellip;</div>
+
+  <article id="story" class="story" hidden tabindex="-1">
+    <div class="story__main">
+      <div class="story__badge" id="badge"></div>
+      <h1 class="story__title" id="title"></h1>
+      <p class="story__dek" id="dek" hidden></p>
+      <div class="story__meta" id="meta"></div>
+      <div class="story__tools">
+        <button type="button" class="tool" id="share">Share</button>
+        <button type="button" class="tool" id="copy">Copy link</button>
+        <button type="button" class="tool" id="print">Print</button>
+        <span class="tool-said" id="tool-said" role="status"></span>
+      </div>
+      <figure class="story__figure" id="figure" hidden><img id="cover" alt=""></figure>
+      <div class="story__video" id="video" hidden></div>
+      <div class="prose" id="body"></div>
+
+      <div class="wall" id="wall" hidden>
+        <div class="wall__fade" aria-hidden="true"></div>
+        <div class="wall__card">
+          <div class="label" id="wall-tag"></div>
+          <h2 class="wall__title" id="wall-title"></h2>
+          <p class="wall__body" id="wall-body"></p>
+          <div class="actions actions--center">
+            <a class="btn btn--red btn--tall" id="wall-cta" href="#"></a>
+            <a class="textlink textlink--ink" id="wall-second" href="#"></a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="story__side">
+      <div class="card" id="issue-card" hidden>
+        <div class="label">From the issue</div>
+        <a class="story__issue" id="issue-link" href="issue-archive.html">
+          <div class="frame" id="issue-cover"></div>
+          <div class="issue__when" id="issue-when"></div>
+          <div class="recent__title" id="issue-title"></div>
+        </a>
+      </div>
+      <div class="card card--quiet" id="tags-card" hidden>
+        <div class="label">Filed under</div>
+        <ul class="tags" id="tags"></ul>
+      </div>
+      <div class="card card--quiet">
+        <div class="label">Talk back</div>
+        <p class="card__p">Tell us where the reporting got it wrong and it gets printed. Corrections run beside your letters, every issue.</p>
+        <a class="textlink" href="mailto:info@dbw-news.com?subject=About%20a%20story">Write to the editor</a>
+      </div>
+    </aside>
+  </article>
+</main>
+
+<footer class="footer on-dark">
+  <div class="footer__inner">
+    <div class="footer__brand">
+      <img src="assets/brand/dbw-news-seal-128.png" alt="DBW News, Dynamic Black Women Media" width="88" height="88">
+      <div>
+        <div class="footer__name">DBW News</div>
+        <div class="footer__tag">Documenting Black Womanhood</div>
+      </div>
+    </div>
+    <p class="footer__legal">Dynamic Black Women Media, Inc. (formerly Dear Black Woman Media, Inc.) is a 501(c)(3) public charity (509(a)(2)). Contributions are tax-deductible to the extent allowed by law. EIN: 33-3726585</p>
+    <p class="footer__small">Published by Redd Ladys Chronicles Publishing &amp; Production. All administrative duties performed by Hill Country Consultants.</p>
+    <div class="footer__row">
+      <div class="footer__links">
+        <a href="index.html">Home</a>
+        <a href="issue-archive.html">Every issue</a>
+        <a href="policies.html">Policies &amp; terms</a>
+        <a href="policies.html#privacy">Privacy</a>
+        <a href="sign-in.html">Sign in</a>
+      </div>
+      <div class="footer__social">
+        <a href="https://www.youtube.com/@DearBlackWomanMedia" rel="noopener" target="_blank">YouTube</a>
+        <a href="https://www.instagram.com/dearblackwomanmedia" rel="noopener" target="_blank">Instagram</a>
+      </div>
+      <div class="footer__contact"><a href="mailto:info@dbw-news.com">info@dbw-news.com</a> &middot; (470) 236-1755<br>Atlanta, Georgia</div>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/vendor/supabase-2.119.0.js"></script>
+<script src="assets/js/config.js"></script>
+<script src="assets/js/issues.js"></script>
+<script src="assets/js/account.js"></script>
+<script src="assets/js/page.js"></script>
+<script src="assets/js/sanitize.js"></script>
+<script src="assets/js/article.js"></script>
+</body>
+</html>

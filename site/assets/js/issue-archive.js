@@ -60,7 +60,7 @@
   function loadArticles() {
     if (!A.client) return Promise.resolve([]);
     return A.client.from("archive_articles")
-      .select("title, published_on, byline, section, issue_ym, url")
+      .select("title, published_on, byline, section, issue_ym, url, slug")
       .order("published_on", { ascending: false, nullsFirst: false })
       .then(function (r) { return r.error ? [] : (r.data || []); })
       .catch(function () { return []; });
@@ -166,7 +166,7 @@
         byKey[key] = { key: key, no: null, theme: "", featured: "", edition: "", cover: "", pieces: [] };
         merged.push(byKey[key]);
       }
-      byKey[key].pieces.push({ title: art.title, kind: art.section || art.byline || "From the archive", href: safeUrl(art.url) });
+      byKey[key].pieces.push({ title: art.title, kind: art.section || art.byline || "From the archive", href: art.slug ? "article.html?slug=" + encodeURIComponent(art.slug) : safeUrl(art.url) });
     });
     merged.sort(function (x, y) { return x.key < y.key ? 1 : -1; });
 
@@ -216,7 +216,7 @@
         '<ul class="loose__grid">' + loose.map(function (art) {
           var when = art.published_on ? I.monthName(monthKey(art.published_on)) : "Undated";
           var kind = [art.section || art.byline || "", when].filter(Boolean).join(" · ");
-          var href = safeUrl(art.url);
+          var href = art.slug ? "article.html?slug=" + encodeURIComponent(art.slug) : safeUrl(art.url);
           return '<li class="loose__item"><div class="loose__kind">' + esc(kind) + "</div>" +
             (href ? '<a class="loose__title" href="' + esc(href) + '">' + esc(art.title) + "</a>"
                   : '<span class="loose__title">' + esc(art.title) + "</span>") + "</li>";
