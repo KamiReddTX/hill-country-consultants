@@ -1,0 +1,2 @@
+# Old Wix blog addresses go to the same story on the new site.
+/post/:slug   /article.html?slug=:slug   301

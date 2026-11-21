@@ -35,7 +35,7 @@
   function problem(r, fallback) {
     var m = (r && r.error && r.error.message) || "";
     if (/42501|permission|row-level|not allowed|Only an administrator/i.test(m)) return m.indexOf("Only") === 0 ? m : "Your role does not allow that.";
-    if (/duplicate key|already exists/i.test(m)) return "There is already one with that month.";
+    if (/duplicate key|already exists/i.test(m)) return /slug/i.test(m) ? "Another article already uses that web address. Change it and save again." : "There is already one with that month.";
     return m && m.length < 160 ? m : fallback;
   }
   function confirmIt(text) { return w.confirm(text); }
@@ -366,6 +366,44 @@
     });
   });
 
+  // ---- the story editor ---------------------------------------------------
+  var S = w.DBWSanitize;
+  var ed = $("a-body");
+  function slugify(t) {
+    return String(t || "").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/['\u2019]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 120);
+  }
+  // Pasting from Word or Google Docs keeps the structure and drops the rest.
+  ed.addEventListener("paste", function (e) {
+    var html = e.clipboardData && e.clipboardData.getData("text/html");
+    var text = e.clipboardData && e.clipboardData.getData("text/plain");
+    e.preventDefault();
+    var clean = html ? S.clean(html) : String(text || "").split(/\n{2,}/).map(function (para) {
+      var p = d.createElement("p"); p.textContent = para.trim(); return p.textContent ? p.outerHTML : "";
+    }).join("");
+    d.execCommand("insertHTML", false, clean);
+  });
+  Array.prototype.forEach.call(d.querySelectorAll(".editor-bar button"), function (b) {
+    b.addEventListener("mousedown", function (e) { e.preventDefault(); });   // keep the selection
+    b.addEventListener("click", function () {
+      ed.focus();
+      var c = b.getAttribute("data-cmd");
+      if (c === "bold" || c === "italic") d.execCommand(c);
+      else if (c === "h2") d.execCommand("formatBlock", false, "h2");
+      else if (c === "quote") d.execCommand("formatBlock", false, "blockquote");
+      else if (c === "list") d.execCommand("insertUnorderedList");
+      else if (c === "plain") { d.execCommand("removeFormat"); d.execCommand("formatBlock", false, "p"); }
+      else if (c === "link") {
+        var u = w.prompt("Link address (starting https://)");
+        if (u && /^https?:\/\//i.test(u.trim())) d.execCommand("createLink", false, u.trim());
+      }
+    });
+  });
+  $("a-title").addEventListener("input", function () {
+    if (!editingId && !$("a-slug").dataset.touched) $("a-slug").value = slugify($("a-title").value);
+  });
+  $("a-slug").addEventListener("input", function () { $("a-slug").dataset.touched = "1"; });
+
   // ---- articles -----------------------------------------------------------
   var articles = [];
   var editingId = null;
@@ -392,6 +430,7 @@
           h("div", { class: "issue__credit", text: [when, a.section, a.byline].filter(Boolean).join(" · ") })
         ]),
         h("div", { class: "mg-item__actions" }, [
+          a.slug ? h("a", { class: "btn btn--plain btn--small", href: "article.html?slug=" + encodeURIComponent(a.slug), target: "_blank", text: "View", "aria-label": "View " + a.title }) : null,
           h("button", { type: "button", class: "btn btn--plain btn--small", text: "Edit", "aria-label": "Edit " + a.title, onclick: function () { editArticle(a); } }),
           h("button", { type: "button", class: "btn btn--plain btn--small", text: "Delete", "aria-label": "Delete " + a.title, onclick: function () { deleteArticle(a); } })
         ])
@@ -403,6 +442,7 @@
 
   function resetArticleForm() {
     editingId = null; $("art-form").reset();
+    ed.innerHTML = ""; delete $("a-slug").dataset.touched;
     $("art-form-title").textContent = "Add an article";
     show($("art-new"), false); say($("art-err"), "");
     paintArticles();
@@ -413,6 +453,12 @@
     $("a-title").value = a.title || ""; $("a-date").value = a.published_on || "";
     $("a-byline").value = a.byline || ""; $("a-section").value = a.section || "";
     $("a-issue").value = a.issue_ym || ""; $("a-url").value = a.url || "";
+    $("a-excerpt").value = a.excerpt || ""; $("a-free").checked = !!a.free; $("a-slug").value = a.slug || "";
+    ed.innerHTML = "";
+    var forId = a.id;
+    client.from("article_bodies").select("body_html").eq("article_id", a.id).maybeSingle().then(function (r) {
+      if (editingId === forId) ed.innerHTML = S.clean((r.data && r.data.body_html) || "");
+    });
     show($("art-new"), true); say($("art-err"), ""); say($("art-said"), "");
     paintArticles(); $("a-title").focus();
   }
@@ -426,13 +472,22 @@
     if (!title) { say($("art-err"), "Give the article its headline."); $("a-title").focus(); return; }
     if (url && /^[a-z][a-z0-9+.-]*:/i.test(url) && !/^https?:\/\//i.test(url)) { say($("art-err"), "The link must start with https:// or be a page on this site."); return; }
     say($("art-err"), "");
+    var slug = slugify($("a-slug").value || title);
+    if (!slug) { say($("art-err"), "Give the article a web address: letters, numbers and dashes."); return; }
+    var bodyHtml = S.clean(ed.innerHTML);
     var row = { title: title, published_on: $("a-date").value || null, byline: $("a-byline").value.trim(),
-                section: $("a-section").value.trim(), issue_ym: $("a-issue").value || null, url: url || null };
-    var btn = $("art-save"); busy(btn, true, "Saving…");
-    var q = editingId ? client.from("archive_articles").update(row).eq("id", editingId) : client.from("archive_articles").insert(row);
+                section: $("a-section").value.trim(), issue_ym: $("a-issue").value || null, url: url || null,
+                excerpt: $("a-excerpt").value.trim(), free: $("a-free").checked, slug: slug };
+    var btn = $("art-save"); busy(btn, true, "Saving\u2026");
+    var q = editingId ? client.from("archive_articles").update(row).eq("id", editingId).select("id").single()
+                      : client.from("archive_articles").insert(row).select("id").single();
     q.then(function (r) {
+      if (r.error) return r;
+      var id = (r.data && r.data.id) || editingId;
+      return client.from("article_bodies").upsert({ article_id: id, body_html: bodyHtml, preview_html: S.preview(bodyHtml, 2) });
+    }).then(function (r) {
       busy(btn, false);
-      if (r.error) { say($("art-err"), problem(r, "That did not save. Try again.")); return; }
+      if (r && r.error) { say($("art-err"), problem(r, "That did not save. Try again.")); return; }
       var was = editingId;
       resetArticleForm();
       say($("art-said"), was ? "Saved." : "Added to the archive.");
@@ -448,6 +503,8 @@
       loadArticles();
     });
   }
+
+  w.DBWManage = { reloadArticles: function () { return loadArticles(); }, slugify: slugify, articles: function () { return articles; } };
 
   // ---- members (admins) ---------------------------------------------------
   var TIER_KEYS = ["free", "online", "print", "everything", "vip", "business"];

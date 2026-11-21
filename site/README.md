@@ -12,6 +12,7 @@ Static HTML/CSS/JS for dbw-news.com, built from the Claude Design handoff in
 | `index.html` | `project/DBW News Home.dc.html` (preview version: masthead, the issue on the stand, every issue) |
 | `member-profile.html` | `project/Member Profile.dc.html` (Subscription and Settings tabs) |
 | `manage.html` | Staff workspace (new): issues, covers, page scans from a PDF, archive articles, members' levels, staff |
+| `article.html` | `project/Article Template.dc.html`: one story, `article.html?slug=…`, with the paywall card |
 | `policies.html` | `project/Policies.dc.html` (v1.1, renamed to Dynamic Black Women Media, Inc.) |
 
 ## Shared files
@@ -73,6 +74,20 @@ It is split into pages in the browser and uploaded. By hand:
 Upload scans to the `issue-pages` bucket as `YYYY-MM/001.jpg`, `002.jpg`, …
 (zero-padded, so they sort in page order). The archive's reader shows them
 two at a time and works out the page count itself.
+
+## Articles
+
+Run the fourth migration (`…030000_articles.sql`). Stories live in
+`archive_articles` (listing) and `article_bodies` (the text). Readers get the
+text through `read_article(slug)`, which applies the paywall in the database:
+free stories to everyone; stories over a year old to any account; newer ones
+to site levels; everyone else the first two paragraphs.
+
+Bring the Wix blog over from the workspace: Articles → "Bring articles over
+from Wix" → choose the export's `.md` (and `.json`) files. Old addresses
+`/post/<slug>` redirect to `article.html?slug=<slug>` (see `_redirects`).
+Cover images still load from Wix's image servers; copy them over before the
+Wix site is closed.
 
 ## How accounts work
 

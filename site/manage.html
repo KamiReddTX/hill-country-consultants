@@ -100,6 +100,21 @@
     <section id="p-articles" role="tabpanel" aria-labelledby="t-articles" class="mg-grid" hidden>
       <div>
         <div class="section-head"><h2>Archive articles</h2><span class="section-head__note" id="art-note"></span></div>
+        <details class="card import" id="import">
+          <summary class="import__sum">Bring articles over from Wix</summary>
+          <p class="mg-p">Choose the files from your Wix export folder: the <strong>.md</strong> files (and the <strong>.json</strong> files beside them, if you have them). You can select them all at once. Nothing is saved until you check the list and press Import.</p>
+          <div class="mg-row">
+            <label class="field"><span class="field-label">Export files</span><input type="file" id="im-files" accept=".md,.json,text/markdown,application/json" multiple></label>
+            <label class="field"><span class="field-label">Or the whole folder</span><input type="file" id="im-folder" multiple></label>
+          </div>
+          <label class="field"><span class="field-label">Byline for these articles (optional)</span><input type="text" id="im-byline" maxlength="200" placeholder="The export does not carry author names"></label>
+          <div class="mg-progress" id="im-status" role="status" aria-live="polite"></div>
+          <div class="mg-table-wrap" id="im-preview-wrap" hidden><table class="mg-table" id="im-preview">
+            <thead><tr><th scope="col">Headline</th><th scope="col">Ran</th><th scope="col">Section</th><th scope="col">Words</th><th scope="col">Will</th></tr></thead><tbody></tbody>
+          </table></div>
+          <div class="error" id="im-err" role="alert" hidden></div>
+          <div class="actions actions--top"><button type="button" class="btn btn--ink" id="im-go" hidden>Import</button></div>
+        </details>
         <label class="field"><span class="field-label">Find</span><input type="search" id="art-find" placeholder="Title, byline or section"></label>
         <ul class="mg-list mg-list--plain" id="art-list"></ul>
       </div>
@@ -110,7 +125,23 @@
         <label class="field"><span class="field-label">Byline</span><input type="text" id="a-byline" maxlength="200"></label>
         <label class="field"><span class="field-label">Section</span><input type="text" id="a-section" maxlength="120" placeholder="For example: The Money"></label>
         <label class="field"><span class="field-label">Issue</span><input type="month" id="a-issue"><span class="hint">Leave empty to file it by the date it ran. Work from before the first issue is listed on its own.</span></label>
-        <label class="field"><span class="field-label">Link to the story</span><input type="text" id="a-url" maxlength="500" placeholder="https://… or a page on this site"></label>
+        <label class="field"><span class="field-label">Standfirst</span><textarea id="a-excerpt" rows="2" maxlength="600" placeholder="One or two sentences under the headline"></textarea></label>
+        <div class="field">
+          <span class="field-label" id="a-body-label">The story</span>
+          <div class="editor-bar" role="toolbar" aria-label="Formatting" aria-controls="a-body">
+            <button type="button" data-cmd="bold" aria-label="Bold"><b>B</b></button>
+            <button type="button" data-cmd="italic" aria-label="Italic"><i>I</i></button>
+            <button type="button" data-cmd="h2" aria-label="Subheading">Subhead</button>
+            <button type="button" data-cmd="quote" aria-label="Pull quote">Quote</button>
+            <button type="button" data-cmd="list" aria-label="Bulleted list">List</button>
+            <button type="button" data-cmd="link" aria-label="Add a link">Link</button>
+            <button type="button" data-cmd="plain" aria-label="Clear formatting">Clear</button>
+          </div>
+          <div class="editor" id="a-body" contenteditable="true" role="textbox" aria-multiline="true" aria-labelledby="a-body-label" data-placeholder="Type or paste the story here. Formatting from Word or Google Docs is kept and tidied."></div>
+        </div>
+        <label class="check check--top"><input type="checkbox" id="a-free"><span>Free to everyone, even without an account (letters, and anything the editor opens)</span></label>
+        <label class="field field--gap"><span class="field-label">Web address</span><input type="text" id="a-slug" maxlength="200" placeholder="filled in from the headline"><span class="hint">The story's page is article.html?slug= followed by this. Lowercase letters, numbers and dashes.</span></label>
+        <label class="field"><span class="field-label">Link elsewhere instead (optional)</span><input type="text" id="a-url" maxlength="500" placeholder="Only if the story lives on another site"></label>
         <div class="error" id="art-err" role="alert" hidden></div>
         <div class="said" id="art-said" role="status" hidden></div>
         <div class="actions">
@@ -155,7 +186,8 @@
       <div class="mg-help">
         <div><h3>Put a new issue on the site</h3><p>Issues &rarr; fill in the month, number, title and who is on the cover, choose the cover image, Save. The newest issue that has reached its online date (the 8th) shows on the home page; before then it shows as "Coming next".</p></div>
         <div><h3>Let subscribers read an issue</h3><p>Page scans &rarr; choose the issue, choose the PDF, Upload. Keep this tab open until it says every page is done. Only readers whose level includes the site can open them.</p></div>
-        <div><h3>Add an old story to the archive</h3><p>Articles &rarr; headline, the date it ran, byline and section, and a link if it has a page. It is filed under its month automatically. Every story opens to any account a year after it ran.</p></div>
+        <div><h3>Bring the Wix articles over</h3><p>Articles &rarr; "Bring articles over from Wix" &rarr; choose the files from the export folder. Check the list, then Import. Articles already on the site are skipped, so running it twice is safe.</p></div>
+        <div><h3>Write or fix a story</h3><p>Articles &rarr; Edit (or the empty form for a new one). Type or paste into "The story"; the buttons make bold, italic, subheads, quotes, lists and links. Every story opens to any account a year after it ran; tick "Free to everyone" for letters.</p></div>
         <div><h3>Give someone a subscription by hand</h3><p>Members &rarr; find her, Change, pick the level and the date it ends, Save. She sees it the next time she opens a page.</p></div>
         <div><h3>Something looks wrong</h3><p>Nothing here can break the design of the site. If a save fails, the message says why. Write to the web team with the page and what you did.</p></div>
       </div>
@@ -168,6 +200,8 @@
 <script src="assets/js/issues.js"></script>
 <script src="assets/js/account.js"></script>
 <script src="assets/js/page.js"></script>
+<script src="assets/js/sanitize.js"></script>
 <script src="assets/js/manage.js"></script>
+<script src="assets/js/manage-import.js"></script>
 </body>
 </html>
