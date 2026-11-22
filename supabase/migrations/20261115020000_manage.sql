@@ -90,7 +90,7 @@ insert into public.issues (ym, no, title, featured, edition, blurb, cover_path) 
   ('2025-05', 5, 'A Mother''s Legacy of Leadership and Love', 'Dr. Nikki & Briana Harris', 'Mother''s Day Edition', '', 'assets/covers/2025-05.jpg'),
   ('2025-06', 6, 'The Architect of Fortitude: The Unbreakable Spirit', 'Kami Redd', 'Premier Edition (6 Month Birthday)', '', 'assets/covers/2025-06.jpg'),
   ('2025-07', 7, 'Reclaiming the Fourth: The Unfinished Promise of Freedom', '', '4th of July Edition', '', 'assets/covers/2025-07.jpg'),
-  ('2027-01', 8, 'Black Women Leading the Nation and the State of Georgia', '', '', 'The first issue of the relaunch.', ''),
+  ('2027-01', 8, 'The Power of Her: Then. Now. Next.', '', 'The Relaunch Issue', 'From Georgia’s Historic Election to America’s Political Future.', ''),
   ('2027-05', null, 'Should We Re-Segregate Our Children?', '', '', 'Six institutions: the classroom, the squad car, the exam room, the caseworker’s office, the newsroom, and the first job and first campus.', '')
 on conflict (ym) do nothing;
 

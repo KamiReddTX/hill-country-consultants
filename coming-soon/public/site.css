@@ -279,3 +279,7 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
   .sec__head h2 { font-size: 32px; }
   .strip { margin: 16px 0 0; padding: 0; grid-auto-flow: row; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-columns: auto; gap: 16px; overflow: visible; }
 }
+
+/* first issue: title lines */
+.first__then { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--red); margin: -4px 0 8px; }
+.first p.first__deck { font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.35; color: var(--ink); margin: 0 0 14px; }

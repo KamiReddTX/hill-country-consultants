@@ -28,9 +28,9 @@
       featured: "Kami Redd", edition: "Premier Edition (6 Month Birthday)", cover: "assets/covers/2025-06.jpg" },
     { ym: "2025-07", no: 7, title: "Reclaiming the Fourth: The Unfinished Promise of Freedom",
       featured: "", edition: "4th of July Edition", cover: "assets/covers/2025-07.jpg" },
-    { ym: "2027-01", no: 8, title: "Black Women Leading the Nation and the State of Georgia",
-      featured: "", edition: "", cover: "",
-      blurb: "The first issue of the relaunch." },
+    { ym: "2027-01", no: 8, title: "The Power of Her: Then. Now. Next.",
+      featured: "", edition: "The Relaunch Issue", cover: "",
+      blurb: "From Georgia\u2019s Historic Election to America\u2019s Political Future." },
     // Numbered once February to April are set.
     { ym: "2027-05", no: null, title: "Should We Re-Segregate Our Children?",
       featured: "", edition: "", cover: "",
