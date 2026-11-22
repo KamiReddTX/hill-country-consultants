@@ -75,15 +75,13 @@ HEAD = """<!DOCTYPE html>
 """
 
 BAR = """<header class="bar dark">
-  <div class="bar__in">
-    <a class="bar__brand" href="index.html"><img src="dbw-news-seal-64.png" alt="" width="36" height="36">DBW News</a>
-    <div class="bar__right">
+  <div class="bar__in bar__in--three">
     <a class="bar__give" href="donate.html">Donate</a>
+    <a class="bar__brand" href="index.html"><img src="dbw-news-seal-64.png" alt="" width="36" height="36">DBW News</a>
     <details class="menu">
       <summary class="menu__btn"><span class="menu__icon" aria-hidden="true"></span>Menu</summary>
       <nav class="menu__list" aria-label="Site menu">{links}</nav>
     </details>
-    </div>
   </div>
   <nav class="tabs" aria-label="Site">{links}</nav>
 </header>

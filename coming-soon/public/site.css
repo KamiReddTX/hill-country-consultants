@@ -238,3 +238,15 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
 
 .tile--read { min-height: 80px; }
 .tile--read::after { content: "\2197"; }
+
+/* ---- header: Donate left, logo centred, Menu right --------------------- */
+.bar__in--three { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 10px; flex-wrap: nowrap; }
+.bar__in--three .bar__give { justify-self: start; }
+.bar__in--three .bar__brand { justify-self: center; }
+.bar__in--three .menu { justify-self: end; }
+@media (max-width: 360px) { .bar__in--three .bar__brand { font-size: 0; gap: 0; } }
+@media (min-width: 900px) {
+  /* Wide screens show the tabs, so the Menu button goes and Donate moves right. */
+  .bar__in--three .bar__give { grid-column: 3; grid-row: 1; justify-self: end; }
+  .bar__in--three .bar__brand { grid-column: 2; grid-row: 1; }
+}
