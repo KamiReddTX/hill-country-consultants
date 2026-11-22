@@ -64,6 +64,20 @@ def past_issues() -> str:
     return '<ul class="issues">' + "".join(cards) + "</ul>"
 
 
+def past_issues_strip() -> str:
+    """The home page row: every past issue's cover, newest first."""
+    items = []
+    for ym, no, month, title, featured, edition in reversed(PAST_ISSUES):
+        link = FLIPBOOKS.get(ym, "")
+        ok = link.startswith("https://heyzine.com/")
+        img = '<img src="covers/{}.jpg" alt="{} cover, Issue #{}: {}" width="600" height="783" loading="lazy">'.format(ym, month, no, html.escape(title))
+        cover = '<a href="{}" rel="noopener">{}</a>'.format(html.escape(link, quote=True), img) if ok else img
+        read = '<a class="strip__read" href="{}" rel="noopener">Read</a>'.format(html.escape(link, quote=True)) if ok else ""
+        items.append('<li class="strip__item"><div class="strip__cover">{}</div><div class="strip__meta">{} &middot; #{}</div>{}</li>'.format(
+            cover, month.replace(" 2025", ""), no, read))
+    return '<ul class="strip">' + "".join(items) + "</ul>"
+
+
 DONATE_ONCE = ""
 DONATE_MONTHLY = ""
 
@@ -183,6 +197,7 @@ def build(src: pathlib.Path) -> None:
         out += BAR.format(links=links)
     body = body.replace("<!--GIVE-BUTTONS-->", give_buttons())
     body = body.replace("<!--PAST-ISSUES-->", past_issues())
+    body = body.replace("<!--PAST-ISSUES-STRIP-->", past_issues_strip())
     out += body.rstrip() + "\n\n" + FOOT
     uses_form = "data-dbw-form" in body
     if uses_form:

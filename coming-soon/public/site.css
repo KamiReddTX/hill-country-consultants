@@ -263,3 +263,19 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
 .issue .btn { margin-top: 6px; padding: 12px 10px; min-height: 44px; font-size: 10px; }
 .issue__soon { margin-top: 6px; display: block; text-align: center; border: 1px dashed var(--rule-2); padding: 11px 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); font-weight: 600; }
 @media (min-width: 721px) { .issues { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px 24px; } .issue__title { font-size: 21px; } }
+
+/* ---- home: past-issues strip (swipe on phones, one row on computers) ---- */
+.sec__head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px 16px; flex-wrap: wrap; }
+.sec__head h2 { font-family: var(--serif); font-size: 28px; line-height: 1.12; font-weight: 600; margin: 0 0 6px; }
+.strip { list-style: none; margin: 14px -20px 0; padding: 0 20px 8px; display: grid; grid-auto-flow: column; grid-auto-columns: 40%; gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding-inline: 20px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+.strip__item { scroll-snap-align: start; display: flex; flex-direction: column; gap: 6px; }
+.strip__cover { border: 1px solid var(--rule); background: var(--white); padding: 4px; }
+.strip__cover img { display: block; width: 100%; height: auto; aspect-ratio: 600 / 783; object-fit: cover; }
+.strip__cover a { display: block; }
+.strip__meta { font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); font-weight: 700; }
+.strip__read { align-self: flex-start; display: inline-block; padding: 8px 12px; min-height: 36px; background: var(--ink); color: var(--paper); text-decoration: none; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; font-weight: 700; }
+.strip__read:hover { background: var(--red); color: var(--paper); }
+@media (min-width: 721px) {
+  .sec__head h2 { font-size: 32px; }
+  .strip { margin: 16px 0 0; padding: 0; grid-auto-flow: row; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-columns: auto; gap: 16px; overflow: visible; }
+}
