@@ -53,7 +53,7 @@ def past_issues() -> str:
             cover = '<a href="{}" rel="noopener" aria-label="Read the {} issue">{}</a>'.format(html.escape(link, quote=True), month, cover)
             action = '<a class="btn btn--ink btn--block" href="{}" rel="noopener">Read the issue</a>'.format(html.escape(link, quote=True))
         else:
-            action = '<span class="issue__soon">Flipbook coming soon</span>'
+            action = ""  # just the cover until its flipbook link is added
         cards.append(
             '<li class="issue"><div class="issue__cover">{cover}</div>'
             '<div class="issue__when">{month} &middot; Issue #{no}</div>'
