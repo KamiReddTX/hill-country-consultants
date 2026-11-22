@@ -18,7 +18,11 @@ SITE = "https://www.dbw-news.com"
 
 NAV = [
     ("home", "index.html", "Home"),
-    ("involved", "index.html#get-involved", "Get involved"),
+    ("her-flowers", "her-flowers.html", "Her Flowers"),
+    ("she-showed-up", "she-showed-up.html", "She Showed Up"),
+    ("be-featured", "be-featured.html", "Be Featured"),
+    ("letters", "letters.html", "DBW Letters"),
+    ("write-for-us", "write-for-us.html", "Write for Us"),
     ("advertise", "advertise.html", "Advertise"),
 ]
 
@@ -50,8 +54,12 @@ HEAD = """<!DOCTYPE html>
 BAR = """<header class="bar dark">
   <div class="bar__in">
     <a class="bar__brand" href="index.html"><img src="dbw-news-seal-64.png" alt="" width="36" height="36">DBW News</a>
-    <nav class="bar__nav" aria-label="Site">{links}</nav>
+    <details class="menu">
+      <summary class="menu__btn"><span class="menu__icon" aria-hidden="true"></span>Menu</summary>
+      <nav class="menu__list" aria-label="Site menu">{links}</nav>
+    </details>
   </div>
+  <nav class="tabs" aria-label="Site">{links}</nav>
 </header>
 """
 
@@ -89,7 +97,7 @@ def build(src: pathlib.Path) -> None:
         canonical=canonical,
         site=SITE,
     )
-    nav = meta.get("nav", "none")
+    nav = meta.get("nav", name.replace(".html", ""))
     if nav != "hero":
         links = "".join(
             '<a href="{}"{}>{}</a>'.format(href, ' aria-current="page"' if key == nav else "", label)
