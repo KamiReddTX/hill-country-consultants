@@ -20,6 +20,50 @@ SITE = "https://www.dbw-news.com"
 # "Customers choose what to pay"). Paste each link between the quotes and run
 # this script. While a link is empty, the Donate page explains how to give by
 # check instead of showing a button that goes nowhere.
+# Heyzine flipbook links for past issues. Paste each issue's share link
+# (https://heyzine.com/flip-book/...) and run this script; the issue's
+# "Read the issue" button switches on.
+FLIPBOOKS = {
+    "2025-01": "",
+    "2025-02": "",
+    "2025-03": "",
+    "2025-04": "",
+    "2025-05": "",
+    "2025-06": "",
+}
+
+PAST_ISSUES = [
+    ("2025-01", 1, "January 2025", "Turning Purpose to Profit", "June Marie Outlaw", "Premier Edition"),
+    ("2025-02", 2, "February 2025", "I See My Baby Inc.", "Alicia Hurtt", ""),
+    ("2025-03", 3, "March 2025", "WorxK Solutions", "Dr. Kristy Taylor", "Women's History Month Edition"),
+    ("2025-04", 4, "April 2025", "Publishing Conscious Dreams", "Daniella Blechner", ""),
+    ("2025-05", 5, "May 2025", "A Mother's Legacy of Leadership and Love", "Dr. Nikki & Briana Harris", "Mother's Day Edition"),
+    ("2025-06", 6, "June 2025", "The Architect of Fortitude: The Unbreakable Spirit", "Kami Redd", "Premier Edition (6 Month Birthday)"),
+]
+
+
+def past_issues() -> str:
+    cards = []
+    for ym, no, month, title, featured, edition in reversed(PAST_ISSUES):
+        link = FLIPBOOKS.get(ym, "")
+        ok = link.startswith("https://heyzine.com/")
+        credit = " &middot; ".join(x for x in [("Featuring " + html.escape(featured)) if featured else "", html.escape(edition)] if x)
+        cover = '<img src="covers/{}.jpg" alt="{} cover, Issue #{}" width="600" height="783" loading="lazy">'.format(ym, month, no)
+        if ok:
+            cover = '<a href="{}" rel="noopener" aria-label="Read the {} issue">{}</a>'.format(html.escape(link, quote=True), month, cover)
+            action = '<a class="btn btn--ink btn--block" href="{}" rel="noopener">Read the issue</a>'.format(html.escape(link, quote=True))
+        else:
+            action = '<span class="issue__soon">Flipbook coming soon</span>'
+        cards.append(
+            '<li class="issue"><div class="issue__cover">{cover}</div>'
+            '<div class="issue__when">{month} &middot; Issue #{no}</div>'
+            '<h3 class="issue__title">{title}</h3>'
+            '{credit}{action}</li>'.format(
+                cover=cover, month=month, no=no, title=html.escape(title),
+                credit=('<div class="issue__credit">' + credit + '</div>') if credit else "", action=action))
+    return '<ul class="issues">' + "".join(cards) + "</ul>"
+
+
 DONATE_ONCE = ""
 DONATE_MONTHLY = ""
 
@@ -40,6 +84,7 @@ def give_buttons() -> str:
 
 NAV = [
     ("home", "index.html", "Home"),
+    ("past-issues", "past-issues.html", "Past Issues"),
     ("her-flowers", "her-flowers.html", "Her Flowers"),
     ("she-showed-up", "she-showed-up.html", "She Showed Up"),
     ("be-featured", "be-featured.html", "Be Featured"),
@@ -100,6 +145,7 @@ FOOT = """<footer class="dark">
       <a href="donate.html">Donate</a>
     </nav>
     <nav class="foot__links foot__links--social" aria-label="Listen and follow">
+      <a href="past-issues.html">Past issues</a>
       <a href="https://chefkami.wixsite.com/dear-black-woman" rel="noopener">Past articles</a>
       <a href="https://open.spotify.com/show/3oVotvLqIbKtIohgXUTTph" rel="noopener">Podcast on Spotify</a>
       <a href="https://podcasts.apple.com/us/podcast/dear-black-woman/id1775101234" rel="noopener">Apple Podcasts</a>
@@ -136,6 +182,7 @@ def build(src: pathlib.Path) -> None:
         )
         out += BAR.format(links=links)
     body = body.replace("<!--GIVE-BUTTONS-->", give_buttons())
+    body = body.replace("<!--PAST-ISSUES-->", past_issues())
     out += body.rstrip() + "\n\n" + FOOT
     uses_form = "data-dbw-form" in body
     if uses_form:

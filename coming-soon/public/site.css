@@ -250,3 +250,16 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
   .bar__in--three .bar__give { grid-column: 3; grid-row: 1; justify-self: end; }
   .bar__in--three .bar__brand { grid-column: 2; grid-row: 1; }
 }
+
+/* ---- past issues ------------------------------------------------------- */
+.issues { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 14px; }
+.issue { display: flex; flex-direction: column; gap: 6px; }
+.issue__cover { border: 1px solid var(--rule); background: var(--white); padding: 6px; margin-bottom: 4px; }
+.issue__cover img { display: block; width: 100%; height: auto; aspect-ratio: 600 / 783; object-fit: cover; }
+.issue__cover a { display: block; }
+.issue__when { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); font-weight: 700; }
+.issue__title { font-family: var(--serif); font-size: 17px; line-height: 1.2; font-weight: 600; margin: 0; }
+.issue__credit { font-size: 12.5px; line-height: 1.45; color: var(--text-3); }
+.issue .btn { margin-top: 6px; padding: 12px 10px; min-height: 44px; font-size: 10px; }
+.issue__soon { margin-top: 6px; display: block; text-align: center; border: 1px dashed var(--rule-2); padding: 11px 8px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-3); font-weight: 600; }
+@media (min-width: 721px) { .issues { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 34px 24px; } .issue__title { font-size: 21px; } }
