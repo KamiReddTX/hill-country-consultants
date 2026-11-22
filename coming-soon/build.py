@@ -16,6 +16,28 @@ import pathlib
 ROOT = pathlib.Path(__file__).parent
 SITE = "https://www.dbw-news.com"
 
+# Stripe Payment Links for donations (Stripe dashboard > Payment Links,
+# "Customers choose what to pay"). Paste each link between the quotes and run
+# this script. While a link is empty, the Donate page explains how to give by
+# check instead of showing a button that goes nowhere.
+DONATE_ONCE = ""
+DONATE_MONTHLY = ""
+
+
+def give_buttons() -> str:
+    def ok(u):
+        return u.startswith("https://buy.stripe.com/") or u.startswith("https://donate.stripe.com/")
+    links = []
+    if ok(DONATE_ONCE):
+        links.append('<a class="btn btn--block" href="{}" rel="noopener">Give once</a>'.format(html.escape(DONATE_ONCE, quote=True)))
+    if ok(DONATE_MONTHLY):
+        links.append('<a class="btn btn--ink btn--block" href="{}" rel="noopener">Give monthly</a>'.format(html.escape(DONATE_MONTHLY, quote=True)))
+    if links:
+        return '<div class="give">' + "".join(links) + '</div><p class="fine">You choose the amount on the next screen, a secure Stripe checkout.</p>'
+    return ('<div class="give-soon"><strong>Online giving opens shortly.</strong> To give now, mail a check payable to '
+            'Dynamic Black Women Media, Inc. to Atlanta, Georgia, or write to '
+            '<a href="mailto:info@dbw-news.com?subject=I%20would%20like%20to%20give">info@dbw-news.com</a> and we will send you a secure link.</div>')
+
 NAV = [
     ("home", "index.html", "Home"),
     ("her-flowers", "her-flowers.html", "Her Flowers"),
@@ -24,6 +46,7 @@ NAV = [
     ("letters", "letters.html", "DBW Letters"),
     ("write-for-us", "write-for-us.html", "Write for Us"),
     ("advertise", "advertise.html", "Advertise"),
+    ("donate", "donate.html", "Donate"),
 ]
 
 HEAD = """<!DOCTYPE html>
@@ -54,10 +77,13 @@ HEAD = """<!DOCTYPE html>
 BAR = """<header class="bar dark">
   <div class="bar__in">
     <a class="bar__brand" href="index.html"><img src="dbw-news-seal-64.png" alt="" width="36" height="36">DBW News</a>
+    <div class="bar__right">
+    <a class="bar__give" href="donate.html">Donate</a>
     <details class="menu">
       <summary class="menu__btn"><span class="menu__icon" aria-hidden="true"></span>Menu</summary>
       <nav class="menu__list" aria-label="Site menu">{links}</nav>
     </details>
+    </div>
   </div>
   <nav class="tabs" aria-label="Site">{links}</nav>
 </header>
@@ -73,6 +99,7 @@ FOOT = """<footer class="dark">
       <a href="letters.html">DBW Letters</a>
       <a href="write-for-us.html">Write for us</a>
       <a href="advertise.html">Advertise</a>
+      <a href="donate.html">Donate</a>
     </nav>
     <nav class="foot__links foot__links--social" aria-label="Listen and follow">
       <a href="https://open.spotify.com/show/3oVotvLqIbKtIohgXUTTph" rel="noopener">Podcast on Spotify</a>
@@ -109,6 +136,7 @@ def build(src: pathlib.Path) -> None:
             for key, href, label in NAV
         )
         out += BAR.format(links=links)
+    body = body.replace("<!--GIVE-BUTTONS-->", give_buttons())
     out += body.rstrip() + "\n\n" + FOOT
     uses_form = "data-dbw-form" in body
     if uses_form:

@@ -221,3 +221,17 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
   .tile { min-height: 120px; padding: 18px; }
   .tile__name { font-size: 24px; }
 }
+
+/* ---- donate ------------------------------------------------------------ */
+.bar__right { display: flex; align-items: center; gap: 10px; }
+.bar__give { display: inline-flex; align-items: center; min-height: 44px; padding: 10px 14px; background: var(--gold); color: var(--ink); text-decoration: none; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; font-weight: 700; }
+.bar__give:hover { background: var(--cream); color: var(--ink); }
+.tabs a[href="donate.html"] { color: var(--gold); }
+.tiles__wide { grid-column: 1 / -1; }
+.tile--gold { background: var(--gold); border-color: var(--gold); color: var(--ink); min-height: 80px; }
+.tile--gold .tile__label, .tile--gold::after { color: var(--ink); }
+.tile--gold:hover { background: #D9B661; color: var(--ink); }
+.give { display: grid; gap: 10px; }
+.give-soon { border-left: 3px solid var(--gold); background: var(--gold-wash); padding: 14px 16px; font-size: 14.5px; line-height: 1.6; color: var(--text-2); }
+.give-soon strong { display: block; color: var(--ink); margin-bottom: 4px; }
+@media (min-width: 900px) { .bar__right .menu { display: none; } .give { grid-template-columns: 1fr 1fr; } }
