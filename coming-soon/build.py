@@ -50,8 +50,8 @@ def past_issues() -> str:
         credit = " &middot; ".join(x for x in [("Featuring " + html.escape(featured)) if featured else "", html.escape(edition)] if x)
         cover = '<img src="covers/{}.jpg" alt="{} cover, Issue #{}" width="600" height="783" loading="lazy">'.format(ym, month, no)
         if ok:
-            cover = '<a href="{}" rel="noopener" aria-label="Read the {} issue">{}</a>'.format(html.escape(link, quote=True), month, cover)
-            action = '<a class="btn btn--ink btn--block" href="{}" rel="noopener">Read the issue</a>'.format(html.escape(link, quote=True))
+            cover = '<a href="{}" target="_blank" rel="noopener" aria-label="Read the {} issue">{}</a>'.format(html.escape(link, quote=True), month, cover)
+            action = '<a class="btn btn--ink btn--block" href="{}" target="_blank" rel="noopener">Read the issue</a>'.format(html.escape(link, quote=True))
         else:
             action = ""  # just the cover until its flipbook link is added
         cards.append(
@@ -71,8 +71,8 @@ def past_issues_strip() -> str:
         link = FLIPBOOKS.get(ym, "")
         ok = link.startswith("https://heyzine.com/")
         img = '<img src="covers/{}.jpg" alt="{} cover, Issue #{}: {}" width="600" height="783" loading="lazy">'.format(ym, month, no, html.escape(title))
-        cover = '<a href="{}" rel="noopener">{}</a>'.format(html.escape(link, quote=True), img) if ok else img
-        read = '<a class="strip__read" href="{}" rel="noopener">Read</a>'.format(html.escape(link, quote=True)) if ok else ""
+        cover = '<a href="{}" target="_blank" rel="noopener">{}</a>'.format(html.escape(link, quote=True), img) if ok else img
+        read = '<a class="strip__read" href="{}" target="_blank" rel="noopener">Read</a>'.format(html.escape(link, quote=True)) if ok else ""
         items.append('<li class="strip__item"><div class="strip__cover">{}</div><div class="strip__meta">{} &middot; #{}</div>{}</li>'.format(
             cover, month.replace(" 2025", ""), no, read))
     return '<ul class="strip">' + "".join(items) + "</ul>"
