@@ -25,9 +25,9 @@ SITE = "https://www.dbw-news.com"
 # "Read the issue" button switches on.
 FLIPBOOKS = {
     "2025-01": "",
-    "2025-02": "",
-    "2025-03": "",
-    "2025-04": "",
+    "2025-02": "https://heyzine.com/flip-book/e92d3ae509.html",
+    "2025-03": "https://heyzine.com/flip-book/5ec4510182.html",
+    "2025-04": "https://heyzine.com/flip-book/621f1be39a.html",
     "2025-05": "",
     "2025-06": "",
 }
