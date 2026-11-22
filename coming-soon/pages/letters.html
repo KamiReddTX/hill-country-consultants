@@ -1,0 +1,76 @@
+title: DBW Letters · Write your letter · DBW News
+description: Write to your younger self, your mother, your daughter, a girl who did not make it, or the woman you are still becoming. DBW Letters run in print, online and on the podcast, under your name or none.
+nav: involved
+
+<div class="head">
+  <div class="label">First Words</div>
+  <h1>DBW Letters</h1>
+  <p>The letter that started all of this. Three run in print each month and more run online. Write to a younger self, to your mother, to your daughter, to a girl who did not make it, or to the woman you are still becoming.</p>
+</div>
+
+<main id="main">
+  <section class="sec" aria-labelledby="how-title">
+    <h2 id="how-title">Write it the way you would say it</h2>
+    <p>There is no word count and no right way to do this. Write it the way you would say it out loud. The desk edits lightly for clarity and never for tone.</p>
+    <p>If you are not sure where to start, write to the woman who needs to hear it. That might be your younger self, at the age things got hard. Your mother, or the version of her you understand now that you are grown. Your daughter, or the girl you hope she becomes. A friend you lost. The woman you are still becoming.</p>
+    <p>Write about what you carried and what you put down. What nobody warned you about. The thing you finally forgave. What you wish somebody had told you at twenty-three. A win nobody clapped for. It can be four lines or four pages. It can be a poem. It does not have to be finished, polished, or happy. It only has to be true.</p>
+    <p class="note"><strong>On the podcast:</strong> every episode of the Dear Black Woman podcast opens with a letter. Tick the box on the form and yours could be one of them.</p>
+  </section>
+
+  <section class="sec" id="write" aria-labelledby="w-title">
+    <div class="formbox">
+      <h2 id="w-title">Write your letter</h2>
+      <p>Your letter can run under your full name, your first name only, or fully anonymous. The choice is yours.</p>
+      <form name="letters" method="POST" data-netlify="true" netlify-honeypot="company" enctype="multipart/form-data" data-dbw-form data-done="lt-done" novalidate>
+        <input type="hidden" name="form-name" value="letters">
+        <input type="hidden" name="subject" value="DBW Letters: a new letter">
+        <label class="hp" aria-hidden="true">Leave this empty <input name="company" tabindex="-1" autocomplete="off"></label>
+
+        <fieldset class="choices" data-required="how you want to be credited">
+          <legend>How do you want to be credited? <b class="req">*</b></legend>
+          <label class="check"><input type="radio" name="credit" value="Full name"><span>Print my name as I type it below</span></label>
+          <label class="check"><input type="radio" name="credit" value="First name only"><span>First name only</span></label>
+          <label class="check"><input type="radio" name="credit" value="Anonymous"><span>Anonymous: no name, no city. It is credited as &ldquo;A reader.&rdquo;</span></label>
+        </fieldset>
+        <label class="check"><input type="checkbox" name="anon_print_only" value="yes"><span>Keep me anonymous in print only</span></label>
+        <label class="check"><input type="checkbox" name="anon_podcast_only" value="yes"><span>Keep me anonymous on the podcast only</span></label>
+
+        <fieldset class="part">
+          <legend>About you</legend>
+          <label class="field"><span>Your legal name <b class="req">*</b></span><input type="text" name="legal_name" autocomplete="name" required maxlength="120" placeholder="Your full name, for our records"><span class="hint">Held privately for copyright and permission. Not printed unless you chose to be named.</span></label>
+          <div class="two">
+            <label class="field"><span>Email <b class="req">*</b></span><input type="email" name="email" autocomplete="email" required maxlength="200" placeholder="So we can reach you before we print"></label>
+            <label class="field"><span>City</span><input type="text" name="city" maxlength="120" placeholder="City, state or country"></label>
+          </div>
+          <label class="field"><span>Phone (optional)</span><input type="tel" name="phone" autocomplete="tel" inputmode="tel" maxlength="30"></label>
+        </fieldset>
+
+        <fieldset class="part">
+          <legend>Your letter</legend>
+          <label class="field"><span>Who is it to?</span>
+            <select name="to">
+              <option>My younger self</option><option>My mother</option><option>My daughter</option>
+              <option>A girl who did not make it</option><option>The woman I am still becoming</option><option>Someone else</option>
+            </select>
+          </label>
+          <label class="field field--letter"><span>Your letter <b class="req">*</b></span><textarea name="letter" required maxlength="20000" placeholder="Dear &hellip;"></textarea></label>
+          <label class="field"><span>Photographs (optional, up to 2)</span><input type="file" name="photo" accept="image/*" multiple data-max="2"><input type="file" name="photo-2" accept="image/*" hidden tabindex="-1" aria-hidden="true"><span class="hint">A photograph of you, or of the person you are writing to. Skip this and the letter runs as type.</span></label>
+          <label class="field"><span>Who took the photographs</span><input type="text" name="photo_credit" maxlength="150" placeholder="Photographer's name, or yours if you took them"></label>
+        </fieldset>
+
+        <div class="consent">
+          <div class="label">Permission to print</div>
+          <label class="check"><input type="checkbox" name="permission_publish" value="yes" data-must><span>I give Dynamic Black Women Media permission to publish this letter and any photographs I have uploaded, in the print magazine, on the website, in email, on the podcast and on social media, and to keep it in the archive, under the credit I chose above.</span></label>
+          <label class="check"><input type="checkbox" name="own_work" value="yes" data-must><span>This letter is my own original writing, and any photograph is mine to share or I have the permission of the person who took it and the people in it. If anyone pictured is under eighteen, their parent or guardian has agreed.</span></label>
+          <label class="check"><input type="checkbox" name="no_ai" value="yes" data-must><span>I wrote this myself. No part of it was generated by AI.</span></label>
+          <label class="check"><input type="checkbox" name="may_edit" value="yes"><span>You may edit my letter lightly for length and clarity.</span></label>
+          <label class="check"><input type="checkbox" name="may_read_aloud" value="yes"><span>You may read my letter aloud on the Dear Black Woman podcast.</span></label>
+        </div>
+        <p class="small">Submitting does not guarantee publication, and your letter may be edited for length, clarity, and accuracy. You keep the copyright in your own words; this permission is a license to publish, not a transfer of ownership. If you name another living person, the desk may ask you to change a detail before it prints. Write to us at any time and an unpublished letter is withdrawn.</p>
+        <p class="err" data-err role="alert" tabindex="-1" hidden></p>
+        <button type="submit" class="btn btn--block">Send my letter</button>
+      </form>
+      <div class="done" id="lt-done" role="status" hidden tabindex="-1"><strong>Your letter is with the editors.</strong> Every letter is read, and a selection is printed each month. If yours is chosen, the desk writes to you before it runs.</div>
+    </div>
+  </section>
+</main>

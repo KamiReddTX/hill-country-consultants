@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#14110F">
+<title>Be featured · She Owns It · DBW News</title>
+<meta name="description" content="DBW News features Black women business owners in She Owns It: what she built, what it cost her, and how the numbers really look. Put yourself forward, or nominate a business woman you know.">
+<link rel="canonical" href="https://www.dbw-news.com/be-featured">
+<meta property="og:site_name" content="DBW News">
+<meta property="og:title" content="Be featured · She Owns It · DBW News">
+<meta property="og:description" content="DBW News features Black women business owners in She Owns It: what she built, what it cost her, and how the numbers really look. Put yourself forward, or nominate a business woman you know.">
+<meta property="og:image" content="https://www.dbw-news.com/dbw-news-seal-512.png">
+<meta name="twitter:card" content="summary">
+<link rel="icon" type="image/png" href="dbw-news-seal-64.png">
+<link rel="apple-touch-icon" href="dbw-news-seal-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Archivo:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to the page</a>
+<header class="bar dark">
+  <div class="bar__in">
+    <a class="bar__brand" href="index.html"><img src="dbw-news-seal-64.png" alt="" width="36" height="36">DBW News</a>
+    <nav class="bar__nav" aria-label="Site"><a href="index.html">Home</a><a href="index.html#get-involved" aria-current="page">Get involved</a><a href="advertise.html">Advertise</a></nav>
+  </div>
+</header>
+<div class="head">
+  <div class="label">The Money &middot; She Owns It</div>
+  <h1>Be featured</h1>
+  <p>A Black woman business owner: what she built, what it cost her, and how the numbers actually look. If that is you, or a woman you know, tell us about the business. Put yourself forward; you do not have to wait to be found.</p>
+</div>
+
+<main id="main">
+  <section class="sec" aria-labelledby="how-title">
+    <h2 id="how-title">How it works</h2>
+    <ol class="steps">
+      <li>Tell us about the business below. It takes about ten minutes.</li>
+      <li>An editor reads every submission and checks the business is real and running.</li>
+      <li>If it is a fit for an upcoming issue, she is contacted for an interview and photographs.</li>
+      <li>She sees nothing printed about her without her own permission.</li>
+    </ol>
+    <p class="note">Being featured is editorial: it is never sold, and a feature cannot be bought. If you would like to promote your business, that is <a href="advertise.html">advertising</a>, and it is kept apart from the stories.</p>
+  </section>
+
+  <section class="sec" id="apply" aria-labelledby="apply-title">
+    <div class="formbox">
+      <h2 id="apply-title">Tell us about the business</h2>
+      <p><b class="req">*</b> Required.</p>
+      <form name="be-featured" method="POST" data-netlify="true" netlify-honeypot="company" enctype="multipart/form-data" data-dbw-form data-done="bf-done" novalidate>
+        <input type="hidden" name="form-name" value="be-featured">
+        <input type="hidden" name="subject" value="She Owns It: a business to feature">
+        <label class="hp" aria-hidden="true">Leave this empty <input name="company" tabindex="-1" autocomplete="off"></label>
+
+        <fieldset class="choices" data-required="who is this for">
+          <legend>Who is this for? <b class="req">*</b></legend>
+          <label class="check"><input type="radio" name="for_whom" value="Myself"><span>I am the owner, and I would like to be featured</span></label>
+          <label class="check"><input type="radio" name="for_whom" value="Someone I know"><span>I am nominating a business woman I know</span></label>
+        </fieldset>
+
+        <fieldset class="part">
+          <legend>The owner</legend>
+          <div class="two">
+            <label class="field"><span>Owner's full name <b class="req">*</b></span><input type="text" name="owner_name" required maxlength="120"></label>
+            <label class="field"><span>Owner's email <b class="req">*</b></span><input type="email" name="email" required maxlength="200"></label>
+            <label class="field"><span>Owner's phone <b class="req">*</b></span><input type="tel" name="phone" inputmode="tel" required maxlength="30"></label>
+            <label class="field"><span>City <b class="req">*</b></span><input type="text" name="city" required maxlength="120" placeholder="City, state or country"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="part">
+          <legend>The business</legend>
+          <div class="two">
+            <label class="field"><span>Business name <b class="req">*</b></span><input type="text" name="business" required maxlength="150"></label>
+            <label class="field"><span>Industry</span><input type="text" name="industry" maxlength="120" placeholder="e.g. food, beauty, tech, construction"></label>
+            <label class="field"><span>Website or Instagram</span><input type="text" name="website" maxlength="300" placeholder="Where readers can find it"></label>
+            <label class="field"><span>Year it opened</span><input type="text" name="opened" inputmode="numeric" maxlength="20"></label>
+          </div>
+          <label class="field"><span class="q">What did she build, and who is it for? <b class="req">*</b></span><textarea name="what_built" required maxlength="4000"></textarea></label>
+          <label class="field"><span class="q">What did it cost her to get here, and what was she told she could not do? <b class="req">*</b></span><textarea name="what_it_cost" required maxlength="4000" placeholder="Money, time, loans turned down, the moments it nearly closed."></textarea></label>
+          <label class="field"><span class="q">How do the numbers actually look? (optional)</span><textarea name="numbers" maxlength="4000" placeholder="Staff, customers, years in business, revenue if she is willing to share it. Nothing is printed without her agreement."></textarea></label>
+          <label class="field"><span class="q">What should other women starting out know?</span><textarea name="advice" maxlength="4000"></textarea></label>
+        </fieldset>
+
+        <fieldset class="part">
+          <legend>About you (if you are nominating her)</legend>
+          <div class="two">
+            <label class="field"><span>Your name</span><input type="text" name="nominator_name" autocomplete="name" maxlength="120"></label>
+            <label class="field"><span>Your email</span><input type="email" name="nominator_email" autocomplete="email" maxlength="200"></label>
+          </div>
+        </fieldset>
+
+        <fieldset class="part">
+          <legend>Photos (optional)</legend>
+          <label class="field"><span>Her, the business, the work (up to 3)</span><input type="file" name="photo" accept="image/*" multiple data-max="3"><input type="file" name="photo-2" accept="image/*" hidden tabindex="-1" aria-hidden="true"><input type="file" name="photo-3" accept="image/*" hidden tabindex="-1" aria-hidden="true"><span class="hint">Large phone photos are fine; they are made smaller before sending.</span></label>
+          <label class="field"><span>Who took the pictures</span><input type="text" name="photo_credit" maxlength="200"></label>
+        </fieldset>
+
+        <div class="consent">
+          <div class="label">Permission</div>
+          <label class="check"><input type="checkbox" name="true_statement" value="yes" data-must><span>What I have written here is true to the best of my knowledge, and it can be confirmed.</span></label>
+          <label class="check"><input type="checkbox" name="consent" value="yes" data-must><span>If I am nominating someone, she knows and is willing to be contacted. If I am the owner, I am willing to be interviewed and photographed.</span></label>
+          <label class="check"><input type="checkbox" name="photo_rights" value="yes" data-must><span>Any photograph I upload is mine to share, or I have the permission of the person who took it and of everyone in it.</span></label>
+          <label class="check"><input type="checkbox" name="permission_publish" value="yes" data-must><span>I give Dynamic Black Women Media permission to use the words and images I have submitted in the print magazine, on the website, in email, on social media and on the podcast, and to keep them in the archive.</span></label>
+        </div>
+        <p class="small">Submitting does not guarantee a feature, and anything printed may be edited for length, clarity, and accuracy. Every business is verified, and the owner gives her own permission before anything about her runs. A feature is never sold.</p>
+        <p class="err" data-err role="alert" tabindex="-1" hidden></p>
+        <button type="submit" class="btn btn--block">Send it to the editors</button>
+      </form>
+      <div class="done" id="bf-done" role="status" hidden tabindex="-1"><strong>Received.</strong> An editor reads every submission. If it is a fit for an upcoming issue, the desk will be in touch with the owner.</div>
+    </div>
+  </section>
+</main>
+
+<footer class="dark">
+  <div class="foot">
+    <strong>DBW News</strong>
+    <nav class="foot__links" aria-label="Get involved">
+      <a href="her-flowers.html">Her Flowers</a>
+      <a href="she-showed-up.html">She Showed Up</a>
+      <a href="be-featured.html">Be featured</a>
+      <a href="letters.html">DBW Letters</a>
+      <a href="write-for-us.html">Write for us</a>
+      <a href="advertise.html">Advertise</a>
+      <a href="https://www.instagram.com/dbwnews" rel="noopener">Instagram</a>
+    </nav>
+    Dynamic Black Women Media, Inc. (formerly Dear Black Woman Media, Inc.) is a 501(c)(3) public charity (509(a)(2)). Contributions are tax-deductible to the extent allowed by law. EIN: 33-3726585. Published by Redd Ladys Chronicles Publishing &amp; Production.
+    <div class="foot__row">
+      <span><a href="mailto:info@dbw-news.com">info@dbw-news.com</a> &middot; (470) 236-1755</span>
+      <span>Atlanta, Georgia</span>
+    </div>
+  </div>
+</footer>
+<script src="form.js"></script>
+</body>
+</html>
