@@ -235,3 +235,6 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
 .give-soon { border-left: 3px solid var(--gold); background: var(--gold-wash); padding: 14px 16px; font-size: 14.5px; line-height: 1.6; color: var(--text-2); }
 .give-soon strong { display: block; color: var(--ink); margin-bottom: 4px; }
 @media (min-width: 900px) { .bar__right .menu { display: none; } .give { grid-template-columns: 1fr 1fr; } }
+
+.tile--read { min-height: 80px; }
+.tile--read::after { content: "\2197"; }
