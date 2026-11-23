@@ -81,6 +81,25 @@ def past_issues_strip() -> str:
 DONATE_ONCE = ""
 DONATE_MONTHLY = ""
 
+# Other ways to give. Paste each handle between the quotes (for example
+# CASHAPP = "$DBWNews") and run this script; each one shows on the Donate page.
+# Never put a street or mailing address here.
+CASHAPP = ""
+PAYPAL = ""
+VENMO = ""
+ZELLE = ""
+
+
+def other_ways() -> str:
+    """Cash App, PayPal, Venmo and Zelle, as far as their handles are set."""
+    rows = [(n, h) for n, h in [("Cash App", CASHAPP), ("PayPal", PAYPAL), ("Venmo", VENMO), ("Zelle", ZELLE)] if h.strip()]
+    if not rows:
+        return ('<p style="margin:0">Give by Cash App, PayPal, Venmo or Zelle. Write to '
+                '<a href="mailto:info@dbw-news.com?subject=I%20would%20like%20to%20give">info@dbw-news.com</a> '
+                'and we will send you the details for the one you use.</p>')
+    items = "".join('<li><strong>{}:</strong> {}</li>'.format(n, html.escape(h)) for n, h in rows)
+    return '<ul class="ticks">' + items + '</ul><p class="fine">Add your email in the note so we can send your receipt.</p>'
+
 
 def give_buttons() -> str:
     def ok(u):
@@ -92,9 +111,7 @@ def give_buttons() -> str:
         links.append('<a class="btn btn--ink btn--block" href="{}" rel="noopener">Give monthly</a>'.format(html.escape(DONATE_MONTHLY, quote=True)))
     if links:
         return '<div class="give">' + "".join(links) + '</div><p class="fine">You choose the amount on the next screen, a secure Stripe checkout.</p>'
-    return ('<div class="give-soon"><strong>Online giving opens shortly.</strong> To give now, mail a check payable to '
-            'Dynamic Black Women Media, Inc. to Atlanta, Georgia, or write to '
-            '<a href="mailto:info@dbw-news.com?subject=I%20would%20like%20to%20give">info@dbw-news.com</a> and we will send you a secure link.</div>')
+    return '<div class="give-soon">' + other_ways() + '</div>'
 
 NAV = [
     ("home", "index.html", "Home"),
@@ -169,7 +186,6 @@ FOOT = """<footer class="dark">
     Dynamic Black Women Media, Inc. (formerly Dear Black Woman Media, Inc.) is a 501(c)(3) public charity (509(a)(2)). Contributions are tax-deductible to the extent allowed by law. EIN: 33-3726585. Published by Redd Ladys Chronicles Publishing &amp; Production.
     <div class="foot__row">
       <span><a href="mailto:info@dbw-news.com">info@dbw-news.com</a> &middot; (470) 236-1755</span>
-      <span>Atlanta, Georgia</span>
     </div>
   </div>
 </footer>
@@ -196,6 +212,8 @@ def build(src: pathlib.Path) -> None:
         )
         out += BAR.format(links=links)
     body = body.replace("<!--GIVE-BUTTONS-->", give_buttons())
+    # The apps show in the gift box until Stripe is connected, then move down here.
+    body = body.replace("<!--OTHER-WAYS-->", other_ways() if "give-soon" not in give_buttons() else "")
     body = body.replace("<!--PAST-ISSUES-->", past_issues())
     body = body.replace("<!--PAST-ISSUES-STRIP-->", past_issues_strip())
     out += body.rstrip() + "\n\n" + FOOT
