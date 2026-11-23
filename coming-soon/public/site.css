@@ -283,3 +283,8 @@ footer { background: var(--ink); color: var(--cream); margin-top: 36px; }
 /* first issue: title lines */
 .first__then { font-size: 12px; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 700; color: var(--red); margin: -4px 0 8px; }
 .first p.first__deck { font-family: var(--serif); font-style: italic; font-size: 19px; line-height: 1.35; color: var(--ink); margin: 0 0 14px; }
+
+/* first issue: cover under the title */
+.first__cover { margin: 4px 0 20px; max-width: 300px; border: 1px solid var(--rule); background: var(--white); padding: 5px; box-shadow: 0 10px 28px rgba(20, 17, 15, 0.18); }
+.first__cover img { display: block; width: 100%; height: auto; }
+@media (min-width: 721px) { .first__cover { max-width: 340px; margin: 8px 0 24px; } }
